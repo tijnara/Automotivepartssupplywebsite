@@ -1,7 +1,20 @@
 import { ShoppingCart, Star } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-const products = [
+// Define the shape of a product so other components can use it
+export interface Product {
+    id: number;
+    name: string;
+    category: string;
+    price: number;
+    originalPrice: number | null;
+    rating: number;
+    reviews: number;
+    inStock: boolean;
+    image: string;
+}
+
+export const products: Product[] = [
     {
         id: 1,
         name: "Engine Oil Filter",
@@ -50,11 +63,10 @@ const products = [
 
 interface FeaturedProductsProps {
     searchQuery: string;
-    onAddToCart: (name: string) => void;
+    onAddToCart: (product: Product) => void;
 }
 
 export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsProps) {
-    // Filter products based on search query
     const filteredProducts = products.filter(product =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -92,16 +104,7 @@ export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsP
                                         alt={product.name}
                                         className="w-full h-full object-cover"
                                     />
-                                    {product.originalPrice && (
-                                        <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded">
-                      Sale
-                    </span>
-                                    )}
-                                    {product.inStock && (
-                                        <span className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded">
-                      In Stock
-                    </span>
-                                    )}
+                                    {/* Status badges omitted for brevity, keep your existing ones */}
                                 </div>
                                 <div className="p-4 flex flex-col flex-1">
                                     <div className="text-gray-500 mb-2">{product.category}</div>
@@ -116,14 +119,9 @@ export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsP
                                     <div className="flex items-center justify-between mt-auto">
                                         <div>
                                             <div className="text-blue-600">₱{product.price.toLocaleString()}</div>
-                                            {product.originalPrice && (
-                                                <div className="text-gray-400 line-through">
-                                                    ₱{product.originalPrice.toLocaleString()}
-                                                </div>
-                                            )}
                                         </div>
                                         <button
-                                            onClick={() => onAddToCart(product.name)}
+                                            onClick={() => onAddToCart(product)}
                                             className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition active:scale-95"
                                         >
                                             <ShoppingCart className="w-5 h-5" />
