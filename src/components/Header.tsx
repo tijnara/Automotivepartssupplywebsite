@@ -45,13 +45,11 @@ export function Header({
                        }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Calculate total items and total price
     const itemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     return (
-        // FIX: Increased z-index to 50 to ensure it stays above page content
-        <header className="bg-white shadow-sm sticky top-0 z-50 w-full">
+        <header className="bg-white shadow-sm sticky top-0 z-40 w-full">
             {/* Top Bar */}
             <div className="bg-blue-900 text-white py-2">
                 <div className="container mx-auto px-4 flex justify-between items-center">
@@ -98,7 +96,8 @@ export function Header({
                     {/* Cart & Menu */}
                     <div className="flex items-center gap-4">
                         {/* CART IMPLEMENTATION */}
-                        <Sheet>
+                        {/* FIX: modal={false} allows body scrolling */}
+                        <Sheet modal={false}>
                             <SheetTrigger asChild>
                                 <button className="relative hover:text-blue-600 transition">
                                     <ShoppingCart className="w-6 h-6" />
@@ -109,7 +108,8 @@ export function Header({
                                     )}
                                 </button>
                             </SheetTrigger>
-                            <SheetContent>
+                            {/* FIX: overlay={false} removes the dark background */}
+                            <SheetContent overlay={false}>
                                 <SheetHeader>
                                     <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
                                     <SheetDescription>
@@ -124,11 +124,14 @@ export function Header({
                                     </div>
                                 ) : (
                                     <>
-                                        <ScrollArea className="flex-1 -mx-6 px-6 my-4" style={{ height: 'calc(100vh - 200px)' }}>
-                                            <div className="space-y-4">
+                                        <ScrollArea className="flex-1 -mx-6 px-6" style={{ flex: '1 1 0%', overflow: 'hidden' }}>
+                                            <div className="space-y-4 py-4">
                                                 {cartItems.map((item) => (
                                                     <div key={item.id} className="flex gap-4">
-                                                        <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                                        <div
+                                                            className="bg-gray-100 rounded-md overflow-hidden flex-shrink-0"
+                                                            style={{ width: '80px', height: '80px' }}
+                                                        >
                                                             <ImageWithFallback
                                                                 src={item.image}
                                                                 alt={item.name}
@@ -173,7 +176,7 @@ export function Header({
                                             </div>
                                         </ScrollArea>
 
-                                        <div className="space-y-4 pt-4">
+                                        <div className="space-y-4 pt-4 mt-auto">
                                             <Separator />
                                             <div className="flex justify-between items-center font-medium text-lg">
                                                 <span>Total:</span>
