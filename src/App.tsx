@@ -23,7 +23,6 @@ export default function App() {
         setCartItems((prev) => {
             const existingItem = prev.find((item) => item.id === product.id);
             if (existingItem) {
-                // Increment quantity if exists
                 toast.info(`Increased quantity of ${product.name}`);
                 return prev.map((item) =>
                     item.id === product.id
@@ -31,7 +30,6 @@ export default function App() {
                         : item
                 );
             }
-            // Add new item
             toast.success(`${product.name} added to cart!`);
             return [...prev, { ...product, quantity: 1 }];
         });
@@ -54,14 +52,18 @@ export default function App() {
         );
     };
 
+    // Helper to scroll to specific sections
+    const scrollToSection = (id: string) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     const handleSelectCategory = (category: string | null) => {
         setSelectedCategory(category);
         if (category) {
-            // Smooth scroll to products section if a category is selected
-            const productsSection = document.getElementById('featured-products');
-            if (productsSection) {
-                productsSection.scrollIntoView({ behavior: 'smooth' });
-            }
+            scrollToSection('featured-products');
         }
     };
 
@@ -74,8 +76,12 @@ export default function App() {
                 onRemoveItem={handleRemoveFromCart}
                 onUpdateQuantity={handleUpdateQuantity}
             />
+            {/* Added padding top to account for fixed header */}
             <main className="pt-[160px]">
-                <Hero />
+                <Hero
+                    onShopNow={() => scrollToSection('featured-products')}
+                    onRequestQuote={() => scrollToSection('contact')}
+                />
                 <ProductCategories
                     selectedCategory={selectedCategory}
                     onSelectCategory={handleSelectCategory}
