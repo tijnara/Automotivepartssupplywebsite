@@ -9,16 +9,18 @@ import {
     Wrench
 } from "lucide-react";
 import { cn } from "./ui/utils";
+import { products } from "./FeaturedProducts";
 
-const categories = [
-    { icon: Cog, name: "Engine Parts", count: "2,500+" },
-    { icon: CircleDot, name: "Brake System", count: "1,800+" },
-    { icon: Battery, name: "Electrical", count: "1,200+" },
-    { icon: Wind, name: "Suspension", count: "950+" },
-    { icon: Gauge, name: "Transmission", count: "870+" },
-    { icon: Lightbulb, name: "Lighting", count: "650+" },
-    { icon: Wrench, name: "Tools", count: "800+" },
-    { icon: Car, name: "Body Parts", count: "1,400+" },
+// Removed hardcoded counts, kept static definition of icon + name
+const categoryDefinitions = [
+    { icon: Cog, name: "Engine Parts" },
+    { icon: CircleDot, name: "Brake System" },
+    { icon: Battery, name: "Electrical" },
+    { icon: Wind, name: "Suspension" },
+    { icon: Gauge, name: "Transmission" },
+    { icon: Lightbulb, name: "Lighting" },
+    { icon: Wrench, name: "Tools" },
+    { icon: Car, name: "Body Parts" },
 ];
 
 interface ProductCategoriesProps {
@@ -37,9 +39,12 @@ export function ProductCategories({ selectedCategory, onSelectCategory }: Produc
                     </p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {categories.map((category) => {
+                    {categoryDefinitions.map((category) => {
                         const Icon = category.icon;
                         const isSelected = selectedCategory === category.name;
+
+                        // Calculate real count from the products array
+                        const count = products.filter(p => p.category === category.name).length;
 
                         return (
                             <button
@@ -69,7 +74,7 @@ export function ProductCategories({ selectedCategory, onSelectCategory }: Produc
                                     {category.name}
                                 </h3>
                                 <p className={cn("text-sm", isSelected ? "text-blue-700" : "text-gray-600")}>
-                                    {category.count} items
+                                    {count} {count === 1 ? 'item' : 'items'}
                                 </p>
                             </button>
                         );
