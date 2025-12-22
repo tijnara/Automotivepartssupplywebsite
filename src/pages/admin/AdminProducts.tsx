@@ -3,106 +3,244 @@ import { supabase } from "../../lib/supabase";
 import { Database } from "../../types/database.types";
 import { Button } from "../../components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Trash2, Plus, LogOut } from "lucide-react";
+import { Trash2, Plus, Package, Search, Edit2, TrendingUp, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
+import { Input } from "../../components/ui/input";
+import { AdminLayout } from "../../components/admin/AdminLayout";
+import { ProductDialog } from "../../components/admin/ProductDialog";
 
 type Product = Database['public']['Tables']['products']['Row'];
+type ProductInsert = Database['public']['Tables']['products']['Insert'];
 
 export default function AdminProducts() {
     const [products, setProducts] = useState<Product[]>([]);
-    const navigate = useNavigate();
+    const [filter, setFilter] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     useEffect(() => {
         fetchProducts();
     }, []);
 
     const fetchProducts = async () => {
+        setLoading(true);
         const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
         if (error) toast.error("Failed to load products");
         else setProducts(data || []);
+        setLoading(false);
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm("Are you sure you want to delete this product?")) return;
+        if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) return;
 
         const { error } = await supabase.from('products').delete().eq('id', id);
         if (error) {
             toast.error("Error deleting product");
         } else {
-            toast.success("Product deleted");
+            toast.success("Product deleted successfully");
             setProducts(products.filter(p => p.id !== id));
         }
     };
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        navigate("/login");
+    const handleSaveProduct = async (productData: ProductInsert | Product) => {
+        if ('id' in productData && productData.id) {
+            // Update
+            const { error } = await supabase
+                .from('products')
+                .update(productData as any)
+                .eq('id', productData.id);
+            
+            if (error) throw error;
+            toast.success("Product updated successfully");
+        } else {
+            // Insert
+            const { error } = await supabase
+                .from('products')
+                .insert([productData as ProductInsert]);
+            
+            if (error) throw error;
+            toast.success("Product added successfully");
+        }
+        fetchProducts();
     };
 
+    const openEditDialog = (product: Product) => {
+        setEditingProduct(product);
+        setIsDialogOpen(true);
+    };
+
+    const openAddDialog = () => {
+        setEditingProduct(null);
+        setIsDialogOpen(true);
+    };
+
+    const filteredProducts = products.filter(p =>
+        p.name.toLowerCase().includes(filter.toLowerCase()) ||
+        p.category.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    const outOfStockCount = products.filter(p => !p.in_stock).length;
+
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
-            <div className="max-w-6xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold">Product Management</h1>
-                    <div className="flex gap-4">
-                        <Button variant="outline" onClick={handleLogout}>
-                            <LogOut className="w-4 h-4 mr-2" /> Logout
-                        </Button>
-                        <Button>
-                            <Plus className="w-4 h-4 mr-2" /> Add Product
-                        </Button>
+        <AdminLayout 
+            title="Products" 
+            description="Manage your inventory, prices, and stock levels."
+        >
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-md">
+                    <div className="p-4 bg-blue-50 rounded-full text-blue-600">
+                        <Package className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Products</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">{products.length}</h3>
+                    </div>
+                </div>
+                
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-md">
+                    <div className="p-4 bg-green-50 rounded-full text-green-600">
+                        <TrendingUp className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Active Categories</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">
+                            {new Set(products.map(p => p.category)).size}
+                        </h3>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow border">
-                    <Table>
-                        <TableHeader>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-md">
+                    <div className="p-4 bg-orange-50 rounded-full text-orange-600">
+                        <AlertCircle className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Out of Stock</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">{outOfStockCount}</h3>
+                    </div>
+                </div>
+            </div>
+
+            {/* Toolbar */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="relative w-full md:w-96 group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors w-4 h-4" />
+                    <Input
+                        placeholder="Search by name or category..."
+                        className="pl-10 h-10 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all rounded-lg"
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                    />
+                </div>
+                <Button 
+                    onClick={openAddDialog}
+                    className="h-10 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 rounded-lg px-6 w-full md:w-auto transition-all active:scale-95 flex items-center gap-2"
+                >
+                    <Plus className="w-4 h-4" /> Add New Product
+                </Button>
+            </div>
+
+            {/* Product Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <Table>
+                    <TableHeader className="bg-gray-50/80 border-b border-gray-100">
+                        <TableRow className="hover:bg-transparent">
+                            <TableHead className="w-[100px] py-4">Image</TableHead>
+                            <TableHead className="py-4">Product Name</TableHead>
+                            <TableHead className="py-4">Category</TableHead>
+                            <TableHead className="py-4">Price</TableHead>
+                            <TableHead className="py-4">Stock Status</TableHead>
+                            <TableHead className="text-right py-4 pr-6">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loading ? (
                             <TableRow>
-                                <TableHead>Image</TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Category</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Stock</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableCell colSpan={6} className="text-center py-20">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-gray-500 font-medium">Loading inventory...</p>
+                                    </div>
+                                </TableCell>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {products.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell>
-                                        <div className="w-12 h-12 rounded overflow-hidden bg-gray-100">
+                        ) : filteredProducts.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center py-16 text-gray-500">
+                                    <div className="flex flex-col items-center justify-center gap-3">
+                                        <Package className="w-12 h-12 text-gray-200" />
+                                        <p>No products found matching your search.</p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            filteredProducts.map((product) => (
+                                <TableRow key={product.id} className="group hover:bg-blue-50/30 transition-colors border-b border-gray-50 last:border-none">
+                                    <TableCell className="py-3">
+                                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
                                             <ImageWithFallback
                                                 src={product.image}
                                                 alt={product.name}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
                                             />
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell>{product.category}</TableCell>
-                                    <TableCell>₱{product.price}</TableCell>
+                                    <TableCell className="font-medium text-gray-900">{product.name}</TableCell>
                                     <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${product.in_stock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {product.in_stock ? 'In Stock' : 'Out of Stock'}
-                    </span>
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wider">
+                                            {product.category}
+                                        </span>
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            variant="destructive"
-                                            size="icon"
-                                            onClick={() => handleDelete(product.id)}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                    <TableCell className="font-semibold text-gray-700">₱{Number(product.price).toLocaleString()}</TableCell>
+                                    <TableCell>
+                                        {product.in_stock ? (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
+                                                In Stock
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                                                Out of Stock
+                                            </span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="text-right pr-6">
+                                        <div className="flex justify-end gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                onClick={() => openEditDialog(product)}
+                                                title="Edit Product"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                onClick={() => handleDelete(product.id)}
+                                                title="Delete Product"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
             </div>
-        </div>
+
+            <ProductDialog 
+                open={isDialogOpen} 
+                onOpenChange={setIsDialogOpen} 
+                product={editingProduct} 
+                onSave={handleSaveProduct}
+            />
+        </AdminLayout>
     );
 }

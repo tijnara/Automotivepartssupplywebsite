@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PublicShop from "./pages/PublicShop"; // Ensure you renamed your old App.tsx to this
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminProducts from "./pages/admin/AdminProducts";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AdminOrders from "./pages/admin/AdminOrders";
 import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
@@ -47,6 +49,22 @@ export default function App() {
                     element={
                         <ProtectedRoute>
                             <AdminProducts />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/messages"
+                    element={
+                        <ProtectedRoute>
+                            <AdminMessages />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/orders"
+                    element={
+                        <ProtectedRoute>
+                            <AdminOrders />
                         </ProtectedRoute>
                     }
                 />
