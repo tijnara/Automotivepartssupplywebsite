@@ -62,7 +62,8 @@ export default function App() {
                 onRemoveItem={handleRemoveFromCart}
                 onUpdateQuantity={handleUpdateQuantity}
             />
-            <main>
+            {/* FIX: Added pt-[160px] to push content down below the fixed header */}
+            <main className="pt-[160px]">
                 <Hero />
                 <ProductCategories />
                 <FeaturedProducts

@@ -14,7 +14,6 @@ import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-// --- INTERFACES ---
 interface Product {
     id: number;
     name: string;
@@ -26,7 +25,6 @@ interface Product {
 interface CartItem extends Product {
     quantity: number;
 }
-// -----------------
 
 interface HeaderProps {
     cartItems: CartItem[];
@@ -49,7 +47,9 @@ export function Header({
     const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     return (
-        <header className="bg-white shadow-sm sticky top-0 z-40 w-full">
+        // FIX 1: Changed to 'fixed top-0' to force it to stay visible.
+        // Z-Index is 40. The Sheet (Cart) will be 100.
+        <header className="fixed top-0 left-0 right-0 z-40 w-full bg-white shadow-sm">
             {/* Top Bar */}
             <div className="bg-blue-900 text-white py-2">
                 <div className="container mx-auto px-4 flex justify-between items-center">
@@ -95,8 +95,6 @@ export function Header({
 
                     {/* Cart & Menu */}
                     <div className="flex items-center gap-4">
-                        {/* CART IMPLEMENTATION */}
-                        {/* FIX: modal={false} allows body scrolling */}
                         <Sheet modal={false}>
                             <SheetTrigger asChild>
                                 <button className="relative hover:text-blue-600 transition">
@@ -108,12 +106,11 @@ export function Header({
                                     )}
                                 </button>
                             </SheetTrigger>
-                            {/* FIX: overlay={false} removes the dark background */}
                             <SheetContent overlay={false}>
                                 <SheetHeader>
                                     <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
                                     <SheetDescription>
-                                        Review your selected items before checking out.
+                                        Review your selected items.
                                     </SheetDescription>
                                 </SheetHeader>
 
@@ -128,9 +125,10 @@ export function Header({
                                             <div className="space-y-4 py-4">
                                                 {cartItems.map((item) => (
                                                     <div key={item.id} className="flex gap-4">
+                                                        {/* FIX 2: Inline styles to force image container size. This fixes the giant image bug. */}
                                                         <div
                                                             className="bg-gray-100 rounded-md overflow-hidden flex-shrink-0"
-                                                            style={{ width: '80px', height: '80px' }}
+                                                            style={{ width: '80px', height: '80px', minWidth: '80px' }}
                                                         >
                                                             <ImageWithFallback
                                                                 src={item.image}
@@ -176,8 +174,7 @@ export function Header({
                                             </div>
                                         </ScrollArea>
 
-                                        <div className="space-y-4 pt-4 mt-auto">
-                                            <Separator />
+                                        <div className="space-y-4 pt-4 mt-auto border-t">
                                             <div className="flex justify-between items-center font-medium text-lg">
                                                 <span>Total:</span>
                                                 <span>₱{totalAmount.toLocaleString()}</span>
