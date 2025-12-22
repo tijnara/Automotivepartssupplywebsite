@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import PublicShop from "./pages/PublicShop"; // Ensure you renamed your old App.tsx to this
+import PublicShop from "./pages/PublicShop";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminMessages from "./pages/admin/AdminMessages";
@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
 
-// Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const [session, setSession] = useState<any>(null);
     const [loading, setLoading] = useState(true);
