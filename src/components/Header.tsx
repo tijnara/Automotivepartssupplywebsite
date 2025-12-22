@@ -31,6 +31,7 @@ interface HeaderProps {
     setSearchQuery: (query: string) => void;
     onRemoveItem: (id: number) => void;
     onUpdateQuantity: (id: number, delta: number) => void;
+    onCheckout: () => void; // New prop for checkout action
 }
 
 export function Header({
@@ -38,7 +39,8 @@ export function Header({
                            searchQuery,
                            setSearchQuery,
                            onRemoveItem,
-                           onUpdateQuantity
+                           onUpdateQuantity,
+                           onCheckout
                        }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -46,10 +48,8 @@ export function Header({
     const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     return (
-        // FIX 1: Changed to 'fixed top-0' to force it to stay visible.
-        // Z-Index is 40. The Sheet (Cart) will be 100.
         <header className="fixed top-0 left-0 right-0 z-40 w-full bg-white shadow-sm">
-            {/* Top Bar */}
+            {/* ... Top Bar and Main Header code ... */}
             <div className="bg-blue-900 text-white py-2">
                 <div className="container mx-auto px-4 flex justify-between items-center">
                     <div className="flex items-center gap-4">
@@ -66,17 +66,14 @@ export function Header({
                 </div>
             </div>
 
-            {/* Main Header */}
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between gap-4">
-                    {/* Logo */}
                     <div className="flex items-center gap-2">
                         <div className="bg-blue-600 text-white px-4 py-2 rounded font-bold cursor-pointer" onClick={() => window.scrollTo(0,0)}>
                             <span>AutoParts PH</span>
                         </div>
                     </div>
 
-                    {/* Search Bar */}
                     <div className="hidden md:flex flex-1 max-w-xl">
                         <div className="relative w-full">
                             <input
@@ -92,7 +89,6 @@ export function Header({
                         </div>
                     </div>
 
-                    {/* Cart & Menu */}
                     <div className="flex items-center gap-4">
                         <Sheet modal={false}>
                             <SheetTrigger asChild>
@@ -124,7 +120,6 @@ export function Header({
                                             <div className="space-y-4 py-4">
                                                 {cartItems.map((item) => (
                                                     <div key={item.id} className="flex gap-4">
-                                                        {/* FIX 2: Inline styles to force image container size. This fixes the giant image bug. */}
                                                         <div
                                                             className="bg-gray-100 rounded-md overflow-hidden flex-shrink-0"
                                                             style={{ width: '80px', height: '80px', minWidth: '80px' }}
@@ -178,8 +173,12 @@ export function Header({
                                                 <span>Total:</span>
                                                 <span>₱{totalAmount.toLocaleString()}</span>
                                             </div>
+                                            {/* Pass the onCheckout handler here */}
                                             <SheetClose asChild>
-                                                <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg">
+                                                <Button
+                                                    onClick={onCheckout}
+                                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg"
+                                                >
                                                     Checkout
                                                 </Button>
                                             </SheetClose>
@@ -188,7 +187,7 @@ export function Header({
                                 )}
                             </SheetContent>
                         </Sheet>
-
+                        {/* Mobile menu trigger */}
                         <button
                             className="md:hidden"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -198,7 +197,6 @@ export function Header({
                     </div>
                 </div>
 
-                {/* Mobile Search */}
                 <div className="md:hidden mt-4">
                     <div className="relative w-full">
                         <input
@@ -215,7 +213,6 @@ export function Header({
                 </div>
             </div>
 
-            {/* Navigation */}
             <nav className={`bg-gray-50 border-t ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
                 <div className="container mx-auto px-4">
                     <ul className="flex flex-col md:flex-row md:items-center md:gap-8 py-2">

@@ -9,9 +9,9 @@ import {
     Wrench
 } from "lucide-react";
 import { cn } from "./ui/utils";
-import { products } from "./FeaturedProducts";
+// We no longer import 'products' here. It comes via props.
 
-// Removed hardcoded counts, kept static definition of icon + name
+// Static definition of categories
 const categoryDefinitions = [
     { icon: Cog, name: "Engine Parts" },
     { icon: CircleDot, name: "Brake System" },
@@ -23,12 +23,19 @@ const categoryDefinitions = [
     { icon: Car, name: "Body Parts" },
 ];
 
+interface Product {
+    id: number;
+    category: string;
+    // other fields are not needed here
+}
+
 interface ProductCategoriesProps {
+    products: Product[]; // Added products prop
     selectedCategory: string | null;
     onSelectCategory: (category: string | null) => void;
 }
 
-export function ProductCategories({ selectedCategory, onSelectCategory }: ProductCategoriesProps) {
+export function ProductCategories({ products, selectedCategory, onSelectCategory }: ProductCategoriesProps) {
     return (
         <section id="products" className="py-16 bg-gray-50">
             <div className="container mx-auto px-4">
@@ -43,7 +50,7 @@ export function ProductCategories({ selectedCategory, onSelectCategory }: Produc
                         const Icon = category.icon;
                         const isSelected = selectedCategory === category.name;
 
-                        // Calculate real count from the products array
+                        // Calculate real count from the passed products array
                         const count = products.filter(p => p.category === category.name).length;
 
                         return (

@@ -6,7 +6,7 @@ export type Json =
     | { [key: string]: Json | undefined }
     | Json[]
 
-export interface Database {
+export type Database = {
     public: {
         Tables: {
             products: {
@@ -46,6 +46,7 @@ export interface Database {
                     image?: string
                     created_at?: string
                 }
+                Relationships: []
             }
             contact_messages: {
                 Row: {
@@ -75,6 +76,7 @@ export interface Database {
                     status?: string
                     created_at?: string
                 }
+                Relationships: []
             }
             orders: {
                 Row: {
@@ -104,6 +106,7 @@ export interface Database {
                     status?: string
                     created_at?: string
                 }
+                Relationships: []
             }
             order_items: {
                 Row: {
@@ -127,7 +130,35 @@ export interface Database {
                     quantity?: number
                     price_at_purchase?: number
                 }
+                Relationships: [
+                    {
+                        foreignKeyName: "order_items_order_id_fkey"
+                        columns: ["order_id"]
+                        isOneToOne: false
+                        referencedRelation: "orders"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "order_items_product_id_fkey"
+                        columns: ["product_id"]
+                        isOneToOne: false
+                        referencedRelation: "products"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
+        }
+        Views: {
+            [_ in never]: never
+        }
+        Functions: {
+            [_ in never]: never
+        }
+        Enums: {
+            [_ in never]: never
+        }
+        CompositeTypes: {
+            [_ in never]: never
         }
     }
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { ProductCategories } from "./components/ProductCategories";
@@ -8,6 +8,7 @@ import { Contact } from "./components/Contact";
 import { Footer } from "./components/Footer";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
+import { supabase } from "./lib/supabase";
 
 // Define Cart Item Type
 export interface CartItem extends Product {
@@ -18,6 +19,40 @@ export default function App() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+
+    // Fetch products from Supabase on mount
+    useEffect(() => {
+        async function fetchProducts() {
+            try {
+                const { data, error } = await supabase.from('products').select('*');
+                if (error) throw error;
+
+                if (data) {
+                    const mappedProducts = data.map((item: any) => ({
+                        id: item.id,
+                        name: item.name,
+                        category: item.category,
+                        price: Number(item.price), // Ensure numbers
+                        originalPrice: item.original_price ? Number(item.original_price) : null,
+                        rating: Number(item.rating),
+                        reviews: item.reviews,
+                        inStock: item.in_stock,
+                        image: item.image
+                    }));
+                    setProducts(mappedProducts);
+                }
+            } catch (err) {
+                console.error("Error fetching products:", err);
+                // Fallback to static data if DB connection fails (optional, but good for stability during dev)
+            } finally {
+                setLoadingProducts(false);
+            }
+        }
+
+        fetchProducts();
+    }, []);
 
     const handleAddToCart = (product: Product) => {
         setCartItems((prev) => {
@@ -52,7 +87,11 @@ export default function App() {
         );
     };
 
-    // Helper to scroll to specific sections
+    const handleSelectCategory = (category: string | null) => {
+        setSelectedCategory(category);
+        scrollToSection('featured-products');
+    };
+
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
         if (element) {
@@ -60,10 +99,54 @@ export default function App() {
         }
     };
 
-    const handleSelectCategory = (category: string | null) => {
-        setSelectedCategory(category);
-        if (category) {
-            scrollToSection('featured-products');
+    // New: Handle Checkout using Supabase 'orders' and 'order_items'
+    const handleCheckout = async () => {
+        if (cartItems.length === 0) return;
+
+        // 1. Calculate total
+        const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+        // 2. Insert Order
+        // Note: Using hardcoded customer details for this demo as we don't have auth/checkout form yet.
+        const orderData = {
+            customer_name: "Guest User",
+            customer_email: "guest@example.com",
+            customer_phone: "",
+            total_amount: totalAmount,
+            status: "pending"
+        };
+
+        try {
+            const { data: order, error: orderError } = await supabase
+                .from('orders')
+                .insert([orderData])
+                .select()
+                .single();
+
+            if (orderError) throw orderError;
+
+            // 3. Insert Order Items
+            if (order) {
+                const orderItems = cartItems.map(item => ({
+                    order_id: order.id,
+                    product_id: item.id,
+                    quantity: item.quantity,
+                    price_at_purchase: item.price
+                }));
+
+                const { error: itemsError } = await supabase
+                    .from('order_items')
+                    .insert(orderItems);
+
+                if (itemsError) throw itemsError;
+
+                // 4. Success state
+                setCartItems([]);
+                toast.success("Order placed successfully! Thank you.");
+            }
+        } catch (error: any) {
+            console.error("Checkout error:", error);
+            toast.error("Checkout failed. Please try again.");
         }
     };
 
@@ -75,22 +158,28 @@ export default function App() {
                 setSearchQuery={setSearchQuery}
                 onRemoveItem={handleRemoveFromCart}
                 onUpdateQuantity={handleUpdateQuantity}
+                onCheckout={handleCheckout}
             />
-            {/* Added padding top to account for fixed header */}
             <main className="pt-[160px]">
                 <Hero
                     onShopNow={() => scrollToSection('featured-products')}
                     onRequestQuote={() => scrollToSection('contact')}
                 />
                 <ProductCategories
+                    products={products}
                     selectedCategory={selectedCategory}
                     onSelectCategory={handleSelectCategory}
                 />
-                <FeaturedProducts
-                    searchQuery={searchQuery}
-                    selectedCategory={selectedCategory}
-                    onAddToCart={handleAddToCart}
-                />
+                {loadingProducts ? (
+                    <div className="text-center py-20 text-gray-500">Loading products from database...</div>
+                ) : (
+                    <FeaturedProducts
+                        products={products}
+                        searchQuery={searchQuery}
+                        selectedCategory={selectedCategory}
+                        onAddToCart={handleAddToCart}
+                    />
+                )}
                 <WhyChooseUs />
                 <Contact />
             </main>

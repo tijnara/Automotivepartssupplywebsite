@@ -1,19 +1,43 @@
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "../lib/supabase"; // Import Supabase client
 
 export function Contact() {
-    const handleSubmit = (e: FormEvent) => {
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        // In a real app, you would send data to a backend here
-        toast.success("Message sent! We'll get back to you shortly.");
-        (e.target as HTMLFormElement).reset();
+        setLoading(true);
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+
+        const name = formData.get('name') as string;
+        const email = formData.get('email') as string;
+        const phone = formData.get('phone') as string;
+        const message = formData.get('message') as string;
+
+        try {
+            // Insert into Supabase table
+            const { error } = await supabase
+                .from('contact_messages')
+                .insert([{ name, email, phone, message }]);
+
+            if (error) throw error;
+
+            toast.success("Message sent successfully!");
+            form.reset();
+        } catch (error: any) {
+            console.error('Error submitting form:', error);
+            toast.error("Failed to send message. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <section id="contact" className="py-16 bg-gray-50">
             <div className="container mx-auto px-4">
-                {/* ... (Left side content remains the same) ... */}
                 <div className="grid md:grid-cols-2 gap-12">
                     <div>
                         <h2 className="mb-4">Get in Touch</h2>
@@ -23,6 +47,7 @@ export function Contact() {
                         </p>
 
                         <div className="space-y-6">
+                            {/* ... info section remains the same ... */}
                             <div className="flex gap-4">
                                 <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
                                     <MapPin className="w-6 h-6 text-blue-600" />
@@ -35,7 +60,7 @@ export function Contact() {
                                     </p>
                                 </div>
                             </div>
-
+                            {/* ... phone, email, clock items ... */}
                             <div className="flex gap-4">
                                 <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
                                     <Phone className="w-6 h-6 text-blue-600" />
@@ -48,7 +73,6 @@ export function Contact() {
                                     </p>
                                 </div>
                             </div>
-
                             <div className="flex gap-4">
                                 <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
                                     <Mail className="w-6 h-6 text-blue-600" />
@@ -61,7 +85,6 @@ export function Contact() {
                                     </p>
                                 </div>
                             </div>
-
                             <div className="flex gap-4">
                                 <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
                                     <Clock className="w-6 h-6 text-blue-600" />
@@ -88,6 +111,7 @@ export function Contact() {
                                 <input
                                     type="text"
                                     id="name"
+                                    name="name"
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="Your name"
@@ -101,6 +125,7 @@ export function Contact() {
                                 <input
                                     type="email"
                                     id="email"
+                                    name="email"
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="your.email@example.com"
@@ -114,6 +139,7 @@ export function Contact() {
                                 <input
                                     type="tel"
                                     id="phone"
+                                    name="phone"
                                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="+63 912 345 6789"
                                 />
@@ -125,6 +151,7 @@ export function Contact() {
                                 </label>
                                 <textarea
                                     id="message"
+                                    name="message"
                                     rows={4}
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -132,8 +159,12 @@ export function Contact() {
                                 />
                             </div>
 
-                            <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition">
-                                Send Message
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition disabled:opacity-50"
+                            >
+                                {loading ? "Sending..." : "Send Message"}
                             </button>
                         </form>
                     </div>
