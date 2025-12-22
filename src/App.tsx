@@ -17,6 +17,7 @@ export interface CartItem extends Product {
 export default function App() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const handleAddToCart = (product: Product) => {
         setCartItems((prev) => {
@@ -53,6 +54,17 @@ export default function App() {
         );
     };
 
+    const handleSelectCategory = (category: string | null) => {
+        setSelectedCategory(category);
+        if (category) {
+            // Smooth scroll to products section if a category is selected
+            const productsSection = document.getElementById('featured-products');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen">
             <Header
@@ -62,12 +74,15 @@ export default function App() {
                 onRemoveItem={handleRemoveFromCart}
                 onUpdateQuantity={handleUpdateQuantity}
             />
-            {/* FIX: Added pt-[160px] to push content down below the fixed header */}
             <main className="pt-[160px]">
                 <Hero />
-                <ProductCategories />
+                <ProductCategories
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={handleSelectCategory}
+                />
                 <FeaturedProducts
                     searchQuery={searchQuery}
+                    selectedCategory={selectedCategory}
                     onAddToCart={handleAddToCart}
                 />
                 <WhyChooseUs />

@@ -1,6 +1,6 @@
 import { ShoppingCart, Star } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Define the shape of a product
 export interface Product {
@@ -15,7 +15,7 @@ export interface Product {
     image: string;
 }
 
-// Expanded product list to simulate "many items"
+// Expanded product list
 export const products: Product[] = [
     {
         id: 1,
@@ -64,7 +64,7 @@ export const products: Product[] = [
     {
         id: 5,
         name: "Spark Plug (Set of 4)",
-        category: "Ignition",
+        category: "Engine Parts", // Changed from Ignition to match existing categories
         price: 1200,
         originalPrice: 1500,
         rating: 4.9,
@@ -75,7 +75,7 @@ export const products: Product[] = [
     {
         id: 6,
         name: "Air Filter",
-        category: "Filters",
+        category: "Engine Parts", // Changed from Filters
         price: 850,
         originalPrice: null,
         rating: 4.5,
@@ -86,7 +86,7 @@ export const products: Product[] = [
     {
         id: 7,
         name: "Synthetic Motor Oil 4L",
-        category: "Fluids",
+        category: "Engine Parts", // Changed from Fluids
         price: 2500,
         originalPrice: 2800,
         rating: 4.8,
@@ -97,7 +97,7 @@ export const products: Product[] = [
     {
         id: 8,
         name: "Wiper Blades (Pair)",
-        category: "Accessories",
+        category: "Body Parts", // Changed from Accessories
         price: 450,
         originalPrice: null,
         rating: 4.3,
@@ -141,7 +141,7 @@ export const products: Product[] = [
     {
         id: 12,
         name: "Radiator Coolant",
-        category: "Fluids",
+        category: "Engine Parts",
         price: 350,
         originalPrice: null,
         rating: 4.9,
@@ -153,26 +153,34 @@ export const products: Product[] = [
 
 interface FeaturedProductsProps {
     searchQuery: string;
+    selectedCategory: string | null;
     onAddToCart: (product: Product) => void;
 }
 
-export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsProps) {
+export function FeaturedProducts({ searchQuery, selectedCategory, onAddToCart }: FeaturedProductsProps) {
     // Initial visible count
     const ITEMS_PER_PAGE = 4;
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
-    // 1. Filter by search query first
-    const filteredBySearch = products.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Reset pagination when search query or category changes
+    useEffect(() => {
+        setVisibleCount(ITEMS_PER_PAGE);
+    }, [searchQuery, selectedCategory]);
 
-    // 2. Slice the data based on visible count
-    // If searching, we usually want to show all matches, but you can also paginate search results if desired.
-    // Here, we'll auto-expand if searching to avoid hiding relevant results.
-    const displayedProducts = searchQuery
-        ? filteredBySearch
-        : filteredBySearch.slice(0, visibleCount);
+    // 1. Filter by search query AND category
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.category.toLowerCase().includes(searchQuery.toLowerCase());
+
+        const matchesCategory = selectedCategory
+            ? product.category === selectedCategory
+            : true;
+
+        return matchesSearch && matchesCategory;
+    });
+
+    // 2. Slice for "Load More"
+    const displayedProducts = filteredProducts.slice(0, visibleCount);
 
     const handleLoadMore = () => {
         setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
@@ -183,29 +191,25 @@ export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsP
     };
 
     return (
-        <section id="products" className="py-16 bg-white">
+        <section id="featured-products" className="py-16 bg-white">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center mb-12">
                     <div>
-                        <h2 className="mb-2">Featured Products</h2>
+                        <h2 className="mb-2">
+                            {selectedCategory ? `${selectedCategory}` : "Featured Products"}
+                        </h2>
                         <p className="text-gray-600">
-                            {filteredBySearch.length} items found
+                            {filteredProducts.length} items found
                         </p>
                     </div>
-                    {/* Header Link - acts as a quick "Show All" or "Reset" */}
-                    {!searchQuery && visibleCount < filteredBySearch.length && (
-                        <button
-                            onClick={handleLoadMore}
-                            className="text-blue-600 hover:text-blue-700 font-medium transition-colors hidden md:block"
-                        >
-                            View More →
-                        </button>
-                    )}
                 </div>
 
                 {displayedProducts.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                        No products found matching "{searchQuery}"
+                    <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
+                        <p className="text-lg">No products found</p>
+                        {selectedCategory && (
+                            <p className="text-sm mt-2">Try selecting a different category or clearing your search.</p>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -221,38 +225,39 @@ export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsP
                                         className="w-full h-full object-cover"
                                     />
                                     {product.originalPrice && (
-                                        <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded">
-                      Sale
-                    </span>
+                                        <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded shadow-sm text-sm font-medium">
+                                          Sale
+                                        </span>
                                     )}
                                     {product.inStock && (
-                                        <span className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded">
-                      In Stock
-                    </span>
+                                        <span className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded shadow-sm text-sm font-medium">
+                                          In Stock
+                                        </span>
                                     )}
                                 </div>
                                 <div className="p-4 flex flex-col flex-1">
-                                    <div className="text-gray-500 mb-2">{product.category}</div>
-                                    <h3 className="mb-2">{product.name}</h3>
+                                    <div className="text-gray-500 mb-2 text-sm">{product.category}</div>
+                                    <h3 className="mb-2 font-semibold text-lg leading-tight">{product.name}</h3>
                                     <div className="flex items-center gap-2 mb-3">
-                                        <div className="flex items-center gap-1">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                            <span>{product.rating}</span>
+                                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded">
+                                            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                                            <span className="text-sm font-medium text-yellow-700">{product.rating}</span>
                                         </div>
-                                        <span className="text-gray-400">({product.reviews})</span>
+                                        <span className="text-xs text-gray-400">({product.reviews} reviews)</span>
                                     </div>
-                                    <div className="flex items-center justify-between mt-auto">
+                                    <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
                                         <div>
-                                            <div className="text-blue-600">₱{product.price.toLocaleString()}</div>
+                                            <div className="text-blue-700 font-bold text-lg">₱{product.price.toLocaleString()}</div>
                                             {product.originalPrice && (
-                                                <div className="text-gray-400 line-through">
+                                                <div className="text-gray-400 text-xs line-through">
                                                     ₱{product.originalPrice.toLocaleString()}
                                                 </div>
                                             )}
                                         </div>
                                         <button
                                             onClick={() => onAddToCart(product)}
-                                            className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition active:scale-95"
+                                            className="bg-blue-600 text-white p-2.5 rounded-full hover:bg-blue-700 transition active:scale-95 shadow-sm hover:shadow"
+                                            title="Add to Cart"
                                         >
                                             <ShoppingCart className="w-5 h-5" />
                                         </button>
@@ -264,12 +269,12 @@ export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsP
                 )}
 
                 {/* Bottom Action Buttons */}
-                {!searchQuery && (
+                {filteredProducts.length > ITEMS_PER_PAGE && (
                     <div className="mt-12 text-center flex justify-center gap-4">
-                        {visibleCount < filteredBySearch.length && (
+                        {visibleCount < filteredProducts.length && (
                             <button
                                 onClick={handleLoadMore}
-                                className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition shadow-sm"
+                                className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition shadow-sm font-medium"
                             >
                                 Load More Products
                             </button>
@@ -278,7 +283,7 @@ export function FeaturedProducts({ searchQuery, onAddToCart }: FeaturedProductsP
                         {visibleCount > ITEMS_PER_PAGE && (
                             <button
                                 onClick={handleShowLess}
-                                className="bg-gray-100 text-gray-800 px-8 py-3 rounded-full hover:bg-gray-200 transition shadow-sm"
+                                className="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-full hover:bg-gray-50 transition shadow-sm font-medium"
                             >
                                 Show Less
                             </button>
