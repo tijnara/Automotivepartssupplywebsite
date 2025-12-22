@@ -35,8 +35,7 @@ const SheetOverlay = React.forwardRef<
     <SheetPrimitive.Overlay
         ref={ref}
         data-slot="sheet-overlay"
-        // Maintain z-index 99
-        style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 99 }}
+        style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100 }}
         className={cn(
             "fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             className,
@@ -46,7 +45,6 @@ const SheetOverlay = React.forwardRef<
 ));
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
-// UPDATED: Added 'overlay' prop to control visibility of the backdrop
 const SheetContent = React.forwardRef<
     React.ElementRef<typeof SheetPrimitive.Content>,
     React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> & {
@@ -55,12 +53,10 @@ const SheetContent = React.forwardRef<
 }
 >(({ className, children, side = "right", overlay = true, ...props }, ref) => (
     <SheetPortal>
-        {/* Conditionally render the overlay */}
         {overlay && <SheetOverlay />}
         <SheetPrimitive.Content
             ref={ref}
             data-slot="sheet-content"
-            // Maintain critical inline styles for visibility and layout
             style={{
                 backgroundColor: 'white',
                 zIndex: 100,
@@ -73,7 +69,7 @@ const SheetContent = React.forwardRef<
                 borderLeft: '1px solid #e5e7eb',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' // Added subtle shadow for non-modal look
+                boxShadow: '-4px 0 15px rgba(0,0,0,0.1)'
             }}
             className={cn(
                 "p-6 shadow-2xl transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",

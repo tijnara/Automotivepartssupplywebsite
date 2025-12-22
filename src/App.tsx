@@ -10,7 +10,6 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { supabase } from "./lib/supabase";
 
-// Define Cart Item Type
 export interface CartItem extends Product {
     quantity: number;
 }
@@ -22,7 +21,6 @@ export default function App() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
 
-    // Fetch products from Supabase on mount
     useEffect(() => {
         async function fetchProducts() {
             try {
@@ -34,7 +32,7 @@ export default function App() {
                         id: item.id,
                         name: item.name,
                         category: item.category,
-                        price: Number(item.price), // Ensure numbers
+                        price: Number(item.price),
                         originalPrice: item.original_price ? Number(item.original_price) : null,
                         rating: Number(item.rating),
                         reviews: item.reviews,
@@ -45,7 +43,6 @@ export default function App() {
                 }
             } catch (err) {
                 console.error("Error fetching products:", err);
-                // Fallback to static data if DB connection fails (optional, but good for stability during dev)
             } finally {
                 setLoadingProducts(false);
             }
@@ -95,19 +92,23 @@ export default function App() {
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+            // Offset for the fixed header
+            const headerOffset = 180;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
         }
     };
 
-    // New: Handle Checkout using Supabase 'orders' and 'order_items'
     const handleCheckout = async () => {
         if (cartItems.length === 0) return;
 
-        // 1. Calculate total
         const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-        // 2. Insert Order
-        // Note: Using hardcoded customer details for this demo as we don't have auth/checkout form yet.
         const orderData = {
             customer_name: "Guest User",
             customer_email: "guest@example.com",
@@ -125,7 +126,6 @@ export default function App() {
 
             if (orderError) throw orderError;
 
-            // 3. Insert Order Items
             if (order) {
                 const orderItems = cartItems.map(item => ({
                     order_id: order.id,
@@ -140,7 +140,6 @@ export default function App() {
 
                 if (itemsError) throw itemsError;
 
-                // 4. Success state
                 setCartItems([]);
                 toast.success("Order placed successfully! Thank you.");
             }
@@ -160,7 +159,7 @@ export default function App() {
                 onUpdateQuantity={handleUpdateQuantity}
                 onCheckout={handleCheckout}
             />
-            <main className="pt-[160px]">
+            <main>
                 <Hero
                     onShopNow={() => scrollToSection('featured-products')}
                     onRequestQuote={() => scrollToSection('contact')}

@@ -31,7 +31,7 @@ interface HeaderProps {
     setSearchQuery: (query: string) => void;
     onRemoveItem: (id: number) => void;
     onUpdateQuantity: (id: number, delta: number) => void;
-    onCheckout: () => void; // New prop for checkout action
+    onCheckout: () => void;
 }
 
 export function Header({
@@ -48,8 +48,8 @@ export function Header({
     const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-40 w-full bg-white shadow-sm">
-            {/* ... Top Bar and Main Header code ... */}
+        <header className="sticky top-0 z-50 w-full bg-white shadow-md">
+            {/* Top Bar */}
             <div className="bg-blue-900 text-white py-2">
                 <div className="container mx-auto px-4 flex justify-between items-center">
                     <div className="flex items-center gap-4">
@@ -66,14 +66,17 @@ export function Header({
                 </div>
             </div>
 
+            {/* Main Header */}
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between gap-4">
+                    {/* Logo */}
                     <div className="flex items-center gap-2">
                         <div className="bg-blue-600 text-white px-4 py-2 rounded font-bold cursor-pointer" onClick={() => window.scrollTo(0,0)}>
                             <span>AutoParts PH</span>
                         </div>
                     </div>
 
+                    {/* Search Bar */}
                     <div className="hidden md:flex flex-1 max-w-xl">
                         <div className="relative w-full">
                             <input
@@ -89,7 +92,9 @@ export function Header({
                         </div>
                     </div>
 
+                    {/* Cart & Menu */}
                     <div className="flex items-center gap-4">
+                        {/* Cart Sidebar */}
                         <Sheet modal={false}>
                             <SheetTrigger asChild>
                                 <button className="relative hover:text-blue-600 transition">
@@ -173,7 +178,6 @@ export function Header({
                                                 <span>Total:</span>
                                                 <span>₱{totalAmount.toLocaleString()}</span>
                                             </div>
-                                            {/* Pass the onCheckout handler here */}
                                             <SheetClose asChild>
                                                 <Button
                                                     onClick={onCheckout}
@@ -187,7 +191,8 @@ export function Header({
                                 )}
                             </SheetContent>
                         </Sheet>
-                        {/* Mobile menu trigger */}
+
+                        {/* Mobile Menu Trigger */}
                         <button
                             className="md:hidden"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -197,6 +202,7 @@ export function Header({
                     </div>
                 </div>
 
+                {/* Mobile Search */}
                 <div className="md:hidden mt-4">
                     <div className="relative w-full">
                         <input
@@ -213,6 +219,7 @@ export function Header({
                 </div>
             </div>
 
+            {/* Navigation Links */}
             <nav className={`bg-gray-50 border-t ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
                 <div className="container mx-auto px-4">
                     <ul className="flex flex-col md:flex-row md:items-center md:gap-8 py-2">
