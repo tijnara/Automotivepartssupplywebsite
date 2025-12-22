@@ -1,4 +1,4 @@
-import { Search, Phone, ShoppingCart, Menu, Trash2, Plus, Minus, X } from "lucide-react";
+import { Search, Phone, ShoppingCart, Menu, Plus, Minus, X } from "lucide-react";
 import { useState } from "react";
 import {
     Sheet,
@@ -6,7 +6,6 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-    SheetFooter,
     SheetClose,
     SheetDescription
 } from "./ui/sheet";
@@ -15,7 +14,7 @@ import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-// --- ADDED MISSING INTERFACES ---
+// --- INTERFACES ---
 interface Product {
     id: number;
     name: string;
@@ -27,7 +26,7 @@ interface Product {
 interface CartItem extends Product {
     quantity: number;
 }
-// -------------------------------
+// -----------------
 
 interface HeaderProps {
     cartItems: CartItem[];
@@ -51,7 +50,8 @@ export function Header({
     const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     return (
-        <header className="bg-white shadow-sm sticky top-0 z-50">
+        // FIX: Increased z-index to 50 to ensure it stays above page content
+        <header className="bg-white shadow-sm sticky top-0 z-50 w-full">
             {/* Top Bar */}
             <div className="bg-blue-900 text-white py-2">
                 <div className="container mx-auto px-4 flex justify-between items-center">
@@ -104,12 +104,12 @@ export function Header({
                                     <ShoppingCart className="w-6 h-6" />
                                     {itemCount > 0 && (
                                         <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                      {itemCount}
-                    </span>
+                                            {itemCount}
+                                        </span>
                                     )}
                                 </button>
                             </SheetTrigger>
-                            <SheetContent className="flex flex-col w-full sm:max-w-md">
+                            <SheetContent>
                                 <SheetHeader>
                                     <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
                                     <SheetDescription>
@@ -118,13 +118,13 @@ export function Header({
                                 </SheetHeader>
 
                                 {cartItems.length === 0 ? (
-                                    <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+                                    <div className="flex-1 flex flex-col items-center justify-center text-gray-500" style={{ minHeight: '300px' }}>
                                         <ShoppingCart className="w-16 h-16 mb-4 opacity-20" />
                                         <p>Your cart is empty</p>
                                     </div>
                                 ) : (
                                     <>
-                                        <ScrollArea className="flex-1 -mx-6 px-6 my-4">
+                                        <ScrollArea className="flex-1 -mx-6 px-6 my-4" style={{ height: 'calc(100vh - 200px)' }}>
                                             <div className="space-y-4">
                                                 {cartItems.map((item) => (
                                                     <div key={item.id} className="flex gap-4">
