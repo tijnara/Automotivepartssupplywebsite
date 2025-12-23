@@ -1,8 +1,8 @@
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Eye } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
-// Define the shape of a product
 export interface Product {
     id: number;
     name: string;
@@ -16,23 +16,20 @@ export interface Product {
 }
 
 interface FeaturedProductsProps {
-    products: Product[]; // UPDATED: Accepts products from parent
+    products: Product[];
     searchQuery: string;
     selectedCategory: string | null;
-    onAddToCart: (product: Product) => void;
+    onAddToCart: (product: any) => void;
 }
 
 export function FeaturedProducts({ products, searchQuery, selectedCategory, onAddToCart }: FeaturedProductsProps) {
-    // Initial visible count
-    const ITEMS_PER_PAGE = 4;
+    const ITEMS_PER_PAGE = 8; // Increased for better grid view
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
-    // Reset pagination when search query or category changes
     useEffect(() => {
         setVisibleCount(ITEMS_PER_PAGE);
     }, [searchQuery, selectedCategory]);
 
-    // 1. Filter by search query AND category
     const filteredProducts = products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             product.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -44,16 +41,7 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
         return matchesSearch && matchesCategory;
     });
 
-    // 2. Slice for "Load More"
     const displayedProducts = filteredProducts.slice(0, visibleCount);
-
-    const handleLoadMore = () => {
-        setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
-    };
-
-    const handleShowLess = () => {
-        setVisibleCount(ITEMS_PER_PAGE);
-    };
 
     return (
         <section id="featured-products" className="py-16 bg-white">
@@ -72,59 +60,67 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                 {displayedProducts.length === 0 ? (
                     <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
                         <p className="text-lg">No products found</p>
-                        {selectedCategory && (
-                            <p className="text-sm mt-2">Try selecting a different category or clearing your search.</p>
-                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {displayedProducts.map((product) => (
                             <div
                                 key={product.id}
-                                className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition group flex flex-col"
+                                className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full"
                             >
-                                <div className="relative aspect-square bg-gray-100">
+                                {/* Link wrapper for image */}
+                                <Link to={`/product/${product.id}`} className="block relative aspect-square bg-gray-100 overflow-hidden">
                                     <ImageWithFallback
                                         src={product.image}
                                         alt={product.name}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
-                                    {product.originalPrice && (
-                                        <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded shadow-sm text-sm font-medium">
-                                          Sale
-                                        </span>
-                                    )}
-                                    {product.inStock && (
-                                        <span className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded shadow-sm text-sm font-medium">
-                                          In Stock
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="p-4 flex flex-col flex-1">
-                                    <div className="text-gray-500 mb-2 text-sm">{product.category}</div>
-                                    <h3 className="mb-2 font-semibold text-lg leading-tight">{product.name}</h3>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded">
-                                            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                                            <span className="text-sm font-medium text-yellow-700">{product.rating}</span>
+                                    {/* Overlay on hover */}
+                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <div className="bg-white text-gray-900 px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                                            <Eye className="w-4 h-4" /> View Details
                                         </div>
-                                        <span className="text-xs text-gray-400">({product.reviews} reviews)</span>
                                     </div>
-                                    <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
-                                        <div>
-                                            <div className="text-blue-700 font-bold text-lg">₱{product.price.toLocaleString()}</div>
+
+                                    {product.originalPrice && (
+                                        <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold shadow-sm">
+                                          SALE
+                                        </span>
+                                    )}
+                                </Link>
+
+                                <div className="p-4 flex flex-col flex-1">
+                                    <div className="text-gray-500 mb-1 text-xs uppercase tracking-wider">{product.category}</div>
+
+                                    <Link to={`/product/${product.id}`} className="mb-2">
+                                        <h3 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 h-12">
+                                            {product.name}
+                                        </h3>
+                                    </Link>
+
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="flex items-center text-yellow-400">
+                                            <Star className="w-3.5 h-3.5 fill-current" />
+                                            <span className="text-sm font-medium text-gray-700 ml-1">{product.rating}</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400">({product.reviews} sold)</span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                                        <div className="flex flex-col">
+                                            <span className="text-blue-700 font-bold text-lg">₱{product.price.toLocaleString()}</span>
                                             {product.originalPrice && (
-                                                <div className="text-gray-400 text-xs line-through">
+                                                <span className="text-gray-400 text-xs line-through">
                                                     ₱{product.originalPrice.toLocaleString()}
-                                                </div>
+                                                </span>
                                             )}
                                         </div>
                                         <button
                                             onClick={() => onAddToCart(product)}
-                                            className="bg-blue-600 text-white p-3.5 rounded-full hover:bg-blue-700 transition active:scale-95 shadow-md hover:shadow-xl cursor-pointer flex items-center justify-center group/cart"
+                                            className="bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 p-2.5 rounded-full transition-colors active:scale-95 shadow-sm"
                                             title="Add to Cart"
                                         >
-                                            <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                                            <ShoppingCart className="w-5 h-5" />
                                         </button>
                                     </div>
                                 </div>
@@ -133,22 +129,19 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                     </div>
                 )}
 
-                {/* Bottom Action Buttons */}
                 {filteredProducts.length > ITEMS_PER_PAGE && (
-                    <div className="mt-12 text-center flex justify-center gap-4">
-                        {visibleCount < filteredProducts.length && (
+                    <div className="mt-12 text-center">
+                        {visibleCount < filteredProducts.length ? (
                             <button
-                                onClick={handleLoadMore}
-                                className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition shadow-sm font-medium cursor-pointer"
+                                onClick={() => setVisibleCount(prev => prev + ITEMS_PER_PAGE)}
+                                className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-full transition font-medium"
                             >
-                                Load More Products
+                                Show More Products
                             </button>
-                        )}
-
-                        {visibleCount > ITEMS_PER_PAGE && (
+                        ) : (
                             <button
-                                onClick={handleShowLess}
-                                className="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-full hover:bg-gray-50 transition shadow-sm font-medium cursor-pointer"
+                                onClick={() => setVisibleCount(ITEMS_PER_PAGE)}
+                                className="text-gray-500 hover:text-gray-700 underline"
                             >
                                 Show Less
                             </button>

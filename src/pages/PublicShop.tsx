@@ -2,22 +2,34 @@ import { useState, useEffect } from "react";
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
 import { ProductCategories } from "../components/ProductCategories";
-import { FeaturedProducts, Product } from "../components/FeaturedProducts";
+import { FeaturedProducts } from "../components/FeaturedProducts";
 import { WhyChooseUs } from "../components/WhyChooseUs";
 import { Contact } from "../components/Contact";
 import { Footer } from "../components/Footer";
-import { toast } from "sonner";
 import { supabase } from "../lib/supabase";
+import { CartItem } from "../App";
 
-export interface CartItem extends Product {
-    quantity: number;
+interface PublicShopProps {
+    cartItems: CartItem[];
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    onRemoveItem: (id: number) => void;
+    onUpdateQuantity: (id: number, delta: number) => void;
+    onCheckout: () => void;
+    onAddToCart: (product: any) => void;
 }
 
-export default function PublicShop() {
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
+export default function PublicShop({
+                                       cartItems,
+                                       searchQuery,
+                                       setSearchQuery,
+                                       onRemoveItem,
+                                       onUpdateQuantity,
+                                       onCheckout,
+                                       onAddToCart
+                                   }: PublicShopProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
 
     useEffect(() => {
@@ -50,39 +62,6 @@ export default function PublicShop() {
         fetchProducts();
     }, []);
 
-    const handleAddToCart = (product: Product) => {
-        setCartItems((prev) => {
-            const existingItem = prev.find((item) => item.id === product.id);
-            if (existingItem) {
-                toast.info(`Increased quantity of ${product.name}`);
-                return prev.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item
-                );
-            }
-            toast.success(`${product.name} added to cart!`);
-            return [...prev, { ...product, quantity: 1 }];
-        });
-    };
-
-    const handleRemoveFromCart = (id: number) => {
-        setCartItems((prev) => prev.filter((item) => item.id !== id));
-        toast.error("Item removed from cart");
-    };
-
-    const handleUpdateQuantity = (id: number, delta: number) => {
-        setCartItems((prev) =>
-            prev.map(item => {
-                if (item.id === id) {
-                    const newQuantity = Math.max(1, item.quantity + delta);
-                    return { ...item, quantity: newQuantity };
-                }
-                return item;
-            })
-        );
-    };
-
     const handleSelectCategory = (category: string | null) => {
         setSelectedCategory(category);
         scrollToSection('featured-products');
@@ -91,7 +70,6 @@ export default function PublicShop() {
     const scrollToSection = (id: string) => {
         const element = document.getElementById(id);
         if (element) {
-            // Offset for the fixed header
             const headerOffset = 180;
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
@@ -103,60 +81,15 @@ export default function PublicShop() {
         }
     };
 
-    const handleCheckout = async () => {
-        if (cartItems.length === 0) return;
-
-        const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-        const orderData = {
-            customer_name: "Guest User",
-            customer_email: "guest@example.com",
-            customer_phone: "",
-            total_amount: totalAmount,
-            status: "pending"
-        };
-
-        try {
-            const { data: order, error: orderError } = await supabase
-                .from('orders')
-                .insert([orderData])
-                .select()
-                .single();
-
-            if (orderError) throw orderError;
-
-            if (order) {
-                const orderItems = cartItems.map(item => ({
-                    order_id: order.id,
-                    product_id: item.id,
-                    quantity: item.quantity,
-                    price_at_purchase: item.price
-                }));
-
-                const { error: itemsError } = await supabase
-                    .from('order_items')
-                    .insert(orderItems);
-
-                if (itemsError) throw itemsError;
-
-                setCartItems([]);
-                toast.success("Order placed successfully! Thank you.");
-            }
-        } catch (error: any) {
-            console.error("Checkout error:", error);
-            toast.error("Checkout failed. Please try again.");
-        }
-    };
-
     return (
         <div className="min-h-screen">
             <Header
                 cartItems={cartItems}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
-                onRemoveItem={handleRemoveFromCart}
-                onUpdateQuantity={handleUpdateQuantity}
-                onCheckout={handleCheckout}
+                onRemoveItem={onRemoveItem}
+                onUpdateQuantity={onUpdateQuantity}
+                onCheckout={onCheckout}
             />
             <main>
                 <Hero
@@ -175,7 +108,7 @@ export default function PublicShop() {
                         products={products}
                         searchQuery={searchQuery}
                         selectedCategory={selectedCategory}
-                        onAddToCart={handleAddToCart}
+                        onAddToCart={onAddToCart}
                     />
                 )}
                 <WhyChooseUs />

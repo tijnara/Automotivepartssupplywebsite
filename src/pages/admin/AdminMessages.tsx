@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { Database } from "../../types/database.types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Mail, User, Phone, MessageSquare, Clock, Trash2 } from "lucide-react";
+import { Mail, Phone, MessageSquare, Clock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/button";
