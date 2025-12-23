@@ -116,7 +116,7 @@ export default function App() {
         // Small delay to ensure Sheet has started closing and won't conflict with Dialog
         setTimeout(() => {
             setIsCheckoutOpen(true);
-        }, 100);
+        }, 300);
     };
 
     // New: Actual database submission logic
@@ -185,12 +185,14 @@ export default function App() {
             <Toaster />
 
             {/* The actual Checkout Dialog Component */}
-            <CheckoutDialog
-                open={isCheckoutOpen}
-                onOpenChange={setIsCheckoutOpen}
-                cartItems={cartItems}
-                onConfirmOrder={handleConfirmOrder}
-            />
+            {isCheckoutOpen && (
+                <CheckoutDialog
+                    open={isCheckoutOpen}
+                    onOpenChange={setIsCheckoutOpen}
+                    cartItems={cartItems}
+                    onConfirmOrder={handleConfirmOrder}
+                />
+            )}
         </BrowserRouter>
     );
 }

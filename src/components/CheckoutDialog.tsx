@@ -56,8 +56,8 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-4xl p-0 bg-white gap-0 h-[90vh] md:h-auto md:max-h-[85vh] !z-[10000]">
+        <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+            <DialogContent className="sm:max-w-4xl p-0 bg-white gap-0 h-[90vh] md:h-auto md:max-h-[85vh]">
                 <DialogHeader className="sr-only">
                     <DialogTitle>Checkout</DialogTitle>
                     <DialogDescription>
