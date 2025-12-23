@@ -7,7 +7,8 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-    SheetDescription
+    SheetDescription,
+    SheetClose // Import SheetClose
 } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "./ui/button";
@@ -40,10 +41,10 @@ export function Header({
                            setSearchQuery,
                            onRemoveItem,
                            onUpdateQuantity,
-                           onCheckout
+                           // onCheckout prop is kept for interface compatibility but ignored
                        }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isCartOpen, setIsCartOpen] = useState(false); // New controlled state
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -53,6 +54,7 @@ export function Header({
     const handleNavClick = (e: React.MouseEvent, id: string) => {
         e.preventDefault();
         setIsMenuOpen(false);
+        setIsCartOpen(false);
 
         if (location.pathname === '/') {
             scrollToSection(id);
@@ -76,6 +78,8 @@ export function Header({
     };
 
     const handleLogoClick = () => {
+        setIsCartOpen(false);
+        setIsMenuOpen(false);
         if (location.pathname === '/') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -83,13 +87,10 @@ export function Header({
         }
     };
 
-    // Manual handler to close cart and open checkout
+    // Updated: Directly navigate to the checkout page
     const handleCheckoutClick = () => {
-        setIsCartOpen(false);
-        // Small timeout to ensure sheet closes cleanly before dialog opens
-        setTimeout(() => {
-            onCheckout();
-        }, 300);
+        setIsCartOpen(false); // Close sidebar
+        navigate('/checkout'); // Redirect to page
     };
 
     return (
@@ -226,12 +227,14 @@ export function Header({
                                                 <span>Total:</span>
                                                 <span>₱{totalAmount.toLocaleString()}</span>
                                             </div>
-                                            <Button
-                                                onClick={handleCheckoutClick}
-                                                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg cursor-pointer"
-                                            >
-                                                Checkout
-                                            </Button>
+                                            <SheetClose asChild>
+                                                <Button
+                                                    onClick={handleCheckoutClick}
+                                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg cursor-pointer"
+                                                >
+                                                    Checkout
+                                                </Button>
+                                            </SheetClose>
                                         </div>
                                     </>
                                 )}

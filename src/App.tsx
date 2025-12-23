@@ -6,10 +6,10 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminOrders from "./pages/admin/AdminOrders";
 import ProductDetails from "./pages/ProductDetails";
+import Checkout from "./pages/Checkout"; // Import the new Checkout Page
 import { supabase } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
-import { CheckoutDialog } from "./components/CheckoutDialog"; // Import the new dialog
 
 // Define shared types
 export interface Product {
@@ -58,9 +58,6 @@ export default function App() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Add state for checkout modal
-    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-
     const handleAddToCart = (product: any, qty: number = 1) => {
         const itemToAdd: CartItem = {
             id: product.id,
@@ -107,19 +104,12 @@ export default function App() {
         );
     };
 
-    // Updated: Open Modal instead of direct logic
-    const handleCheckoutClick = () => {
-        if (cartItems.length === 0) {
-            toast.error("Your cart is empty");
-            return;
-        }
-        // Small delay to ensure Sheet has started closing and won't conflict with Dialog
-        setTimeout(() => {
-            setIsCheckoutOpen(true);
-        }, 300);
+    // This is passed to components but will be overridden/ignored by Header's internal navigation
+    // or we can keep it empty as a placeholder.
+    const handleCheckoutPlaceholder = () => {
+        // No-op: Navigation is handled in Header.tsx via useNavigate('/checkout')
     };
 
-    // New: Actual database submission logic
     const handleConfirmOrder = async (orderData: any) => {
         try {
             const { data: order, error: orderError } = await supabase
@@ -130,7 +120,6 @@ export default function App() {
                     customer_phone: orderData.customer_phone,
                     total_amount: orderData.total_amount,
                     status: "pending"
-                    // Add other fields to your DB schema if available (address, payment_method, etc.)
                 }])
                 .select()
                 .single();
@@ -152,13 +141,12 @@ export default function App() {
                 if (itemsError) throw itemsError;
 
                 setCartItems([]);
-                setIsCheckoutOpen(false); // Close dialog
                 toast.success("Order placed successfully! Thank you.");
             }
         } catch (error: any) {
             console.error("Checkout error:", error);
             toast.error("Checkout failed. Please try again.");
-            throw error; // Re-throw to allow dialog to handle loading state if needed
+            throw error;
         }
     };
 
@@ -168,7 +156,7 @@ export default function App() {
         setSearchQuery,
         onRemoveItem: handleRemoveFromCart,
         onUpdateQuantity: handleUpdateQuantity,
-        onCheckout: handleCheckoutClick, // Pass the function that opens the modal
+        onCheckout: handleCheckoutPlaceholder,
         onAddToCart: handleAddToCart
     };
 
@@ -177,22 +165,21 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<PublicShop {...cartProps} />} />
                 <Route path="/product/:id" element={<ProductDetails {...cartProps} />} />
+
+                {/* New Checkout Route */}
+                <Route path="/checkout" element={
+                    <Checkout
+                        {...cartProps}
+                        onConfirmOrder={handleConfirmOrder}
+                    />
+                } />
+
                 <Route path="/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
                 <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
                 <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
             </Routes>
             <Toaster />
-
-            {/* The actual Checkout Dialog Component */}
-            {isCheckoutOpen && (
-                <CheckoutDialog
-                    open={isCheckoutOpen}
-                    onOpenChange={setIsCheckoutOpen}
-                    cartItems={cartItems}
-                    onConfirmOrder={handleConfirmOrder}
-                />
-            )}
         </BrowserRouter>
     );
 }
