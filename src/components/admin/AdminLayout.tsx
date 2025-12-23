@@ -31,7 +31,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                     <div className="flex items-center gap-4">
                         <button 
                             onClick={() => navigate("/")}
-                            className="flex items-center gap-2 hover:text-blue-200 transition text-xs md:text-sm"
+                            className="flex items-center gap-2 hover:text-blue-200 transition text-xs md:text-sm cursor-pointer"
                         >
                             <ExternalLink className="w-4 h-4" />
                             <span>View Public Shop</span>

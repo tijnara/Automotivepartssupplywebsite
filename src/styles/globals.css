@@ -124,6 +124,10 @@
     @apply border-border outline-ring/50;
   }
 
+  a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], input[type="checkbox"], input[type="radio"], select, label, .cursor-pointer {
+    cursor: pointer !important;
+  }
+
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;

@@ -121,10 +121,10 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                         </div>
                                         <button
                                             onClick={() => onAddToCart(product)}
-                                            className="bg-blue-600 text-white p-2.5 rounded-full hover:bg-blue-700 transition active:scale-95 shadow-sm hover:shadow"
+                                            className="bg-blue-600 text-white p-3.5 rounded-full hover:bg-blue-700 transition active:scale-95 shadow-md hover:shadow-xl cursor-pointer flex items-center justify-center group/cart"
                                             title="Add to Cart"
                                         >
-                                            <ShoppingCart className="w-5 h-5" />
+                                            <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
                                         </button>
                                     </div>
                                 </div>
@@ -139,7 +139,7 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                         {visibleCount < filteredProducts.length && (
                             <button
                                 onClick={handleLoadMore}
-                                className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition shadow-sm font-medium"
+                                className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition shadow-sm font-medium cursor-pointer"
                             >
                                 Load More Products
                             </button>
@@ -148,7 +148,7 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                         {visibleCount > ITEMS_PER_PAGE && (
                             <button
                                 onClick={handleShowLess}
-                                className="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-full hover:bg-gray-50 transition shadow-sm font-medium"
+                                className="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-full hover:bg-gray-50 transition shadow-sm font-medium cursor-pointer"
                             >
                                 Show Less
                             </button>

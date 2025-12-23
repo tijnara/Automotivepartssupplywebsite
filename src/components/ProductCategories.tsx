@@ -58,7 +58,7 @@ export function ProductCategories({ products, selectedCategory, onSelectCategory
                                 key={category.name}
                                 onClick={() => onSelectCategory(isSelected ? null : category.name)}
                                 className={cn(
-                                    "p-6 rounded-lg shadow-sm transition text-center group border-2",
+                                    "p-6 rounded-lg shadow-sm transition text-center group border-2 cursor-pointer",
                                     isSelected
                                         ? "bg-blue-50 border-blue-600 shadow-md"
                                         : "bg-white border-transparent hover:border-blue-100 hover:shadow-md"

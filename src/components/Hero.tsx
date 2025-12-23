@@ -22,13 +22,13 @@ export function Hero({ onShopNow, onRequestQuote }: HeroProps) {
                         <div className="flex flex-wrap gap-4">
                             <button
                                 onClick={onShopNow}
-                                className="bg-white text-blue-900 px-8 py-3 rounded hover:bg-gray-100 transition font-medium"
+                                className="bg-white text-blue-900 px-8 py-3 rounded hover:bg-gray-100 transition font-medium cursor-pointer"
                             >
                                 Shop Now
                             </button>
                             <button
                                 onClick={onRequestQuote}
-                                className="border-2 border-white text-white px-8 py-3 rounded hover:bg-white hover:text-blue-900 transition font-medium"
+                                className="border-2 border-white text-white px-8 py-3 rounded hover:bg-white hover:text-blue-900 transition font-medium cursor-pointer"
                             >
                                 Request Quote
                             </button>

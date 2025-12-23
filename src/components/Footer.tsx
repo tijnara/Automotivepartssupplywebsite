@@ -13,16 +13,16 @@ export function Footer() {
               Your trusted automotive parts supplier in the Philippines since 2015.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition">
+              <a href="#" className="hover:text-white transition cursor-pointer">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="hover:text-white transition">
+              <a href="#" className="hover:text-white transition cursor-pointer">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="hover:text-white transition">
+              <a href="#" className="hover:text-white transition cursor-pointer">
                 <Mail className="w-5 h-5" />
               </a>
-              <a href="#" className="hover:text-white transition">
+              <a href="#" className="hover:text-white transition cursor-pointer">
                 <Phone className="w-5 h-5" />
               </a>
             </div>
@@ -31,30 +31,30 @@ export function Footer() {
           <div>
             <h4 className="text-white mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li><a href="#home" className="hover:text-white transition">Home</a></li>
-              <li><a href="#products" className="hover:text-white transition">Products</a></li>
-              <li><a href="#brands" className="hover:text-white transition">Brands</a></li>
-              <li><a href="#about" className="hover:text-white transition">About Us</a></li>
+              <li><a href="#home" className="hover:text-white transition cursor-pointer">Home</a></li>
+              <li><a href="#products" className="hover:text-white transition cursor-pointer">Products</a></li>
+              <li><a href="#brands" className="hover:text-white transition cursor-pointer">Brands</a></li>
+              <li><a href="#about" className="hover:text-white transition cursor-pointer">About Us</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-white mb-4">Categories</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white transition">Engine Parts</a></li>
-              <li><a href="#" className="hover:text-white transition">Brake System</a></li>
-              <li><a href="#" className="hover:text-white transition">Electrical</a></li>
-              <li><a href="#" className="hover:text-white transition">Suspension</a></li>
+              <li><a href="#" className="hover:text-white transition cursor-pointer">Engine Parts</a></li>
+              <li><a href="#" className="hover:text-white transition cursor-pointer">Brake System</a></li>
+              <li><a href="#" className="hover:text-white transition cursor-pointer">Electrical</a></li>
+              <li><a href="#" className="hover:text-white transition cursor-pointer">Suspension</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-white mb-4">Customer Service</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white transition">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-white transition">Returns Policy</a></li>
-              <li><a href="#" className="hover:text-white transition">Warranty</a></li>
-              <li><a href="#contact" className="hover:text-white transition">Contact Us</a></li>
+              <li><a href="#" className="hover:text-white transition cursor-pointer">Shipping Info</a></li>
+              <li><a href="#" className="hover:text-white transition cursor-pointer">Returns Policy</a></li>
+              <li><a href="#" className="hover:text-white transition cursor-pointer">Warranty</a></li>
+              <li><a href="#contact" className="hover:text-white transition cursor-pointer">Contact Us</a></li>
             </ul>
           </div>
         </div>

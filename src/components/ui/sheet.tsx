@@ -80,7 +80,7 @@ const SheetContent = React.forwardRef<
             {children}
             <SheetPrimitive.Close
                 style={{ position: 'absolute', right: '1rem', top: '1rem', opacity: 0.7 }}
-                className="rounded-sm ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
+                className="rounded-sm ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary cursor-pointer"
             >
                 <XIcon className="h-4 w-4" />
                 <span className="sr-only">Close</span>

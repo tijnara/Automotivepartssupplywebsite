@@ -53,7 +53,7 @@ export function Header({
             <div className="bg-blue-900 text-white py-2">
                 <div className="container mx-auto px-4 flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                        <a href="tel:+639171234567" className="flex items-center gap-2 hover:text-blue-200 transition">
+                        <a href="tel:+639171234567" className="flex items-center gap-2 hover:text-blue-200 transition cursor-pointer">
                             <Phone className="w-4 h-4" />
                             <span>+63 917 123 4567</span>
                         </a>
@@ -71,7 +71,7 @@ export function Header({
                 <div className="flex items-center justify-between gap-4">
                     {/* Logo */}
                     <div className="flex items-center gap-2">
-                        <div className="bg-blue-600 text-white px-4 py-2 rounded font-bold cursor-pointer" onClick={() => window.scrollTo(0,0)}>
+                        <div className="bg-blue-600 text-white px-4 py-2 rounded font-bold cursor-pointer hover:bg-blue-700 transition" onClick={() => window.scrollTo(0,0)}>
                             <span>AutoParts PH</span>
                         </div>
                     </div>
@@ -86,7 +86,7 @@ export function Header({
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-600"
                             />
-                            <button className="absolute right-0 top-0 bottom-0 bg-blue-600 text-white px-6 rounded-r hover:bg-blue-700 transition">
+                            <button className="absolute right-0 top-0 bottom-0 bg-blue-600 text-white px-6 rounded-r hover:bg-blue-700 transition cursor-pointer">
                                 <Search className="w-5 h-5" />
                             </button>
                         </div>
@@ -97,7 +97,7 @@ export function Header({
                         {/* Cart Sidebar */}
                         <Sheet modal={false}>
                             <SheetTrigger asChild>
-                                <button className="relative hover:text-blue-600 transition">
+                                <button className="relative hover:text-blue-600 transition cursor-pointer">
                                     <ShoppingCart className="w-6 h-6" />
                                     {itemCount > 0 && (
                                         <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
@@ -147,7 +147,7 @@ export function Header({
                                                                 <div className="flex items-center gap-2 border rounded-md">
                                                                     <button
                                                                         onClick={() => onUpdateQuantity(item.id, -1)}
-                                                                        className="p-1 hover:bg-gray-100 disabled:opacity-50"
+                                                                        className="p-1 hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
                                                                         disabled={item.quantity <= 1}
                                                                     >
                                                                         <Minus className="w-3 h-3" />
@@ -155,7 +155,7 @@ export function Header({
                                                                     <span className="text-xs w-4 text-center">{item.quantity}</span>
                                                                     <button
                                                                         onClick={() => onUpdateQuantity(item.id, 1)}
-                                                                        className="p-1 hover:bg-gray-100"
+                                                                        className="p-1 hover:bg-gray-100 cursor-pointer"
                                                                     >
                                                                         <Plus className="w-3 h-3" />
                                                                     </button>
@@ -164,7 +164,7 @@ export function Header({
                                                         </div>
                                                         <button
                                                             onClick={() => onRemoveItem(item.id)}
-                                                            className="text-gray-400 hover:text-red-500 self-start"
+                                                            className="text-gray-400 hover:text-red-500 self-start cursor-pointer"
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>
@@ -181,7 +181,7 @@ export function Header({
                                             <SheetClose asChild>
                                                 <Button
                                                     onClick={onCheckout}
-                                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg"
+                                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-lg cursor-pointer"
                                                 >
                                                     Checkout
                                                 </Button>
@@ -194,7 +194,7 @@ export function Header({
 
                         {/* Mobile Menu Trigger */}
                         <button
-                            className="md:hidden"
+                            className="md:hidden cursor-pointer"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                         >
                             <Menu className="w-6 h-6" />
@@ -212,7 +212,7 @@ export function Header({
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-600"
                         />
-                        <button className="absolute right-0 top-0 bottom-0 bg-blue-600 text-white px-6 rounded-r hover:bg-blue-700 transition">
+                        <button className="absolute right-0 top-0 bottom-0 bg-blue-600 text-white px-6 rounded-r hover:bg-blue-700 transition cursor-pointer">
                             <Search className="w-5 h-5" />
                         </button>
                     </div>
@@ -223,11 +223,11 @@ export function Header({
             <nav className={`bg-gray-50 border-t ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
                 <div className="container mx-auto px-4">
                     <ul className="flex flex-col md:flex-row md:items-center md:gap-8 py-2">
-                        <li><a href="#home" className="block py-2 hover:text-blue-600 transition">Home</a></li>
-                        <li><a href="#products" className="block py-2 hover:text-blue-600 transition">Products</a></li>
-                        <li><a href="#brands" className="block py-2 hover:text-blue-600 transition">Brands</a></li>
-                        <li><a href="#about" className="block py-2 hover:text-blue-600 transition">About Us</a></li>
-                        <li><a href="#contact" className="block py-2 hover:text-blue-600 transition">Contact</a></li>
+                        <li><a href="#home" className="block py-2 hover:text-blue-600 transition cursor-pointer">Home</a></li>
+                        <li><a href="#products" className="block py-2 hover:text-blue-600 transition cursor-pointer">Products</a></li>
+                        <li><a href="#brands" className="block py-2 hover:text-blue-600 transition cursor-pointer">Brands</a></li>
+                        <li><a href="#about" className="block py-2 hover:text-blue-600 transition cursor-pointer">About Us</a></li>
+                        <li><a href="#contact" className="block py-2 hover:text-blue-600 transition cursor-pointer">Contact</a></li>
                     </ul>
                 </div>
             </nav>
