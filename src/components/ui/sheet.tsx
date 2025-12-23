@@ -10,23 +10,23 @@ function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
     return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
 
-function SheetTrigger({
-                          ...props
-                      }: React.ComponentProps<typeof SheetPrimitive.Trigger>) {
-    return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />;
-}
+const SheetTrigger = React.forwardRef<
+    React.ElementRef<typeof SheetPrimitive.Trigger>,
+    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Trigger>
+>(({ ...props }, ref) => (
+    <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} ref={ref} />
+));
+SheetTrigger.displayName = SheetPrimitive.Trigger.displayName;
 
-function SheetClose({
-                        ...props
-                    }: React.ComponentProps<typeof SheetPrimitive.Close>) {
-    return <SheetPrimitive.Close data-slot="sheet-close" {...props} />;
-}
+const SheetClose = React.forwardRef<
+    React.ElementRef<typeof SheetPrimitive.Close>,
+    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Close>
+>(({ ...props }, ref) => (
+    <SheetPrimitive.Close data-slot="sheet-close" {...props} ref={ref} />
+));
+SheetClose.displayName = SheetPrimitive.Close.displayName;
 
-function SheetPortal({
-                         ...props
-                     }: React.ComponentProps<typeof SheetPrimitive.Portal>) {
-    return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
-}
+const SheetPortal = SheetPrimitive.Portal;
 
 const SheetOverlay = React.forwardRef<
     React.ElementRef<typeof SheetPrimitive.Overlay>,
