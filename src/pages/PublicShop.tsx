@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; // Import useLocation
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
 import { ProductCategories } from "../components/ProductCategories";
@@ -31,6 +32,7 @@ export default function PublicShop({
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [products, setProducts] = useState<any[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
+    const location = useLocation(); // Get current location
 
     useEffect(() => {
         async function fetchProducts() {
@@ -61,6 +63,17 @@ export default function PublicShop({
 
         fetchProducts();
     }, []);
+
+    // Effect to handle scrolling when the page loads with a hash (e.g., /#contact)
+    useEffect(() => {
+        if (location.hash) {
+            const id = location.hash.replace('#', '');
+            // Use a small timeout to ensure DOM is fully rendered
+            setTimeout(() => {
+                scrollToSection(id);
+            }, 100);
+        }
+    }, [location]);
 
     const handleSelectCategory = (category: string | null) => {
         setSelectedCategory(category);

@@ -1,5 +1,6 @@
 import { Search, Phone, ShoppingCart, Menu, Plus, Minus, X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom"; // Import routing hooks
 import {
     Sheet,
     SheetContent,
@@ -43,9 +44,47 @@ export function Header({
                            onCheckout
                        }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const itemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+    // Handle navigation click
+    const handleNavClick = (e: React.MouseEvent, id: string) => {
+        e.preventDefault();
+        setIsMenuOpen(false);
+
+        if (location.pathname === '/') {
+            // If on home page, scroll smoothly
+            scrollToSection(id);
+        } else {
+            // If on product page, navigate home with hash
+            navigate(`/#${id}`);
+        }
+    };
+
+    const scrollToSection = (id: string) => {
+        const element = document.getElementById(id);
+        if (element) {
+            const headerOffset = 100; // Adjusted for sticky header
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+        }
+    };
+
+    const handleLogoClick = () => {
+        if (location.pathname === '/') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            navigate('/');
+        }
+    };
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white shadow-md">
@@ -71,7 +110,10 @@ export function Header({
                 <div className="flex items-center justify-between gap-4">
                     {/* Logo */}
                     <div className="flex items-center gap-2">
-                        <div className="bg-blue-600 text-white px-4 py-2 rounded font-bold cursor-pointer hover:bg-blue-700 transition" onClick={() => window.scrollTo(0,0)}>
+                        <div
+                            className="bg-blue-600 text-white px-4 py-2 rounded font-bold cursor-pointer hover:bg-blue-700 transition"
+                            onClick={handleLogoClick}
+                        >
                             <span>AutoParts PH</span>
                         </div>
                     </div>
@@ -223,11 +265,36 @@ export function Header({
             <nav className={`bg-gray-50 border-t ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
                 <div className="container mx-auto px-4">
                     <ul className="flex flex-col md:flex-row md:items-center md:gap-8 py-2">
-                        <li><a href="#home" className="block py-2 hover:text-blue-600 transition cursor-pointer">Home</a></li>
-                        <li><a href="#products" className="block py-2 hover:text-blue-600 transition cursor-pointer">Products</a></li>
-                        <li><a href="#brands" className="block py-2 hover:text-blue-600 transition cursor-pointer">Brands</a></li>
-                        <li><a href="#about" className="block py-2 hover:text-blue-600 transition cursor-pointer">About Us</a></li>
-                        <li><a href="#contact" className="block py-2 hover:text-blue-600 transition cursor-pointer">Contact</a></li>
+                        {/* Updated Links:
+                           We use onClick to handle navigation logic (scroll or redirect)
+                           'href' is kept for accessibility/hover but preventDefault is called.
+                        */}
+                        <li>
+                            <a href="#home" onClick={(e) => handleNavClick(e, 'home')} className="block py-2 hover:text-blue-600 transition cursor-pointer">
+                                Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#products" onClick={(e) => handleNavClick(e, 'products')} className="block py-2 hover:text-blue-600 transition cursor-pointer">
+                                Products
+                            </a>
+                        </li>
+                        {/* Note: 'brands' section doesn't exist in PublicShop, mapping to products for now or you can add a brands section */}
+                        <li>
+                            <a href="#products" onClick={(e) => handleNavClick(e, 'products')} className="block py-2 hover:text-blue-600 transition cursor-pointer">
+                                Brands
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#about" onClick={(e) => handleNavClick(e, 'about')} className="block py-2 hover:text-blue-600 transition cursor-pointer">
+                                About Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="block py-2 hover:text-blue-600 transition cursor-pointer">
+                                Contact
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
