@@ -9,6 +9,7 @@ import ProductDetails from "./pages/ProductDetails";
 import { supabase } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
+import { CheckoutDialog } from "./components/CheckoutDialog"; // Import the new dialog
 
 // Define shared types
 export interface Product {
@@ -16,7 +17,7 @@ export interface Product {
     name: string;
     category: string;
     price: number;
-    original_price: number | null; // Changed to match DB snake_case for consistency or mapped
+    original_price: number | null;
     rating: number | null;
     reviews: number | null;
     in_stock: boolean;
@@ -57,8 +58,10 @@ export default function App() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
+    // Add state for checkout modal
+    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
     const handleAddToCart = (product: any, qty: number = 1) => {
-        // Map DB product to CartItem if needed (handling snake_case vs camelCase)
         const itemToAdd: CartItem = {
             id: product.id,
             name: product.name,
@@ -104,23 +107,31 @@ export default function App() {
         );
     };
 
-    const handleCheckout = async () => {
-        if (cartItems.length === 0) return;
+    // Updated: Open Modal instead of direct logic
+    const handleCheckoutClick = () => {
+        if (cartItems.length === 0) {
+            toast.error("Your cart is empty");
+            return;
+        }
+        // Small delay to ensure Sheet has started closing and won't conflict with Dialog
+        setTimeout(() => {
+            setIsCheckoutOpen(true);
+        }, 100);
+    };
 
-        const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-        const orderData = {
-            customer_name: "Guest User",
-            customer_email: "guest@example.com",
-            customer_phone: "",
-            total_amount: totalAmount,
-            status: "pending"
-        };
-
+    // New: Actual database submission logic
+    const handleConfirmOrder = async (orderData: any) => {
         try {
             const { data: order, error: orderError } = await supabase
                 .from('orders')
-                .insert([orderData])
+                .insert([{
+                    customer_name: orderData.customer_name,
+                    customer_email: orderData.customer_email,
+                    customer_phone: orderData.customer_phone,
+                    total_amount: orderData.total_amount,
+                    status: "pending"
+                    // Add other fields to your DB schema if available (address, payment_method, etc.)
+                }])
                 .select()
                 .single();
 
@@ -141,11 +152,13 @@ export default function App() {
                 if (itemsError) throw itemsError;
 
                 setCartItems([]);
+                setIsCheckoutOpen(false); // Close dialog
                 toast.success("Order placed successfully! Thank you.");
             }
         } catch (error: any) {
             console.error("Checkout error:", error);
             toast.error("Checkout failed. Please try again.");
+            throw error; // Re-throw to allow dialog to handle loading state if needed
         }
     };
 
@@ -155,45 +168,29 @@ export default function App() {
         setSearchQuery,
         onRemoveItem: handleRemoveFromCart,
         onUpdateQuantity: handleUpdateQuantity,
-        onCheckout: handleCheckout,
+        onCheckout: handleCheckoutClick, // Pass the function that opens the modal
         onAddToCart: handleAddToCart
     };
 
     return (
         <BrowserRouter>
             <Routes>
-                {/* Public Routes */}
                 <Route path="/" element={<PublicShop {...cartProps} />} />
                 <Route path="/product/:id" element={<ProductDetails {...cartProps} />} />
-
-                {/* Admin Routes */}
                 <Route path="/login" element={<AdminLogin />} />
-                <Route
-                    path="/admin"
-                    element={
-                        <ProtectedRoute>
-                            <AdminProducts />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/admin/messages"
-                    element={
-                        <ProtectedRoute>
-                            <AdminMessages />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/admin/orders"
-                    element={
-                        <ProtectedRoute>
-                            <AdminOrders />
-                        </ProtectedRoute>
-                    }
-                />
+                <Route path="/admin" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
+                <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
+                <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
             </Routes>
             <Toaster />
+
+            {/* The actual Checkout Dialog Component */}
+            <CheckoutDialog
+                open={isCheckoutOpen}
+                onOpenChange={setIsCheckoutOpen}
+                cartItems={cartItems}
+                onConfirmOrder={handleConfirmOrder}
+            />
         </BrowserRouter>
     );
 }
