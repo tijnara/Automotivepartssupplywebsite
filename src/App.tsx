@@ -55,8 +55,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function App() {
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+        try {
+            const savedCart = localStorage.getItem("cartItems");
+            return savedCart ? JSON.parse(savedCart) : [];
+        } catch (error) {
+            console.error("Error loading cart from localStorage:", error);
+            return [];
+        }
+    });
     const [searchQuery, setSearchQuery] = useState("");
+
+    useEffect(() => {
+        try {
+            localStorage.setItem("cartItems", JSON.stringify(cartItems));
+        } catch (error) {
+            console.error("Error saving cart to localStorage:", error);
+        }
+    }, [cartItems]);
 
     const handleAddToCart = (product: any, qty: number = 1) => {
         const itemToAdd: CartItem = {
@@ -118,8 +134,12 @@ export default function App() {
                     customer_name: orderData.customer_name,
                     customer_email: orderData.customer_email,
                     customer_phone: orderData.customer_phone,
+                    shipping_address: orderData.shipping_address,
+                    shipping_method: orderData.shipping_method,
+                    payment_method: orderData.payment_method,
                     total_amount: orderData.total_amount,
-                    status: "pending"
+                    status: "pending",
+                    payment_status: "pending"
                 }])
                 .select()
                 .single();

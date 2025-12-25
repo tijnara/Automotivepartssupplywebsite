@@ -101,11 +101,11 @@ export function Contact() {
                     </div>
 
                     <div>
-                        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-sm">
-                            <h3 className="mb-6">Send us a Message</h3>
+                        <form onSubmit={handleSubmit} className="bg-white p-10 rounded-lg shadow-sm">
+                            <h3 className="mb-8">Send us a Message</h3>
 
-                            <div className="mb-4">
-                                <label htmlFor="name" className="block mb-2">
+                            <div className="mb-6">
+                                <label htmlFor="name" className="block mb-3">
                                     Name
                                 </label>
                                 <input
@@ -113,13 +113,13 @@ export function Contact() {
                                     id="name"
                                     name="name"
                                     required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="Your name"
                                 />
                             </div>
 
-                            <div className="mb-4">
-                                <label htmlFor="email" className="block mb-2">
+                            <div className="mb-6">
+                                <label htmlFor="email" className="block mb-3">
                                     Email
                                 </label>
                                 <input
@@ -127,26 +127,26 @@ export function Contact() {
                                     id="email"
                                     name="email"
                                     required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="your.email@example.com"
                                 />
                             </div>
 
-                            <div className="mb-4">
-                                <label htmlFor="phone" className="block mb-2">
+                            <div className="mb-6">
+                                <label htmlFor="phone" className="block mb-3">
                                     Phone Number
                                 </label>
                                 <input
                                     type="tel"
                                     id="phone"
                                     name="phone"
-                                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="+63 912 345 6789"
                                 />
                             </div>
 
-                            <div className="mb-4">
-                                <label htmlFor="message" className="block mb-2">
+                            <div className="mb-6">
+                                <label htmlFor="message" className="block mb-3">
                                     Message
                                 </label>
                                 <textarea
@@ -154,7 +154,7 @@ export function Contact() {
                                     name="message"
                                     rows={4}
                                     required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
                                     placeholder="How can we help you?"
                                 />
                             </div>

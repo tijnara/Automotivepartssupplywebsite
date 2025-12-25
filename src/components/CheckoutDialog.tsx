@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { CartItem } from "../App";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { ChevronRight, CreditCard, Banknote, Truck } from "lucide-react";
+import { ChevronRight, CreditCard, Banknote, Truck, MapPin, Wallet } from "lucide-react";
 
 interface CheckoutDialogProps {
     open: boolean;
@@ -30,11 +30,12 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
     const [city, setCity] = useState("");
     const [postalCode, setPostalCode] = useState("");
     const [phone, setPhone] = useState("");
+    const [shippingMethod, setShippingMethod] = useState("standard");
     const [paymentMethod, setPaymentMethod] = useState("cod");
 
     // Totals
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const shipping = 150; // Hardcoded standard shipping
+    const shipping = shippingMethod === "standard" ? 150 : 0;
     const total = subtotal + shipping;
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -46,7 +47,10 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
                 customer_email: email,
                 customer_phone: phone,
                 total_amount: total,
-                shipping_address: `${address}${apartment ? `, ${apartment}` : ""}, ${city} ${postalCode}`
+                shipping_address: `${address}${apartment ? `, ${apartment}` : ""}, ${city} ${postalCode}`,
+                shipping_method: shippingMethod,
+                payment_method: paymentMethod,
+                status: "pending"
             });
         } catch (err) {
             console.error(err);
@@ -76,31 +80,25 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
                             <span className={step === "payment" ? "text-blue-600 font-medium" : ""}>Payment</span>
                         </div>
 
-                        <form id="checkout-form" onSubmit={handleFormSubmit} className="space-y-6">
+                        <form id="checkout-form" onSubmit={handleFormSubmit} className="space-y-8">
 
                             {/* Contact Section */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-semibold text-lg">Contact</h3>
-                                    <button type="button" className="text-blue-600 text-sm hover:underline">Log in</button>
-                                </div>
+                            <div className="space-y-6">
+                                <h3 className="font-semibold text-lg">Contact</h3>
                                 <Input
                                     placeholder="Email or mobile phone number"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
+                                    className="h-12"
                                 />
-                                <div className="flex items-center gap-2">
-                                    <input type="checkbox" id="newsletter" className="rounded border-gray-300" />
-                                    <Label htmlFor="newsletter" className="text-sm font-normal text-gray-600">Email me with news and offers</Label>
-                                </div>
                             </div>
 
                             {/* Delivery Section */}
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 <h3 className="font-semibold text-lg">Delivery</h3>
                                 <Select defaultValue="PH">
-                                    <SelectTrigger className="w-full">
+                                    <SelectTrigger className="w-full h-12">
                                         <SelectValue placeholder="Country/Region" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -108,18 +106,20 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
                                     </SelectContent>
                                 </Select>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-5">
                                     <Input
                                         placeholder="First name"
                                         value={firstName}
                                         onChange={(e) => setFirstName(e.target.value)}
                                         required
+                                        className="h-12"
                                     />
                                     <Input
                                         placeholder="Last name"
                                         value={lastName}
                                         onChange={(e) => setLastName(e.target.value)}
                                         required
+                                        className="h-12"
                                     />
                                 </div>
 
@@ -128,25 +128,29 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     required
+                                    className="h-12"
                                 />
-                                <Input 
-                                    placeholder="Apartment, suite, etc. (optional)" 
+                                <Input
+                                    placeholder="Apartment, suite, etc. (optional)"
                                     value={apartment}
                                     onChange={(e) => setApartment(e.target.value)}
+                                    className="h-12"
                                 />
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-5">
                                     <Input
                                         placeholder="City"
                                         value={city}
                                         onChange={(e) => setCity(e.target.value)}
                                         required
+                                        className="h-12"
                                     />
                                     <Input
                                         placeholder="Postal code"
                                         value={postalCode}
                                         onChange={(e) => setPostalCode(e.target.value)}
                                         required
+                                        className="h-12"
                                     />
                                 </div>
 
@@ -155,36 +159,61 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     required
+                                    className="h-12"
                                 />
                             </div>
 
                             {/* Shipping Method (Simplified) */}
-                            <div className="space-y-4 pt-4">
+                            <div className="space-y-6 pt-10">
                                 <h3 className="font-semibold text-lg">Shipping method</h3>
-                                <div className="border rounded-lg p-4 flex justify-between items-center bg-blue-50/50 border-blue-200">
-                                    <div className="flex items-center gap-3">
-                                        <Truck className="w-5 h-5 text-blue-600" />
-                                        <span className="text-sm font-medium">Standard Delivery</span>
+                                <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="flex flex-col gap-5">
+                                    <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${shippingMethod === 'standard' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
+                                        <RadioGroupItem value="standard" id="sd-sm-standard" />
+                                        <Label htmlFor="sd-sm-standard" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <Truck className="w-5 h-5 text-blue-600" />
+                                                <span>Standard Delivery</span>
+                                            </div>
+                                            <span className="font-bold">₱150.00</span>
+                                        </Label>
                                     </div>
-                                    <span className="font-bold text-sm">₱150.00</span>
-                                </div>
+                                    <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${shippingMethod === 'walkin' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
+                                        <RadioGroupItem value="walkin" id="sd-sm-walkin" />
+                                        <Label htmlFor="sd-sm-walkin" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <MapPin className="w-5 h-5 text-blue-600" />
+                                                <span>Walk-in</span>
+                                            </div>
+                                            <span className="font-bold text-green-600">Free</span>
+                                        </Label>
+                                    </div>
+                                </RadioGroup>
                             </div>
 
                             {/* Payment Method */}
-                            <div className="space-y-4 pt-4">
+                            <div className="space-y-6 pt-10">
                                 <h3 className="font-semibold text-lg">Payment</h3>
                                 <p className="text-sm text-gray-500 mb-3">All transactions are secure and encrypted.</p>
-                                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col gap-3">
-                                    <div className={`border rounded-lg p-4 flex items-center gap-3 cursor-pointer ${paymentMethod === 'card' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/30' : ''}`}>
-                                        <RadioGroupItem value="card" id="pm-card" />
-                                        <Label htmlFor="pm-card" className="flex-1 cursor-pointer font-medium flex items-center gap-2">
-                                            Credit/Debit Card via PayMongo <CreditCard className="w-4 h-4 text-gray-500" />
+                                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col gap-6">
+                                    <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer ${paymentMethod === 'card' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/30' : 'hover:bg-gray-50'}`}>
+                                        <RadioGroupItem value="card" id="sd-pm-card" />
+                                        <Label htmlFor="sd-pm-card" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                            <span>Credit/Debit Card via PayMongo</span>
+                                            <CreditCard className="w-5 h-5 text-gray-500" />
                                         </Label>
                                     </div>
-                                    <div className={`border rounded-lg p-4 flex items-center gap-3 cursor-pointer ${paymentMethod === 'cod' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/30' : ''}`}>
-                                        <RadioGroupItem value="cod" id="pm-cod" />
-                                        <Label htmlFor="pm-cod" className="flex-1 cursor-pointer font-medium flex items-center gap-2">
-                                            Cash on Delivery (COD) <Banknote className="w-4 h-4 text-gray-500" />
+                                    <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer ${paymentMethod === 'cod' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/30' : 'hover:bg-gray-50'}`}>
+                                        <RadioGroupItem value="cod" id="sd-pm-cod" />
+                                        <Label htmlFor="sd-pm-cod" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                            <span>Cash on Delivery (COD)</span>
+                                            <Banknote className="w-5 h-5 text-gray-500" />
+                                        </Label>
+                                    </div>
+                                    <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer ${paymentMethod === 'cash' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/30' : 'hover:bg-gray-50'}`}>
+                                        <RadioGroupItem value="cash" id="sd-pm-cash" />
+                                        <Label htmlFor="sd-pm-cash" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                            <span>Cash</span>
+                                            <Wallet className="w-5 h-5 text-gray-500" />
                                         </Label>
                                     </div>
                                 </RadioGroup>
@@ -192,7 +221,7 @@ export function CheckoutDialog({ open, onOpenChange, cartItems, onConfirmOrder }
 
                             <Button
                                 type="submit"
-                                className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-700 mt-6"
+                                className="w-full h-14 text-lg bg-blue-600 hover:bg-blue-700 mt-20"
                                 disabled={loading}
                             >
                                 {loading ? "Processing..." : `Pay ₱${total.toLocaleString()}`}

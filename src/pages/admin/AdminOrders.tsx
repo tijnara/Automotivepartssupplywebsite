@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { Database } from "../../types/database.types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { ShoppingBag, Calendar, CheckCircle2, Clock, Trash2, Eye } from "lucide-react";
+import { ShoppingBag, Calendar, CheckCircle2, Clock, Trash2, Eye, CreditCard, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/button";
@@ -126,6 +126,27 @@ export default function AdminOrders() {
         }
     };
 
+    const updatePaymentStatus = async (id: number, payment_status: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+
+        const { error } = await supabase
+            .from('orders')
+            .update({ payment_status })
+            .eq('id', id);
+
+        if (error) {
+            toast.error("Failed to update payment status");
+        } else {
+            toast.success(`Payment marked as ${payment_status}`);
+            setOrders(prev => prev.map(o => o.id === id ? { ...o, payment_status } : o));
+
+            // Update local state if currently viewing this order
+            if (selectedOrder?.id === id) {
+                setSelectedOrder(prev => prev ? { ...prev, payment_status } : null);
+            }
+        }
+    };
+
     return (
         <AdminLayout
             title="Orders"
@@ -138,6 +159,7 @@ export default function AdminOrders() {
                             <TableHead className="py-4 pl-6 w-[100px]">Order ID</TableHead>
                             <TableHead className="py-4">Customer</TableHead>
                             <TableHead className="py-4">Total Amount</TableHead>
+                            <TableHead className="py-4">Payment</TableHead>
                             <TableHead className="py-4">Status</TableHead>
                             <TableHead className="py-4">Date</TableHead>
                             <TableHead className="text-right py-4 pr-6">Actions</TableHead>
@@ -146,7 +168,7 @@ export default function AdminOrders() {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-20">
+                                <TableCell colSpan={7} className="text-center py-20">
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                         <p className="text-gray-500 font-medium">Loading orders...</p>
@@ -155,7 +177,7 @@ export default function AdminOrders() {
                             </TableRow>
                         ) : orders.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-16 text-gray-500">
+                                <TableCell colSpan={7} className="text-center py-16 text-gray-500">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <ShoppingBag className="w-12 h-12 text-gray-200" />
                                         <p>No orders placed yet.</p>
@@ -182,6 +204,20 @@ export default function AdminOrders() {
                                     </TableCell>
                                     <TableCell className="font-bold text-gray-900">
                                         ₱{Number(order.total_amount).toLocaleString()}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={order.payment_status === 'verified' ? 'secondary' : 'outline'} className={
+                                            order.payment_status === 'verified'
+                                                ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-transparent'
+                                                : 'bg-gray-100 text-gray-700 border-gray-200'
+                                        }>
+                                            {order.payment_status === 'verified' ? (
+                                                <ShieldCheck className="w-3 h-3 mr-1" />
+                                            ) : (
+                                                <CreditCard className="w-3 h-3 mr-1" />
+                                            )}
+                                            <span className="capitalize">{order.payment_status || 'pending'}</span>
+                                        </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={order.status === 'completed' ? 'secondary' : 'outline'} className={
@@ -214,6 +250,18 @@ export default function AdminOrders() {
                                             >
                                                 <Eye className="w-4 h-4" />
                                             </Button>
+
+                                            {order.payment_status !== 'verified' && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                                    onClick={(e) => updatePaymentStatus(order.id, 'verified', e)}
+                                                    title="Verify Payment"
+                                                >
+                                                    <ShieldCheck className="w-4 h-4" />
+                                                </Button>
+                                            )}
 
                                             {order.status !== 'completed' && (
                                                 <Button
@@ -281,6 +329,28 @@ export default function AdminOrders() {
                                     }`}>
                                         {selectedOrder.status}
                                     </Badge>
+                                </div>
+                                <div className="col-span-2 mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                                    <p className="text-gray-500 text-xs uppercase font-medium tracking-wider">Payment Status</p>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant={selectedOrder.payment_status === 'verified' ? 'secondary' : 'outline'} className={
+                                            selectedOrder.payment_status === 'verified'
+                                                ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-transparent'
+                                                : 'bg-gray-100 text-gray-700 border-gray-200'
+                                        }>
+                                            {selectedOrder.payment_status === 'verified' ? 'Verified' : 'Pending'}
+                                        </Badge>
+                                        {selectedOrder.payment_status !== 'verified' && (
+                                            <Button 
+                                                size="sm" 
+                                                variant="outline" 
+                                                className="h-7 text-xs bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
+                                                onClick={() => updatePaymentStatus(selectedOrder.id, 'verified')}
+                                            >
+                                                Verify Now
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

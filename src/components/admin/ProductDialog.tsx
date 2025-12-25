@@ -78,8 +78,8 @@ export function ProductDialog({ product, open, onOpenChange, onSave }: ProductDi
                             {product ? "Update the details of your product here." : "Fill in the details for the new product."}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
+                    <div className="grid gap-6 py-6">
+                        <div className="grid gap-3">
                             <Label htmlFor="name">Product Name</Label>
                             <Input
                                 id="name"
@@ -87,10 +87,11 @@ export function ProductDialog({ product, open, onOpenChange, onSave }: ProductDi
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="e.g. Brake Pads"
                                 required
+                                className="h-11"
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="grid gap-3">
                                 <Label htmlFor="category">Category</Label>
                                 <Input
                                     id="category"
@@ -98,9 +99,10 @@ export function ProductDialog({ product, open, onOpenChange, onSave }: ProductDi
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     placeholder="e.g. Brakes"
                                     required
+                                    className="h-11"
                                 />
                             </div>
-                            <div className="grid gap-2">
+                            <div className="grid gap-3">
                                 <Label htmlFor="price">Price (₱)</Label>
                                 <Input
                                     id="price"
@@ -108,10 +110,11 @@ export function ProductDialog({ product, open, onOpenChange, onSave }: ProductDi
                                     value={formData.price}
                                     onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
                                     required
+                                    className="h-11"
                                 />
                             </div>
                         </div>
-                        <div className="grid gap-2">
+                        <div className="grid gap-3">
                             <Label htmlFor="image">Image URL</Label>
                             <Input
                                 id="image"
@@ -119,6 +122,7 @@ export function ProductDialog({ product, open, onOpenChange, onSave }: ProductDi
                                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                                 placeholder="https://..."
                                 required
+                                className="h-11"
                             />
                         </div>
                         <div className="flex items-center space-x-2 pt-2">

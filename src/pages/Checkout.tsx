@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { CartItem } from "../App";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ChevronRight, CreditCard, Banknote, Truck } from "lucide-react";
+import { ChevronRight, CreditCard, Banknote, Truck, MapPin, Wallet } from "lucide-react";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 
@@ -44,11 +44,12 @@ export default function Checkout({
     const [city, setCity] = useState("");
     const [postalCode, setPostalCode] = useState("");
     const [phone, setPhone] = useState("");
+    const [shippingMethod, setShippingMethod] = useState("standard");
     const [paymentMethod, setPaymentMethod] = useState("cod");
 
     // Totals
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const shipping = 150; // Hardcoded standard shipping
+    const shipping = shippingMethod === "standard" ? 150 : 0;
     const total = subtotal + shipping;
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -61,6 +62,8 @@ export default function Checkout({
                 customer_phone: phone,
                 total_amount: total,
                 shipping_address: `${address}, ${city} ${postalCode}`,
+                shipping_method: shippingMethod,
+                payment_method: paymentMethod,
                 status: "pending"
             });
             // Redirect to home or success page after order
@@ -123,34 +126,25 @@ export default function Checkout({
                                 <span className="text-blue-900 font-semibold">Payment</span>
                             </div>
 
-                            <form id="checkout-form" onSubmit={handleFormSubmit} className="space-y-8">
+                            <form id="checkout-form" onSubmit={handleFormSubmit} className="space-y-10">
 
                                 {/* Contact Section */}
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="font-semibold text-lg text-gray-900">Contact information</h3>
-                                        <div className="text-sm text-gray-600">
-                                            Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
-                                        </div>
-                                    </div>
+                                <div className="space-y-6">
+                                    <h3 className="font-semibold text-lg text-gray-900">Contact information</h3>
                                     <Input
                                         placeholder="Email or mobile phone number"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
-                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                     />
-                                    <div className="flex items-center gap-2">
-                                        <input type="checkbox" id="newsletter" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                                        <Label htmlFor="newsletter" className="text-sm font-normal text-gray-600 cursor-pointer">Email me with news and offers</Label>
-                                    </div>
                                 </div>
 
                                 {/* Delivery Section */}
-                                <div className="space-y-4">
+                                <div className="space-y-6">
                                     <h3 className="font-semibold text-lg text-gray-900">Shipping address</h3>
                                     <Select defaultValue="PH">
-                                        <SelectTrigger className="w-full bg-gray-50 border-gray-200">
+                                        <SelectTrigger className="w-full bg-gray-50 border-gray-200 h-12">
                                             <SelectValue placeholder="Country/Region" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -158,20 +152,20 @@ export default function Checkout({
                                         </SelectContent>
                                     </Select>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-6">
                                         <Input
                                             placeholder="First name"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
                                             required
-                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                         />
                                         <Input
                                             placeholder="Last name"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
                                             required
-                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                         />
                                     </div>
 
@@ -180,27 +174,27 @@ export default function Checkout({
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
                                         required
-                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                     />
                                     <Input
                                         placeholder="Apartment, suite, etc. (optional)"
-                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                     />
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-6">
                                         <Input
                                             placeholder="City"
                                             value={city}
                                             onChange={(e) => setCity(e.target.value)}
                                             required
-                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                         />
                                         <Input
                                             placeholder="Postal code"
                                             value={postalCode}
                                             onChange={(e) => setPostalCode(e.target.value)}
                                             required
-                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                         />
                                     </div>
 
@@ -209,48 +203,71 @@ export default function Checkout({
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
                                         required
-                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                                        className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
                                     />
                                 </div>
 
                                 {/* Shipping Method */}
-                                <div className="space-y-4 pt-2">
+                                <div className="space-y-6 pt-8">
                                     <h3 className="font-semibold text-lg text-gray-900">Shipping method</h3>
-                                    <div className="border rounded-lg p-4 flex justify-between items-center bg-blue-50/30 border-blue-100">
-                                        <div className="flex items-center gap-3">
-                                            <div className="bg-white p-2 rounded-full shadow-sm">
-                                                <Truck className="w-5 h-5 text-blue-600" />
-                                            </div>
-                                            <span className="text-sm font-medium text-gray-900">Standard Delivery</span>
-                                        </div>
-                                        <span className="font-bold text-sm text-gray-900">₱150.00</span>
-                                    </div>
-                                </div>
-
-                                {/* Payment Method */}
-                                <div className="space-y-4 pt-2">
-                                    <h3 className="font-semibold text-lg text-gray-900">Payment</h3>
-                                    <p className="text-sm text-gray-500 mb-3">All transactions are secure and encrypted.</p>
-                                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col gap-3">
-                                        <div className={`border rounded-lg p-4 flex items-center gap-3 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
-                                            <RadioGroupItem value="card" id="pm-card" />
-                                            <Label htmlFor="pm-card" className="flex-1 cursor-pointer font-medium flex items-center gap-2">
-                                                Credit/Debit Card via PayMongo <CreditCard className="w-4 h-4 text-gray-500" />
+                                    <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="flex flex-col gap-6">
+                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${shippingMethod === 'standard' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
+                                            <RadioGroupItem value="standard" id="sm-standard" />
+                                            <Label htmlFor="sm-standard" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="bg-white p-2 rounded-full shadow-sm border border-gray-100">
+                                                        <Truck className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <span>Standard Delivery</span>
+                                                </div>
+                                                <span className="font-bold">₱150.00</span>
                                             </Label>
                                         </div>
-                                        <div className={`border rounded-lg p-4 flex items-center gap-3 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
-                                            <RadioGroupItem value="cod" id="pm-cod" />
-                                            <Label htmlFor="pm-cod" className="flex-1 cursor-pointer font-medium flex items-center gap-2">
-                                                Cash on Delivery (COD) <Banknote className="w-4 h-4 text-gray-500" />
+                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${shippingMethod === 'walkin' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
+                                            <RadioGroupItem value="walkin" id="sm-walkin" />
+                                            <Label htmlFor="sm-walkin" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="bg-white p-2 rounded-full shadow-sm border border-gray-100">
+                                                        <MapPin className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                    <span>Walk-in</span>
+                                                </div>
+                                                <span className="font-bold text-green-600">Free</span>
                                             </Label>
                                         </div>
                                     </RadioGroup>
                                 </div>
 
-                                <div className="flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-4 pt-6">
-                                    <Link to="/" className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-2 transition-colors">
-                                        <ChevronRight className="w-3 h-3 rotate-180" /> Return to cart
-                                    </Link>
+                                {/* Payment Method */}
+                                <div className="space-y-6 pt-8">
+                                    <h3 className="font-semibold text-lg text-gray-900">Payment</h3>
+                                    <p className="text-sm text-gray-500 mb-3">All transactions are secure and encrypted.</p>
+                                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col gap-6">
+                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
+                                            <RadioGroupItem value="card" id="pm-card" />
+                                            <Label htmlFor="pm-card" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                                <span>Credit/Debit Card via PayMongo</span>
+                                                <CreditCard className="w-5 h-5 text-gray-500" />
+                                            </Label>
+                                        </div>
+                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
+                                            <RadioGroupItem value="cod" id="pm-cod" />
+                                            <Label htmlFor="pm-cod" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                                <span>Cash on Delivery (COD)</span>
+                                                <Banknote className="w-5 h-5 text-gray-500" />
+                                            </Label>
+                                        </div>
+                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${paymentMethod === 'cash' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
+                                            <RadioGroupItem value="cash" id="pm-cash" />
+                                            <Label htmlFor="pm-cash" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
+                                                <span>Cash</span>
+                                                <Wallet className="w-5 h-5 text-gray-500" />
+                                            </Label>
+                                        </div>
+                                    </RadioGroup>
+                                </div>
+
+                                <div className="flex justify-end pt-20">
                                     <Button
                                         type="submit"
                                         className="w-full sm:w-auto h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20"

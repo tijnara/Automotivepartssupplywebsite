@@ -86,6 +86,7 @@ export type Database = {
                     customer_phone: string | null
                     total_amount: number
                     status: string
+                    payment_status: string
                     created_at: string
                 }
                 Insert: {
@@ -95,6 +96,7 @@ export type Database = {
                     customer_phone?: string | null
                     total_amount: number
                     status?: string
+                    payment_status?: string
                     created_at?: string
                 }
                 Update: {
@@ -104,6 +106,7 @@ export type Database = {
                     customer_phone?: string | null
                     total_amount?: number
                     status?: string
+                    payment_status?: string
                     created_at?: string
                 }
                 Relationships: []
