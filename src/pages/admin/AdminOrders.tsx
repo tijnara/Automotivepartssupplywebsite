@@ -7,12 +7,12 @@ import { toast } from "sonner";
 import { AdminLayout } from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "../../components/ui/dialog";
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetDescription,
+} from "../../components/ui/sheet";
 import { Badge } from "../../components/ui/badge";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
@@ -39,7 +39,7 @@ export default function AdminOrders() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [orderItems, setOrderItems] = useState<OrderItemDetail[]>([]);
     const [loadingDetails, setLoadingDetails] = useState(false);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     useEffect(() => {
         fetchOrders();
@@ -58,9 +58,10 @@ export default function AdminOrders() {
     };
 
     const fetchOrderDetails = async (order: Order) => {
-        setIsDialogOpen(true);
+        // Set state in a specific order to ensure data availability
         setSelectedOrder(order);
         setLoadingDetails(true);
+        setIsSheetOpen(true);
 
         // Fetch items and join with products table to get names/images
         const { data, error } = await supabase
@@ -101,7 +102,7 @@ export default function AdminOrders() {
         } else {
             toast.success("Order deleted");
             setOrders(prev => prev.filter(o => o.id !== id));
-            if (selectedOrder?.id === id) setIsDialogOpen(false);
+            if (selectedOrder?.id === id) setIsSheetOpen(false);
         }
     };
 
@@ -146,6 +147,9 @@ export default function AdminOrders() {
             }
         }
     };
+
+    // Safe accessor for Order ID
+    const displayOrderId = selectedOrder ? `#${selectedOrder.id.toString().padStart(4, '0')}` : 'Loading...';
 
     return (
         <AdminLayout
@@ -300,137 +304,154 @@ export default function AdminOrders() {
                 </Table>
             </div>
 
-            {/* Order Details Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} modal={true}>
-                <DialogContent className="sm:max-w-2xl">
-                    <DialogHeader>
-                        <div className="flex items-center justify-between mr-8">
-                            <DialogTitle className="text-xl font-bold flex items-center gap-2">
-                                Order Details
-                                <span className="text-sm font-normal text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-md font-mono">
-                                    #{selectedOrder?.id?.toString().padStart(4, '0')}
+            {/* Order Details Sheet */}
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen} modal={false}>
+                <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0" overlay={false}>
+                    <div className="p-6 border-b">
+                        <SheetHeader className="text-left">
+                            <div className="flex items-center justify-between">
+                                <SheetTitle className="text-xl font-bold">Order Details</SheetTitle>
+                                <span className="text-sm font-mono bg-blue-50 text-blue-600 px-2 py-1 rounded">
+                                    {displayOrderId}
                                 </span>
-                            </DialogTitle>
-                        </div>
-                        <DialogDescription>
-                            {selectedOrder && `Placed on ${new Date(selectedOrder.created_at).toLocaleString()}`}
-                        </DialogDescription>
-                    </DialogHeader>
+                            </div>
+                            <SheetDescription>
+                                {selectedOrder ? `Placed on ${new Date(selectedOrder.created_at).toLocaleString()}` : "Loading details..."}
+                            </SheetDescription>
+                        </SheetHeader>
+                    </div>
 
                     {selectedOrder && (
-                        <div className="grid gap-6 py-4">
-                            {/* Customer Info Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <p className="text-gray-500 text-xs uppercase font-medium tracking-wider mb-1">Customer</p>
-                                    <p className="font-semibold text-gray-900">{selectedOrder.customer_name}</p>
-                                    <p className="text-gray-600">{selectedOrder.customer_email}</p>
-                                    {selectedOrder.customer_phone && (
-                                        <p className="text-gray-600">{selectedOrder.customer_phone}</p>
-                                    )}
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-gray-500 text-xs uppercase font-medium tracking-wider mb-1">Order Status</p>
-                                    <Badge className={`capitalize ${
-                                        selectedOrder.status === 'completed' ? 'bg-green-600' : 'bg-yellow-500'
-                                    }`}>
-                                        {selectedOrder.status}
-                                    </Badge>
-                                </div>
-                                <div className="col-span-2 mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
-                                    <p className="text-gray-500 text-xs uppercase font-medium tracking-wider">Payment Status</p>
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant={selectedOrder.payment_status === 'verified' ? 'secondary' : 'outline'} className={
-                                            selectedOrder.payment_status === 'verified'
-                                                ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-transparent'
-                                                : 'bg-gray-100 text-gray-700 border-gray-200'
-                                        }>
-                                            {selectedOrder.payment_status === 'verified' ? 'Verified' : 'Pending'}
-                                        </Badge>
-                                        {selectedOrder.payment_status !== 'verified' && (
-                                            <Button 
-                                                size="sm" 
-                                                variant="outline" 
-                                                className="h-7 text-xs bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100"
-                                                onClick={() => updatePaymentStatus(selectedOrder.id, 'verified')}
-                                            >
-                                                Verify Now
-                                            </Button>
+                        <>
+                            <ScrollArea className="flex-1 px-6">
+                                <div className="py-6 space-y-6">
+                                    {/* Customer Info Section */}
+                                    <div className="space-y-4">
+                                        <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-500">Customer Information</h4>
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 space-y-3">
+                                            <div>
+                                                <p className="text-xs text-gray-500">Name & Email</p>
+                                                <p className="font-medium">{selectedOrder.customer_name}</p>
+                                                <p className="text-sm text-gray-600">{selectedOrder.customer_email}</p>
+                                            </div>
+                                            {selectedOrder.customer_phone && (
+                                                <div>
+                                                    <p className="text-xs text-gray-500">Phone</p>
+                                                    <p className="text-sm text-gray-600">{selectedOrder.customer_phone}</p>
+                                                </div>
+                                            )}
+                                            <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
+                                                <div>
+                                                    <p className="text-xs text-gray-500">Order Status</p>
+                                                    <Badge className={`capitalize mt-1 ${
+                                                        selectedOrder.status === 'completed' ? 'bg-green-600' : 'bg-yellow-500'
+                                                    }`}>
+                                                        {selectedOrder.status}
+                                                    </Badge>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xs text-gray-500">Payment</p>
+                                                    <Badge variant={selectedOrder.payment_status === 'verified' ? 'secondary' : 'outline'} className={`mt-1 ${
+                                                        selectedOrder.payment_status === 'verified'
+                                                            ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-transparent'
+                                                            : 'bg-gray-100 text-gray-700 border-gray-200'
+                                                    }`}>
+                                                        {selectedOrder.payment_status === 'verified' ? 'Verified' : 'Pending'}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Order Items List */}
+                                    <div className="space-y-4">
+                                        <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-500">Items Ordered</h4>
+                                        {loadingDetails ? (
+                                            <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+                                                <p>Loading items...</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {orderItems.map((item) => (
+                                                    <div key={item.id} className="flex gap-4">
+                                                        <div
+                                                            className="bg-gray-100 rounded-md overflow-hidden flex-shrink-0 border border-gray-100"
+                                                            style={{ width: '80px', height: '80px', minWidth: '80px' }}
+                                                        >
+                                                            {item.products?.image && (
+                                                                <ImageWithFallback
+                                                                    src={item.products.image}
+                                                                    alt={item.products.name || "Product"}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 flex flex-col justify-between py-0.5">
+                                                            <div>
+                                                                <h4 className="font-medium text-sm line-clamp-2 text-gray-900">
+                                                                    {item.products?.name || "Unknown Product"}
+                                                                </h4>
+                                                                <p className="text-xs text-gray-500 mt-1">
+                                                                    {item.products?.category || "Uncategorized"}
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex justify-between items-end">
+                                                                <div className="text-xs text-gray-500">
+                                                                    ₱{Number(item.price_at_purchase).toLocaleString()} x {item.quantity}
+                                                                </div>
+                                                                <div className="text-blue-600 font-bold text-sm">
+                                                                    ₱{(Number(item.price_at_purchase) * item.quantity).toLocaleString()}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </ScrollArea>
 
-                            {/* Order Items List */}
-                            <div>
-                                <h4 className="font-medium mb-3 text-sm text-gray-900">Items Ordered</h4>
-                                <ScrollArea className="h-[240px] rounded-md border p-4">
-                                    {loadingDetails ? (
-                                        <div className="flex items-center justify-center h-full text-gray-400">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400 mr-2"></div>
-                                            Loading items...
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            {orderItems.map((item) => (
-                                                <div key={item.id} className="flex gap-4 items-center">
-                                                    <div className="h-12 w-12 rounded-md bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0">
-                                                        {item.products?.image && (
-                                                            <ImageWithFallback
-                                                                src={item.products.image}
-                                                                alt={item.products.name || "Product"}
-                                                                className="h-full w-full object-cover"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                                            {item.products?.name || "Unknown Product"}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {item.products?.category || "Uncategorized"}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right text-sm">
-                                                        <div className="font-medium">
-                                                            ₱{Number(item.price_at_purchase).toLocaleString()}
-                                                            <span className="text-gray-400 font-normal mx-1">x</span>
-                                                            {item.quantity}
-                                                        </div>
-                                                        <div className="text-gray-500 font-medium">
-                                                            ₱{(Number(item.price_at_purchase) * item.quantity).toLocaleString()}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </ScrollArea>
-                            </div>
-
-                            {/* Footer / Total */}
-                            <div className="flex items-center justify-between border-t pt-4">
-                                <div className="flex gap-2">
-                                    {selectedOrder.status !== 'completed' && (
-                                        <Button
-                                            onClick={() => updateStatus(selectedOrder.id, 'completed')}
-                                            className="bg-green-600 hover:bg-green-700 text-white h-9"
-                                        >
-                                            <CheckCircle2 className="w-4 h-4 mr-2" /> Mark Completed
-                                        </Button>
-                                    )}
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-gray-500 mr-3 text-sm">Total Amount</span>
+                            {/* Footer / Actions */}
+                            <div className="p-6 border-t bg-gray-50/50 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-600 font-medium">Total Amount</span>
                                     <span className="text-2xl font-bold text-blue-600">
                                         ₱{Number(selectedOrder.total_amount).toLocaleString()}
                                     </span>
                                 </div>
+
+                                <div className="grid grid-cols-1 gap-2">
+                                    {selectedOrder.payment_status !== 'verified' && (
+                                        <Button
+                                            onClick={() => updatePaymentStatus(selectedOrder.id, 'verified')}
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 font-bold"
+                                        >
+                                            <ShieldCheck className="w-4 h-4 mr-2" /> Verify Payment
+                                        </Button>
+                                    )}
+                                    {selectedOrder.status !== 'completed' && (
+                                        <Button
+                                            onClick={() => updateStatus(selectedOrder.id, 'completed')}
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white h-11 font-bold"
+                                        >
+                                            <CheckCircle2 className="w-4 h-4 mr-2" /> Mark as Completed
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setIsSheetOpen(false)}
+                                        className="w-full h-11"
+                                    >
+                                        Close
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
+                        </>
                     )}
-                </DialogContent>
-            </Dialog>
+                </SheetContent>
+            </Sheet>
         </AdminLayout>
     );
 }

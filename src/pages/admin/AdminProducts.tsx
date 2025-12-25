@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
 import { Input } from "../../components/ui/input";
 import { AdminLayout } from "../../components/admin/AdminLayout";
-import { ProductDialog } from "../../components/admin/ProductDialog";
+import { ProductSheet } from "../../components/admin/ProductSheet";
 
 type Product = Database['public']['Tables']['products']['Row'];
 type ProductInsert = Database['public']['Tables']['products']['Insert'];
@@ -17,7 +17,7 @@ export default function AdminProducts() {
     const [products, setProducts] = useState<Product[]>([]);
     const [filter, setFilter] = useState("");
     const [loading, setLoading] = useState(true);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     useEffect(() => {
@@ -66,14 +66,14 @@ export default function AdminProducts() {
         fetchProducts();
     };
 
-    const openEditDialog = (product: Product) => {
+    const openEditSheet = (product: Product) => {
         setEditingProduct(product);
-        setIsDialogOpen(true);
+        setIsSheetOpen(true);
     };
 
-    const openAddDialog = () => {
+    const openAddSheet = () => {
         setEditingProduct(null);
-        setIsDialogOpen(true);
+        setIsSheetOpen(true);
     };
 
     const filteredProducts = products.filter(p =>
@@ -135,7 +135,7 @@ export default function AdminProducts() {
                     />
                 </div>
                 <Button 
-                    onClick={openAddDialog}
+                    onClick={openAddSheet}
                     className="h-10 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 rounded-lg px-6 w-full md:w-auto transition-all active:scale-95 flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4" /> Add New Product
@@ -176,8 +176,12 @@ export default function AdminProducts() {
                             </TableRow>
                         ) : (
                             filteredProducts.map((product) => (
-                                <TableRow key={product.id} className="group hover:bg-blue-50/30 transition-colors border-b border-gray-200">
-                                    <TableCell className="py-3 text-center border border-gray-200">
+                                <TableRow 
+                                    key={product.id} 
+                                    className="group hover:bg-blue-50/30 transition-colors border-b border-gray-200 cursor-pointer"
+                                    onClick={() => openEditSheet(product)}
+                                >
+                                    <TableCell className="py-4 text-center border border-gray-200">
                                         <div className="flex justify-center">
                                             <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
                                                 <ImageWithFallback
@@ -188,14 +192,14 @@ export default function AdminProducts() {
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-medium text-gray-900 text-center border border-gray-200">{product.name}</TableCell>
-                                    <TableCell className="text-center border border-gray-200">
+                                    <TableCell className="py-4 font-medium text-gray-900 text-center border border-gray-200">{product.name}</TableCell>
+                                    <TableCell className="py-4 text-center border border-gray-200">
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wider">
                                             {product.category}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="font-semibold text-gray-700 text-center border border-gray-200">₱{Number(product.price).toLocaleString()}</TableCell>
-                                    <TableCell className="text-center border border-gray-200">
+                                    <TableCell className="py-4 font-semibold text-gray-700 text-center border border-gray-200">₱{Number(product.price).toLocaleString()}</TableCell>
+                                    <TableCell className="py-4 text-center border border-gray-200">
                                         <div className="flex justify-center">
                                             {product.in_stock ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
@@ -210,13 +214,16 @@ export default function AdminProducts() {
                                             )}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-center border border-gray-200">
-                                        <div className="flex justify-center gap-2">
+                                    <TableCell className="py-4 text-center border border-gray-200">
+                                        <div className="flex justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                onClick={() => openEditDialog(product)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openEditSheet(product);
+                                                }}
                                                 title="Edit Product"
                                             >
                                                 <Edit2 className="w-4 h-4" />
@@ -225,7 +232,10 @@ export default function AdminProducts() {
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                onClick={() => handleDelete(product.id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(product.id);
+                                                }}
                                                 title="Delete Product"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -239,9 +249,9 @@ export default function AdminProducts() {
                 </Table>
             </div>
 
-            <ProductDialog 
-                open={isDialogOpen} 
-                onOpenChange={setIsDialogOpen} 
+            <ProductSheet
+                open={isSheetOpen}
+                onOpenChange={setIsSheetOpen}
                 product={editingProduct} 
                 onSave={handleSaveProduct}
             />
