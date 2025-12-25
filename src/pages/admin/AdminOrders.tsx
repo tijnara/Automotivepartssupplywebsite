@@ -58,9 +58,9 @@ export default function AdminOrders() {
     };
 
     const fetchOrderDetails = async (order: Order) => {
+        setIsDialogOpen(true);
         setSelectedOrder(order);
         setLoadingDetails(true);
-        setIsDialogOpen(true);
 
         // Fetch items and join with products table to get names/images
         const { data, error } = await supabase
@@ -153,22 +153,22 @@ export default function AdminOrders() {
             description="Manage customer orders and track fulfillment status."
         >
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <Table>
-                    <TableHeader className="bg-gray-50/80 border-b border-gray-100">
+                <Table className="border-collapse border border-gray-200">
+                    <TableHeader className="bg-gray-50/80 border-b border-gray-200">
                         <TableRow className="hover:bg-transparent">
-                            <TableHead className="py-4 pl-6 w-[100px]">Order ID</TableHead>
-                            <TableHead className="py-4">Customer</TableHead>
-                            <TableHead className="py-4">Total Amount</TableHead>
-                            <TableHead className="py-4">Payment</TableHead>
-                            <TableHead className="py-4">Status</TableHead>
-                            <TableHead className="py-4">Date</TableHead>
-                            <TableHead className="text-right py-4 pr-6">Actions</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700 w-[100px]">Order ID</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Customer</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Total Amount</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Payment</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Status</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Date</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-20">
+                                <TableCell colSpan={7} className="text-center py-20 border border-gray-200">
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                         <p className="text-gray-500 font-medium">Loading orders...</p>
@@ -177,7 +177,7 @@ export default function AdminOrders() {
                             </TableRow>
                         ) : orders.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-16 text-gray-500">
+                                <TableCell colSpan={7} className="text-center py-16 text-gray-500 border border-gray-200">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <ShoppingBag className="w-12 h-12 text-gray-200" />
                                         <p>No orders placed yet.</p>
@@ -188,64 +188,71 @@ export default function AdminOrders() {
                             orders.map((order) => (
                                 <TableRow
                                     key={order.id}
-                                    className="group hover:bg-blue-50/30 transition-colors border-b border-gray-50 last:border-none cursor-pointer"
+                                    className="group hover:bg-blue-50/30 transition-colors border-b border-gray-200 cursor-pointer"
                                     onClick={() => fetchOrderDetails(order)}
                                 >
-                                    <TableCell className="py-4 pl-6">
-                                        <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                    <TableCell className="py-4 text-center border border-gray-200">
+                                        <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded inline-block">
                                             #{order.id.toString().padStart(4, '0')}
                                         </span>
                                     </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col">
+                                    <TableCell className="text-center border border-gray-200">
+                                        <div className="flex flex-col items-center">
                                             <span className="font-semibold text-gray-900">{order.customer_name}</span>
                                             <span className="text-xs text-gray-500">{order.customer_email}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-bold text-gray-900">
+                                    <TableCell className="text-center font-bold text-gray-900 border border-gray-200">
                                         ₱{Number(order.total_amount).toLocaleString()}
                                     </TableCell>
-                                    <TableCell>
-                                        <Badge variant={order.payment_status === 'verified' ? 'secondary' : 'outline'} className={
-                                            order.payment_status === 'verified'
-                                                ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-transparent'
-                                                : 'bg-gray-100 text-gray-700 border-gray-200'
-                                        }>
-                                            {order.payment_status === 'verified' ? (
-                                                <ShieldCheck className="w-3 h-3 mr-1" />
-                                            ) : (
-                                                <CreditCard className="w-3 h-3 mr-1" />
-                                            )}
-                                            <span className="capitalize">{order.payment_status || 'pending'}</span>
-                                        </Badge>
+                                    <TableCell className="text-center border border-gray-200">
+                                        <div className="flex justify-center">
+                                            <Badge variant={order.payment_status === 'verified' ? 'secondary' : 'outline'} className={
+                                                order.payment_status === 'verified'
+                                                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-transparent'
+                                                    : 'bg-gray-100 text-gray-700 border-gray-200'
+                                            }>
+                                                {order.payment_status === 'verified' ? (
+                                                    <ShieldCheck className="w-3 h-3 mr-1" />
+                                                ) : (
+                                                    <CreditCard className="w-3 h-3 mr-1" />
+                                                )}
+                                                <span className="capitalize">{order.payment_status || 'pending'}</span>
+                                            </Badge>
+                                        </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <Badge variant={order.status === 'completed' ? 'secondary' : 'outline'} className={
-                                            order.status === 'completed'
-                                                ? 'bg-green-100 text-green-700 hover:bg-green-100 border-transparent'
-                                                : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                        }>
-                                            {order.status === 'completed' ? (
-                                                <CheckCircle2 className="w-3 h-3 mr-1" />
-                                            ) : (
-                                                <Clock className="w-3 h-3 mr-1" />
-                                            )}
-                                            <span className="capitalize">{order.status}</span>
-                                        </Badge>
+                                    <TableCell className="text-center border border-gray-200">
+                                        <div className="flex justify-center">
+                                            <Badge variant={order.status === 'completed' ? 'secondary' : 'outline'} className={
+                                                order.status === 'completed'
+                                                    ? 'bg-green-100 text-green-700 hover:bg-green-100 border-transparent'
+                                                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                            }>
+                                                {order.status === 'completed' ? (
+                                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                ) : (
+                                                    <Clock className="w-3 h-3 mr-1" />
+                                                )}
+                                                <span className="capitalize">{order.status}</span>
+                                            </Badge>
+                                        </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <TableCell className="text-center border border-gray-200">
+                                        <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                                             <Calendar className="w-3 h-3" />
                                             {new Date(order.created_at).toLocaleDateString()}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right pr-6">
-                                        <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                    <TableCell className="text-center border border-gray-200">
+                                        <div className="flex justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8 text-blue-600 hover:bg-blue-50 rounded-lg"
-                                                onClick={(e) => { e.stopPropagation(); fetchOrderDetails(order); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    fetchOrderDetails(order);
+                                                }}
                                                 title="View Details"
                                             >
                                                 <Eye className="w-4 h-4" />
@@ -294,7 +301,7 @@ export default function AdminOrders() {
             </div>
 
             {/* Order Details Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} modal={true}>
                 <DialogContent className="sm:max-w-2xl">
                     <DialogHeader>
                         <div className="flex items-center justify-between mr-8">

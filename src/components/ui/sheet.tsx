@@ -35,7 +35,7 @@ const SheetOverlay = React.forwardRef<
     <SheetPrimitive.Overlay
         ref={ref}
         data-slot="sheet-overlay"
-        style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100 }}
+        style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000000 }}
         className={cn(
             "fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             className,
@@ -59,7 +59,7 @@ const SheetContent = React.forwardRef<
             data-slot="sheet-content"
             style={{
                 backgroundColor: 'white',
-                zIndex: 100,
+                zIndex: 1000001,
                 position: 'fixed',
                 top: 0,
                 bottom: 0,
@@ -72,7 +72,7 @@ const SheetContent = React.forwardRef<
                 boxShadow: '-4px 0 15px rgba(0,0,0,0.1)'
             }}
             className={cn(
-                "p-6 shadow-2xl transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+                "p-6 shadow-2xl transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
                 className,
             )}
             {...props}

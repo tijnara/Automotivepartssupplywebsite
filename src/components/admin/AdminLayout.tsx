@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag } from "lucide-react";
 import { supabase } from "../../lib/supabase";
@@ -12,6 +12,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children, title, description }: AdminLayoutProps) {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -54,24 +55,24 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                         {/* Navigation */}
                         <nav className="hidden md:flex items-center gap-1">
                             <Button 
-                                variant="ghost" 
-                                className={`gap-2 ${window.location.pathname === '/admin' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600'}`}
+                                variant={location.pathname === '/admin' ? "default" : "ghost"}
+                                className={`gap-2 ${location.pathname === '/admin' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
                                 onClick={() => navigate("/admin")}
                             >
                                 <Package className="w-4 h-4" />
                                 Products
                             </Button>
                             <Button 
-                                variant="ghost" 
-                                className={`gap-2 ${window.location.pathname === '/admin/orders' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600'}`}
+                                variant={location.pathname === '/admin/orders' ? "default" : "ghost"}
+                                className={`gap-2 ${location.pathname === '/admin/orders' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
                                 onClick={() => navigate("/admin/orders")}
                             >
                                 <ShoppingBag className="w-4 h-4" />
                                 Orders
                             </Button>
                             <Button 
-                                variant="ghost" 
-                                className={`gap-2 ${window.location.pathname === '/admin/messages' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-blue-600'}`}
+                                variant={location.pathname === '/admin/messages' ? "default" : "ghost"}
+                                className={`gap-2 ${location.pathname === '/admin/messages' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
                                 onClick={() => navigate("/admin/messages")}
                             >
                                 <MessageSquare className="w-4 h-4" />

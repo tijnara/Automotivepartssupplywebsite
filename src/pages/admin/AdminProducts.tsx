@@ -144,21 +144,21 @@ export default function AdminProducts() {
 
             {/* Product Table */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <Table>
-                    <TableHeader className="bg-gray-50/80 border-b border-gray-100">
+                <Table className="border-collapse border border-gray-200">
+                    <TableHeader className="bg-gray-50/80 border-b border-gray-200">
                         <TableRow className="hover:bg-transparent">
-                            <TableHead className="w-[100px] py-4">Image</TableHead>
-                            <TableHead className="py-4">Product Name</TableHead>
-                            <TableHead className="py-4">Category</TableHead>
-                            <TableHead className="py-4">Price</TableHead>
-                            <TableHead className="py-4">Stock Status</TableHead>
-                            <TableHead className="text-right py-4 pr-6">Actions</TableHead>
+                            <TableHead className="w-[100px] py-4 text-center border border-gray-200 font-bold text-gray-700">Image</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Product Name</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Category</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Price</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Stock Status</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-20">
+                                <TableCell colSpan={6} className="text-center py-20 border border-gray-200">
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                         <p className="text-gray-500 font-medium">Loading inventory...</p>
@@ -167,7 +167,7 @@ export default function AdminProducts() {
                             </TableRow>
                         ) : filteredProducts.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-16 text-gray-500">
+                                <TableCell colSpan={6} className="text-center py-16 text-gray-500 border border-gray-200">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <Package className="w-12 h-12 text-gray-200" />
                                         <p>No products found matching your search.</p>
@@ -176,42 +176,46 @@ export default function AdminProducts() {
                             </TableRow>
                         ) : (
                             filteredProducts.map((product) => (
-                                <TableRow key={product.id} className="group hover:bg-blue-50/30 transition-colors border-b border-gray-50 last:border-none">
-                                    <TableCell className="py-3">
-                                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
-                                            <ImageWithFallback
-                                                src={product.image}
-                                                alt={product.name}
-                                                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
-                                            />
+                                <TableRow key={product.id} className="group hover:bg-blue-50/30 transition-colors border-b border-gray-200">
+                                    <TableCell className="py-3 text-center border border-gray-200">
+                                        <div className="flex justify-center">
+                                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
+                                                <ImageWithFallback
+                                                    src={product.image}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                                                />
+                                            </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-medium text-gray-900">{product.name}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="font-medium text-gray-900 text-center border border-gray-200">{product.name}</TableCell>
+                                    <TableCell className="text-center border border-gray-200">
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wider">
                                             {product.category}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="font-semibold text-gray-700">₱{Number(product.price).toLocaleString()}</TableCell>
-                                    <TableCell>
-                                        {product.in_stock ? (
-                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
-                                                In Stock
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
-                                                Out of Stock
-                                            </span>
-                                        )}
+                                    <TableCell className="font-semibold text-gray-700 text-center border border-gray-200">₱{Number(product.price).toLocaleString()}</TableCell>
+                                    <TableCell className="text-center border border-gray-200">
+                                        <div className="flex justify-center">
+                                            {product.in_stock ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
+                                                    In Stock
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                                                    Out of Stock
+                                                </span>
+                                            )}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="text-right pr-6">
-                                        <div className="flex justify-end gap-2">
+                                    <TableCell className="text-center border border-gray-200">
+                                        <div className="flex justify-center gap-2">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="h-8 w-8 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                 onClick={() => openEditDialog(product)}
                                                 title="Edit Product"
                                             >
