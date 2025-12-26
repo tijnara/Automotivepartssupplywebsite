@@ -6,18 +6,8 @@ import { Plus, Minus, History, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter
-} from "../../components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { InventoryAdjustmentSheet } from "../../components/admin/InventoryAdjustmentSheet";
 import { Badge } from "../../components/ui/badge";
 
 type Product = Database['public']['Tables']['products']['Row'];
@@ -29,14 +19,9 @@ export default function AdminInventory() {
     const [products, setProducts] = useState<Product[]>([]);
     const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
 
-    // Dialog State
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    // Sheet State
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [adjustmentAmount, setAdjustmentAmount] = useState(0);
-    const [adjustmentType, setAdjustmentType] = useState<"add" | "remove">("add");
-    const [adjustmentReason, setAdjustmentReason] = useState("Restock");
-    const [notes, setNotes] = useState("");
-    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -55,34 +40,28 @@ export default function AdminInventory() {
         else setTransactions(transRes.data as any || []);
     };
 
-    const openAdjustmentDialog = (product: Product, type: "add" | "remove") => {
+    const openAdjustmentSheet = (product: Product) => {
         setSelectedProduct(product);
-        setAdjustmentType(type);
-        setAdjustmentAmount(0);
-        setAdjustmentReason(type === "add" ? "Restock" : "Sale");
-        setNotes("");
-        setIsDialogOpen(true);
+        setIsSheetOpen(true);
     };
 
-    const handleStockAdjustment = async () => {
-        if (!selectedProduct || adjustmentAmount <= 0) return;
-        setSubmitting(true);
+    const handleStockAdjustment = async (amount: number, type: "add" | "remove", reason: string, notes: string) => {
+        if (!selectedProduct || amount <= 0) return;
 
-        const change = adjustmentType === "add" ? adjustmentAmount : -adjustmentAmount;
+        const change = type === "add" ? amount : -amount;
         const newQuantity = (selectedProduct.quantity || 0) + change;
 
         // 1. Insert Transaction Log
         const { error: transError } = await supabase.from('inventory_transactions').insert([{
             product_id: selectedProduct.id,
             quantity_change: change,
-            transaction_type: adjustmentReason,
+            transaction_type: reason,
             notes: notes
         }]);
 
         if (transError) {
             toast.error("Failed to log transaction");
-            setSubmitting(false);
-            return;
+            throw transError;
         }
 
         // 2. Update Product Quantity
@@ -93,12 +72,11 @@ export default function AdminInventory() {
 
         if (prodError) {
             toast.error("Failed to update product quantity");
+            throw prodError;
         } else {
             toast.success("Stock updated successfully");
-            setIsDialogOpen(false);
             fetchData();
         }
-        setSubmitting(false);
     };
 
     return (
@@ -143,26 +121,19 @@ export default function AdminInventory() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <div className="flex justify-center gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-8 w-8 p-0 text-green-600 border-green-200 hover:bg-green-50 hover:border-green-300"
-                                                    onClick={() => openAdjustmentDialog(product, "add")}
-                                                    title="Add Stock"
-                                                >
-                                                    <Plus className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-8 w-8 p-0 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-                                                    onClick={() => openAdjustmentDialog(product, "remove")}
-                                                    title="Remove Stock"
-                                                >
-                                                    <Minus className="w-4 h-4" />
-                                                </Button>
-                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="h-8 gap-1.5 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                                                onClick={() => openAdjustmentSheet(product)}
+                                                title="Adjust Stock"
+                                            >
+                                                <div className="flex items-center -space-x-1">
+                                                    <Plus className="w-3.5 h-3.5" />
+                                                    <Minus className="w-3.5 h-3.5" />
+                                                </div>
+                                                <span className="font-medium">Adjust</span>
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -216,75 +187,12 @@ export default function AdminInventory() {
                 </TabsContent>
             </Tabs>
 
-            {/* Adjustment Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{adjustmentType === "add" ? "Add Stock" : "Remove Stock"}</DialogTitle>
-                        <DialogDescription>
-                            Adjusting inventory for: <span className="font-semibold text-gray-900">{selectedProduct?.name}</span>
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label>Quantity to {adjustmentType}</Label>
-                            <Input
-                                type="number"
-                                min="1"
-                                value={adjustmentAmount || ''}
-                                onChange={(e) => setAdjustmentAmount(parseInt(e.target.value))}
-                                className="text-lg font-semibold"
-                                autoFocus
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Reason</Label>
-                            <Select value={adjustmentReason} onValueChange={setAdjustmentReason}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {adjustmentType === "add" ? (
-                                        <>
-                                            <SelectItem value="Restock">Restock</SelectItem>
-                                            <SelectItem value="Return">Customer Return</SelectItem>
-                                            <SelectItem value="Adjustment">Inventory Adjustment</SelectItem>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <SelectItem value="Sale">Direct Sale</SelectItem>
-                                            <SelectItem value="Damage">Damaged / Expired</SelectItem>
-                                            <SelectItem value="Correction">Inventory Correction</SelectItem>
-                                        </>
-                                    )}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Notes (Optional)</Label>
-                            <Input
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                placeholder="Reference number, details, etc."
-                            />
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                        <Button
-                            onClick={handleStockAdjustment}
-                            disabled={submitting || adjustmentAmount <= 0}
-                            className={adjustmentType === "add" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
-                        >
-                            {submitting ? "Updating..." : "Confirm Adjustment"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <InventoryAdjustmentSheet
+                open={isSheetOpen}
+                onOpenChange={setIsSheetOpen}
+                product={selectedProduct}
+                onSave={handleStockAdjustment}
+            />
         </AdminLayout>
     );
 }
