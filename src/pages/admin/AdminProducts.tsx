@@ -151,6 +151,7 @@ export default function AdminProducts() {
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Product Name</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Category</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Price</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Supplier Price</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Stock Status</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Actions</TableHead>
                         </TableRow>
@@ -158,7 +159,7 @@ export default function AdminProducts() {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-20 border border-gray-200">
+                                <TableCell colSpan={7} className="text-center py-20 border border-gray-200">
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                         <p className="text-gray-500 font-medium">Loading inventory...</p>
@@ -167,7 +168,7 @@ export default function AdminProducts() {
                             </TableRow>
                         ) : filteredProducts.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-16 text-gray-500 border border-gray-200">
+                                <TableCell colSpan={7} className="text-center py-16 text-gray-500 border border-gray-200">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <Package className="w-12 h-12 text-gray-200" />
                                         <p>No products found matching your search.</p>
@@ -199,6 +200,9 @@ export default function AdminProducts() {
                                         </span>
                                     </TableCell>
                                     <TableCell className="py-4 font-semibold text-gray-700 text-center border border-gray-200">₱{Number(product.price).toLocaleString()}</TableCell>
+                                    <TableCell className="py-4 font-semibold text-gray-700 text-center border border-gray-200">
+                                        {product.original_price ? `₱${Number(product.original_price).toLocaleString()}` : "—"}
+                                    </TableCell>
                                     <TableCell className="py-4 text-center border border-gray-200">
                                         <div className="flex justify-center">
                                             {product.in_stock ? (

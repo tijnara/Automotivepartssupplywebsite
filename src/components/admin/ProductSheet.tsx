@@ -122,6 +122,17 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                                     </div>
                                 </div>
                                 <div className="grid gap-3">
+                                    <Label htmlFor="original_price" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Supplier Price (₱)</Label>
+                                    <Input
+                                        id="original_price"
+                                        type="number"
+                                        value={formData.original_price || ""}
+                                        onChange={(e) => setFormData({ ...formData, original_price: e.target.value ? Number(e.target.value) : null })}
+                                        placeholder="Optional original price"
+                                        className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
+                                    />
+                                </div>
+                                <div className="grid gap-3">
                                     <Label htmlFor="image" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Image URL</Label>
                                     <Input
                                         id="image"
