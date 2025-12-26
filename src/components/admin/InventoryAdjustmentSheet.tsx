@@ -60,12 +60,13 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
     const isValid = amountValue > 0;
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0 gap-0">
-                <div className="p-6 border-b bg-white">
+        <Sheet open={open} onOpenChange={onOpenChange} modal={true}>
+            <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0 gap-0" overlay={true}>
+                {/* Header Section */}
+                <div className="p-6 border-b bg-white flex-shrink-0">
                     <SheetHeader className="text-left">
                         <SheetTitle className="text-xl font-bold flex items-center gap-2">
-                            {isAdd ? <Plus className="w-5 h-5 text-green-600" /> : <Minus className="w-5 h-5 text-red-600" />}
+                            {isAdd ? <Plus className="w-5 h-5 text-green-500" /> : <Minus className="w-5 h-5 text-red-500" />}
                             {isAdd ? "Add to Inventory" : "Remove Stock"}
                         </SheetTitle>
                         <SheetDescription>
@@ -74,7 +75,8 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                     </SheetHeader>
                 </div>
 
-                <ScrollArea className="flex-1">
+                {/* Scrollable Form Content */}
+                <ScrollArea className="flex-1 bg-white">
                     <form id="inventory-form" onSubmit={handleSubmit} className="p-6 space-y-6">
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
@@ -87,12 +89,12 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                                             setAdjustmentReason(v === "add" ? "Restock" : "Sale");
                                         }}
                                     >
-                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200">
+                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600/20">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="add" className="font-medium text-green-600">Add Stock (+)</SelectItem>
-                                            <SelectItem value="remove" className="font-medium text-red-600">Remove Stock (-)</SelectItem>
+                                            <SelectItem value="add" className="font-medium text-green-500">Add to Inventory (+)</SelectItem>
+                                            <SelectItem value="remove" className="font-medium text-red-500">Remove Stock (-)</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -106,7 +108,7 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                                         value={adjustmentAmount}
                                         onChange={(e) => setAdjustmentAmount(e.target.value ? parseInt(e.target.value) : "")}
                                         required
-                                        className="h-11 bg-gray-50 border-gray-200 font-bold text-lg text-center focus:ring-2 focus:ring-blue-600"
+                                        className="h-11 bg-gray-50 border-gray-200 font-bold text-lg text-center focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
                                         autoFocus
                                     />
                                 </div>
@@ -115,7 +117,7 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                             <div className="grid gap-2">
                                 <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Reason</Label>
                                 <Select value={adjustmentReason} onValueChange={setAdjustmentReason}>
-                                    <SelectTrigger className="h-11 bg-gray-50 border-gray-200">
+                                    <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600/20">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -143,20 +145,20 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder="Reference number, details, etc."
-                                    className="h-11 bg-gray-50 border-gray-200"
+                                    className="h-11 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600/20"
                                 />
                             </div>
 
-                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-blue-700">Current Stock:</span>
-                                    <span className="font-bold text-blue-900">{product?.quantity || 0}</span>
+                            <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-100 mt-2">
+                                <div className="flex justify-between items-center text-sm mb-1">
+                                    <span className="text-gray-600">Current Stock:</span>
+                                    <span className="font-semibold text-gray-900">{product?.quantity || 0}</span>
                                 </div>
-                                <div className="flex justify-between items-center text-sm mt-1">
-                                    <span className={isAdd ? "text-green-700" : "text-red-700"}>
-                                        {isAdd ? "After Addition:" : "After Removal:"}
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className={isAdd ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                                        {isAdd ? "New Stock Level:" : "New Stock Level:"}
                                     </span>
-                                    <span className={`font-bold ${isAdd ? "text-green-700" : "text-red-700"}`}>
+                                    <span className={`font-bold text-lg ${isAdd ? "text-green-600" : "text-red-600"}`}>
                                         {(product?.quantity || 0) + (isAdd ? (amountValue || 0) : -(amountValue || 0))}
                                     </span>
                                 </div>
@@ -165,15 +167,16 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                     </form>
                 </ScrollArea>
 
-                <div className="p-6 border-t bg-white z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                {/* Footer Section with Button */}
+                <div className="p-6 border-t bg-white z-10 flex-shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                     <Button
                         type="submit"
                         form="inventory-form"
                         disabled={loading || !isValid}
                         className={`w-full h-12 text-base font-bold text-white transition-all shadow-md active:scale-[0.98] ${
                             isAdd
-                                ? "bg-green-600 hover:bg-green-700 disabled:bg-green-300"
-                                : "bg-red-600 hover:bg-red-700 disabled:bg-red-300"
+                                ? "bg-green-500 hover:bg-green-500/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:opacity-100"
+                                : "bg-red-500 hover:bg-red-500/90 disabled:bg-gray-200 disabled:text-gray-400 disabled:opacity-100"
                         }`}
                     >
                         {loading ? (
