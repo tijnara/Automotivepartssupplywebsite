@@ -439,13 +439,6 @@ export default function AdminOrders() {
                                             <CheckCircle2 className="w-4 h-4 mr-2" /> Mark as Completed
                                         </Button>
                                     )}
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setIsSheetOpen(false)}
-                                        className="w-full h-11"
-                                    >
-                                        Close
-                                    </Button>
                                 </div>
                             </div>
                         </>

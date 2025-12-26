@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { X } from "lucide-react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "./utils";
@@ -67,6 +68,12 @@ function DrawerContent({
       >
         <div className="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
         {children}
+        <DrawerPrimitive.Close
+            style={{ position: 'absolute', right: '1rem', top: '1rem', opacity: 0.7 }}
+            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground rounded-xs transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 cursor-pointer"
+        >
+            <X className="h-4 w-4" />
+        </DrawerPrimitive.Close>
       </DrawerPrimitive.Content>
     </DrawerPortal>
   );

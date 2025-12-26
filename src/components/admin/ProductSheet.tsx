@@ -161,9 +161,6 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                         <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 font-bold">
                             {loading ? "Saving..." : (product ? "Save Changes" : "Add Product")}
                         </Button>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full h-11">
-                            Cancel
-                        </Button>
                     </div>
                 </form>
             </SheetContent>
