@@ -138,7 +138,7 @@ export default function AdminProducts() {
                     onClick={openAddSheet}
                     className="h-10 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 rounded-lg px-6 w-full md:w-auto transition-all active:scale-95 flex items-center gap-2"
                 >
-                    <Plus className="w-4 h-4" /> Add New Product
+                    <Plus className="w-4 h-4" /> Add to Inventory
                 </Button>
             </div>
 

@@ -54,8 +54,8 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
     };
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
-            <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0" overlay={false}>
+        <Sheet open={open} onOpenChange={onOpenChange}>
+            <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0">
                 <form onSubmit={handleSubmit} className="flex flex-col h-full">
                     <div className="p-6 border-b">
                         <SheetHeader className="text-left">
