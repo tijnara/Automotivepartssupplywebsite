@@ -49,7 +49,7 @@ export default function PublicShop({
                         originalPrice: item.original_price ? Number(item.original_price) : null,
                         rating: Number(item.rating),
                         reviews: item.reviews,
-                        inStock: item.in_stock,
+                        inStock: item.in_stock && (item.quantity || 0) > 0,
                         image: item.image
                     }));
                     setProducts(mappedProducts);

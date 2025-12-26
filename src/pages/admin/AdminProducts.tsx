@@ -81,7 +81,7 @@ export default function AdminProducts() {
         p.category.toLowerCase().includes(filter.toLowerCase())
     );
 
-    const outOfStockCount = products.filter(p => !p.in_stock).length;
+    const outOfStockCount = products.filter(p => !p.in_stock || (p.quantity || 0) <= 0).length;
 
     return (
         <AdminLayout 
@@ -205,7 +205,7 @@ export default function AdminProducts() {
                                     </TableCell>
                                     <TableCell className="py-4 text-center border border-gray-200">
                                         <div className="flex justify-center">
-                                            {product.in_stock ? (
+                                            {(product.in_stock && (product.quantity || 0) > 0) ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
                                                     In Stock

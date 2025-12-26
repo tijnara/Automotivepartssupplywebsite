@@ -117,7 +117,7 @@ export default function ProductDetails({
                                     alt={product.name}
                                     className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
                                 />
-                                {product.in_stock ? (
+                                {(product.in_stock && (product.quantity || 0) > 0) ? (
                                     <span className="absolute top-0 left-0 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                                         In Stock
                                     </span>
@@ -197,7 +197,7 @@ export default function ProductDetails({
                                     <Button
                                         className="flex-1 h-12 text-lg bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20"
                                         onClick={handleBuyNow}
-                                        disabled={!product.in_stock}
+                                        disabled={!product.in_stock || (product.quantity || 0) <= 0}
                                     >
                                         <ShoppingCart className="w-5 h-5 mr-2" />
                                         Add to Cart

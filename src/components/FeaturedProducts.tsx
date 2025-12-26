@@ -87,6 +87,11 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                           SALE
                                         </span>
                                     )}
+                                    {!product.inStock && (
+                                        <span className="absolute top-3 left-3 bg-gray-900/80 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm uppercase tracking-wider">
+                                          Out of Stock
+                                        </span>
+                                    )}
                                 </Link>
 
                                 <div className="p-4 flex flex-col flex-1">
@@ -117,8 +122,13 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                         </div>
                                         <button
                                             onClick={() => onAddToCart(product)}
-                                            className="bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 p-2.5 rounded-full transition-colors active:scale-95 shadow-sm"
-                                            title="Add to Cart"
+                                            disabled={!product.inStock}
+                                            className={`p-2.5 rounded-full transition-colors active:scale-95 shadow-sm ${
+                                                product.inStock 
+                                                ? "bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700" 
+                                                : "bg-gray-50 text-gray-300 cursor-not-allowed"
+                                            }`}
+                                            title={product.inStock ? "Add to Cart" : "Out of Stock"}
                                         >
                                             <ShoppingCart className="w-5 h-5" />
                                         </button>

@@ -112,12 +112,12 @@ export default function AdminInventory() {
                                             {product.quantity || 0}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <Badge variant={product.in_stock ? "secondary" : "destructive"} className={
-                                                product.in_stock
+                                            <Badge variant={(product.in_stock && (product.quantity || 0) > 0) ? "secondary" : "destructive"} className={
+                                                (product.in_stock && (product.quantity || 0) > 0)
                                                     ? "bg-green-100 text-green-700 hover:bg-green-100"
                                                     : "bg-red-100 text-red-700 hover:bg-red-100"
                                             }>
-                                                {product.in_stock ? "In Stock" : "Out of Stock"}
+                                                {(product.in_stock && (product.quantity || 0) > 0) ? "In Stock" : "Out of Stock"}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-center">

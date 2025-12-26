@@ -31,6 +31,7 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
         original_price: null,
         image: "",
         in_stock: true,
+        quantity: 0,
         rating: 5,
         reviews: 0
     });
@@ -49,6 +50,7 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                 original_price: null,
                 image: "",
                 in_stock: true,
+                quantity: 0,
                 rating: 5,
                 reviews: 0
             });
@@ -59,7 +61,12 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
         e.preventDefault();
         setLoading(true);
         try {
-            await onSave(formData);
+            // Ensure consistency: if quantity is 0, in_stock must be false
+            const finalData = {
+                ...formData,
+                in_stock: (formData.quantity || 0) > 0 ? formData.in_stock : false
+            };
+            await onSave(finalData);
             onOpenChange(false);
         } catch (error) {
             console.error("Error saving product:", error);
@@ -97,18 +104,18 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                                         className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
                                     />
                                 </div>
+                                <div className="grid gap-3">
+                                    <Label htmlFor="category" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Category</Label>
+                                    <Input
+                                        id="category"
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        placeholder="e.g. Brakes"
+                                        required
+                                        className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
+                                    />
+                                </div>
                                 <div className="grid grid-cols-2 gap-6">
-                                    <div className="grid gap-3">
-                                        <Label htmlFor="category" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Category</Label>
-                                        <Input
-                                            id="category"
-                                            value={formData.category}
-                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                            placeholder="e.g. Brakes"
-                                            required
-                                            className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
-                                        />
-                                    </div>
                                     <div className="grid gap-3">
                                         <Label htmlFor="price" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Price (₱)</Label>
                                         <Input
@@ -116,6 +123,24 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                                             type="number"
                                             value={formData.price}
                                             onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                                            required
+                                            className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
+                                        />
+                                    </div>
+                                    <div className="grid gap-3">
+                                        <Label htmlFor="quantity" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Quantity</Label>
+                                        <Input
+                                            id="quantity"
+                                            type="number"
+                                            value={formData.quantity ?? 0}
+                                            onChange={(e) => {
+                                                const val = Number(e.target.value);
+                                                setFormData({ 
+                                                    ...formData, 
+                                                    quantity: val,
+                                                    in_stock: val > 0 ? formData.in_stock : false
+                                                });
+                                            }}
                                             required
                                             className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
                                         />
@@ -147,7 +172,14 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                                     <Checkbox 
                                         id="in_stock" 
                                         checked={formData.in_stock} 
-                                        onCheckedChange={(checked) => setFormData({ ...formData, in_stock: checked === true })}
+                                        onCheckedChange={(checked) => {
+                                            const isChecked = checked === true;
+                                            // Only allow setting in_stock to true if quantity > 0
+                                            setFormData({ 
+                                                ...formData, 
+                                                in_stock: (formData.quantity || 0) > 0 ? isChecked : false 
+                                            });
+                                        }}
                                     />
                                     <Label htmlFor="in_stock" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
                                         In Stock
