@@ -5,8 +5,9 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminInventory from "./pages/admin/AdminInventory"; // Import the new page
 import ProductDetails from "./pages/ProductDetails";
-import Checkout from "./pages/Checkout"; // Import the new Checkout Page
+import Checkout from "./pages/Checkout";
 import { supabase } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
@@ -120,8 +121,6 @@ export default function App() {
         );
     };
 
-    // This is passed to components but will be overridden/ignored by Header's internal navigation
-    // or we can keep it empty as a placeholder.
     const handleCheckoutPlaceholder = () => {
         // No-op: Navigation is handled in Header.tsx via useNavigate('/checkout')
     };
@@ -186,7 +185,6 @@ export default function App() {
                 <Route path="/" element={<PublicShop {...cartProps} />} />
                 <Route path="/product/:id" element={<ProductDetails {...cartProps} />} />
 
-                {/* New Checkout Route */}
                 <Route path="/checkout" element={
                     <Checkout
                         {...cartProps}
@@ -198,6 +196,7 @@ export default function App() {
                 <Route path="/admin" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
                 <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
                 <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
+                <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />
             </Routes>
             <Toaster />
         </BrowserRouter>

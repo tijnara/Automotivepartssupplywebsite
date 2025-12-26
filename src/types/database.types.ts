@@ -19,6 +19,7 @@ export type Database = {
                     rating: number | null
                     reviews: number | null
                     in_stock: boolean
+                    quantity: number
                     image: string
                     created_at: string
                 }
@@ -31,6 +32,7 @@ export type Database = {
                     rating?: number | null
                     reviews?: number | null
                     in_stock?: boolean
+                    quantity?: number
                     image: string
                     created_at?: string
                 }
@@ -43,10 +45,46 @@ export type Database = {
                     rating?: number | null
                     reviews?: number | null
                     in_stock?: boolean
+                    quantity?: number
                     image?: string
                     created_at?: string
                 }
                 Relationships: []
+            }
+            inventory_transactions: {
+                Row: {
+                    id: number
+                    product_id: number
+                    quantity_change: number
+                    transaction_type: string
+                    notes: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: number
+                    product_id: number
+                    quantity_change: number
+                    transaction_type: string
+                    notes?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: number
+                    product_id?: number
+                    quantity_change?: number
+                    transaction_type?: string
+                    notes?: string | null
+                    created_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "inventory_transactions_product_id_fkey"
+                        columns: ["product_id"]
+                        isOneToOne: false
+                        referencedRelation: "products"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             contact_messages: {
                 Row: {

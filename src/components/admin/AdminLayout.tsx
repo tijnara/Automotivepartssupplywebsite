@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
-import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag } from "lucide-react";
+import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag, ClipboardList } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
 interface AdminLayoutProps {
@@ -30,7 +30,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                         <span className="hidden md:inline text-blue-300">Logged in as Administrator</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <button 
+                        <button
                             onClick={() => navigate("/")}
                             className="flex items-center gap-2 hover:text-blue-200 transition text-xs md:text-sm cursor-pointer"
                         >
@@ -54,7 +54,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
 
                         {/* Navigation */}
                         <nav className="hidden md:flex items-center gap-1">
-                            <Button 
+                            <Button
                                 variant={location.pathname === '/admin' ? "default" : "ghost"}
                                 className={`gap-2 ${location.pathname === '/admin' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
                                 onClick={() => navigate("/admin")}
@@ -62,7 +62,15 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                                 <Package className="w-4 h-4" />
                                 Products
                             </Button>
-                            <Button 
+                            <Button
+                                variant={location.pathname === '/admin/inventory' ? "default" : "ghost"}
+                                className={`gap-2 ${location.pathname === '/admin/inventory' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
+                                onClick={() => navigate("/admin/inventory")}
+                            >
+                                <ClipboardList className="w-4 h-4" />
+                                Inventory
+                            </Button>
+                            <Button
                                 variant={location.pathname === '/admin/orders' ? "default" : "ghost"}
                                 className={`gap-2 ${location.pathname === '/admin/orders' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
                                 onClick={() => navigate("/admin/orders")}
@@ -70,7 +78,7 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                                 <ShoppingBag className="w-4 h-4" />
                                 Orders
                             </Button>
-                            <Button 
+                            <Button
                                 variant={location.pathname === '/admin/messages' ? "default" : "ghost"}
                                 className={`gap-2 ${location.pathname === '/admin/messages' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
                                 onClick={() => navigate("/admin/messages")}
