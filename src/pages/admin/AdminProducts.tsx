@@ -88,38 +88,38 @@ export default function AdminProducts() {
             title="Products" 
             description="Manage your inventory, prices, and stock levels."
         >
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-md">
-                    <div className="p-4 bg-blue-50 rounded-full text-blue-600">
+            {/* Stats Tiles */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                {/* Total Products Tile */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="p-3 bg-blue-50 rounded-xl text-blue-600 mb-3">
                         <Package className="w-6 h-6" />
                     </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Products</p>
-                        <h3 className="text-3xl font-bold text-gray-900 mt-1">{products.length}</h3>
-                    </div>
+                    <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Total Products</p>
+                    <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{products.length}</h3>
+                    <div className="mt-3 w-10 h-1 bg-blue-600 rounded-full opacity-20"></div>
                 </div>
                 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-md">
-                    <div className="p-4 bg-green-50 rounded-full text-green-600">
+                {/* Active Categories Tile */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="p-3 bg-green-50 rounded-xl text-green-600 mb-3">
                         <TrendingUp className="w-6 h-6" />
                     </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Active Categories</p>
-                        <h3 className="text-3xl font-bold text-gray-900 mt-1">
-                            {new Set(products.map(p => p.category)).size}
-                        </h3>
-                    </div>
+                    <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Active Categories</p>
+                    <h3 className="text-2xl sm:text-3xl font-black text-gray-900">
+                        {new Set(products.map(p => p.category)).size}
+                    </h3>
+                    <div className="mt-3 w-10 h-1 bg-green-600 rounded-full opacity-20"></div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-5 transition-all hover:shadow-md">
-                    <div className="p-4 bg-orange-50 rounded-full text-orange-600">
+                {/* Out of Stock Tile */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="p-3 bg-orange-50 rounded-xl text-orange-600 mb-3">
                         <AlertCircle className="w-6 h-6" />
                     </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Out of Stock</p>
-                        <h3 className="text-3xl font-bold text-gray-900 mt-1">{outOfStockCount}</h3>
-                    </div>
+                    <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Out of Stock</p>
+                    <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{outOfStockCount}</h3>
+                    <div className="mt-3 w-10 h-1 bg-orange-600 rounded-full opacity-20"></div>
                 </div>
             </div>
 
