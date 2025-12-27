@@ -14,6 +14,7 @@ export type Database = {
                     id: number
                     name: string
                     category: string
+                    brand: string | null // Added
                     price: number
                     original_price: number | null
                     rating: number | null
@@ -27,6 +28,7 @@ export type Database = {
                     id?: number
                     name: string
                     category: string
+                    brand?: string | null // Added
                     price: number
                     original_price?: number | null
                     rating?: number | null
@@ -40,6 +42,7 @@ export type Database = {
                     id?: number
                     name?: string
                     category?: string
+                    brand?: string | null // Added
                     price?: number
                     original_price?: number | null
                     rating?: number | null

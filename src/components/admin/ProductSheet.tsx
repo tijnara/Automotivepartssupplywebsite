@@ -27,6 +27,7 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
     const [formData, setFormData] = useState<ProductInsert>({
         name: "",
         category: "",
+        brand: "", // Added initial state
         price: 0,
         original_price: null,
         image: "",
@@ -46,6 +47,7 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
             setFormData({
                 name: "",
                 category: "",
+                brand: "", // Reset brand for new product
                 price: 0,
                 original_price: null,
                 image: "",
@@ -115,6 +117,17 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                                         className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
                                     />
                                 </div>
+                                {/* Added Brand Input */}
+                                <div className="grid gap-3">
+                                    <Label htmlFor="brand" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Brand</Label>
+                                    <Input
+                                        id="brand"
+                                        value={formData.brand || ""}
+                                        onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                                        placeholder="e.g. Bosch, Sparco"
+                                        className="h-11 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all"
+                                    />
+                                </div>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="grid gap-3">
                                         <Label htmlFor="price" className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Price (₱)</Label>
@@ -135,8 +148,8 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                                             value={formData.quantity ?? 0}
                                             onChange={(e) => {
                                                 const val = Number(e.target.value);
-                                                setFormData({ 
-                                                    ...formData, 
+                                                setFormData({
+                                                    ...formData,
                                                     quantity: val,
                                                     in_stock: val > 0 ? formData.in_stock : false
                                                 });
@@ -169,15 +182,15 @@ export function ProductSheet({ product, open, onOpenChange, onSave }: ProductShe
                                     />
                                 </div>
                                 <div className="flex items-center space-x-2 pt-2">
-                                    <Checkbox 
-                                        id="in_stock" 
-                                        checked={formData.in_stock} 
+                                    <Checkbox
+                                        id="in_stock"
+                                        checked={formData.in_stock}
                                         onCheckedChange={(checked) => {
                                             const isChecked = checked === true;
                                             // Only allow setting in_stock to true if quantity > 0
-                                            setFormData({ 
-                                                ...formData, 
-                                                in_stock: (formData.quantity || 0) > 0 ? isChecked : false 
+                                            setFormData({
+                                                ...formData,
+                                                in_stock: (formData.quantity || 0) > 0 ? isChecked : false
                                             });
                                         }}
                                     />
