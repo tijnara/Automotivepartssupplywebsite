@@ -192,7 +192,7 @@ export default function AdminOrders() {
                             orders.map((order) => (
                                 <TableRow
                                     key={order.id}
-                                    className="group hover:bg-blue-50/30 transition-colors border-b border-gray-200 cursor-pointer"
+                                    className="group hover:bg-accent hover:text-accent-foreground transition-colors border-b border-gray-200 cursor-pointer"
                                     onClick={() => fetchOrderDetails(order)}
                                 >
                                     <TableCell className="py-4 text-center border border-gray-200">

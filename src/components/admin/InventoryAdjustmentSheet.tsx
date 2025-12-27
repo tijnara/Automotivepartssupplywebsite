@@ -89,7 +89,7 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                                             setAdjustmentReason(v === "add" ? "Restock" : "Sale");
                                         }}
                                     >
-                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600/20">
+                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors focus:ring-2 focus:ring-blue-600/20 cursor-pointer">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -117,7 +117,7 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                             <div className="grid gap-2">
                                 <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Reason</Label>
                                 <Select value={adjustmentReason} onValueChange={setAdjustmentReason}>
-                                    <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600/20">
+                                    <SelectTrigger className="h-11 bg-gray-50 border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors focus:ring-2 focus:ring-blue-600/20 cursor-pointer">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>

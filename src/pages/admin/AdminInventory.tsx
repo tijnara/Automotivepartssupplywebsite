@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { Database } from "../../types/database.types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Plus, Minus, History, PackageSearch } from "lucide-react";
+import { History, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
 import { AdminLayout } from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/button";
@@ -105,7 +105,11 @@ export default function AdminInventory() {
                             </TableHeader>
                             <TableBody>
                                 {products.map((product) => (
-                                    <TableRow key={product.id} className="hover:bg-gray-50">
+                                    <TableRow 
+                                        key={product.id} 
+                                        className="hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                                        onClick={() => openAdjustmentSheet(product)}
+                                    >
                                         <TableCell className="font-medium">{product.name}</TableCell>
                                         <TableCell className="text-gray-500">{product.category}</TableCell>
                                         <TableCell className="text-center text-lg font-semibold text-gray-900">
@@ -124,14 +128,13 @@ export default function AdminInventory() {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                className="h-8 gap-1.5 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                                onClick={() => openAdjustmentSheet(product)}
+                                                className="h-8 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openAdjustmentSheet(product);
+                                                }}
                                                 title="Adjust Stock"
                                             >
-                                                <div className="flex items-center -space-x-1">
-                                                    <Plus className="w-3.5 h-3.5" />
-                                                    <Minus className="w-3.5 h-3.5" />
-                                                </div>
                                                 <span className="font-medium">Adjust</span>
                                             </Button>
                                         </TableCell>
