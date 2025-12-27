@@ -91,13 +91,13 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
 
                     <div className="flex items-center gap-3">
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={handleLogout}
-                            className="border-gray-200 text-gray-600 hover:text-red-600 hover:border-red-100 hover:bg-red-50 transition-all"
+                            className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 font-bold transition-all text-base"
                         >
-                            <LogOut className="w-4 h-4 mr-2" />
-                            Logout
+                            <LogOut className="w-5 h-5 mr-2" />
+                            Log Out
                         </Button>
                     </div>
                 </div>

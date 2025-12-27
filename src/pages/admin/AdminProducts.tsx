@@ -51,7 +51,7 @@ export default function AdminProducts() {
                 .from('products')
                 .update(productData as any)
                 .eq('id', productData.id);
-            
+
             if (error) throw error;
             toast.success("Product updated successfully");
         } else {
@@ -59,7 +59,7 @@ export default function AdminProducts() {
             const { error } = await supabase
                 .from('products')
                 .insert([productData as ProductInsert]);
-            
+
             if (error) throw error;
             toast.success("Product added successfully");
         }
@@ -84,8 +84,8 @@ export default function AdminProducts() {
     const outOfStockCount = products.filter(p => !p.in_stock || (p.quantity || 0) <= 0).length;
 
     return (
-        <AdminLayout 
-            title="Products" 
+        <AdminLayout
+            title="Products"
             description="Manage your inventory, prices, and stock levels."
         >
             {/* Stats Tiles */}
@@ -99,7 +99,7 @@ export default function AdminProducts() {
                     <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{products.length}</h3>
                     <div className="mt-3 w-10 h-1 bg-blue-600 rounded-full opacity-20"></div>
                 </div>
-                
+
                 {/* Active Categories Tile */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 text-center">
                     <div className="p-3 bg-green-50 rounded-xl text-green-600 mb-3">
@@ -125,20 +125,23 @@ export default function AdminProducts() {
 
             {/* Toolbar */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="relative w-full md:w-96 group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors w-4 h-4" />
+
+                {/* Search Field Container - explicitly relative to contain absolute icon */}
+                <div className="relative w-full md:w-96 flex items-center">
                     <Input
-                        placeholder="Search by name or category..."
-                        className="pl-10 h-10 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-600 transition-all rounded-lg"
+                        placeholder="Search..."
+                        className="pl-6 pr-12 h-12 w-full rounded-full border-2 border-gray-600 focus-visible:ring-0 focus-visible:border-black transition-all text-base shadow-none placeholder:text-gray-500 font-bold bg-white"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                     />
+                    <Search className="absolute right-4 w-6 h-6 text-gray-700 stroke-[2.5] pointer-events-none" />
                 </div>
-                <Button 
+
+                <Button
                     onClick={openAddSheet}
-                    className="h-10 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 rounded-lg px-6 w-full md:w-auto transition-all active:scale-95 flex items-center gap-2"
+                    className="h-12 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 rounded-full px-8 w-full md:w-auto transition-all active:scale-95 flex items-center gap-2 font-bold"
                 >
-                    <Plus className="w-4 h-4" /> Add New Product
+                    <Plus className="w-5 h-5 stroke-[3]" /> Add New Product
                 </Button>
             </div>
 
@@ -177,8 +180,8 @@ export default function AdminProducts() {
                             </TableRow>
                         ) : (
                             filteredProducts.map((product) => (
-                                <TableRow 
-                                    key={product.id} 
+                                <TableRow
+                                    key={product.id}
                                     className="group hover:bg-accent hover:text-accent-foreground transition-colors border-b border-gray-200 cursor-pointer"
                                     onClick={() => openEditSheet(product)}
                                 >
@@ -256,7 +259,7 @@ export default function AdminProducts() {
             <ProductSheet
                 open={isSheetOpen}
                 onOpenChange={setIsSheetOpen}
-                product={editingProduct} 
+                product={editingProduct}
                 onSave={handleSaveProduct}
             />
         </AdminLayout>
