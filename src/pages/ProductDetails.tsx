@@ -156,17 +156,9 @@ export default function ProductDetails({
                                     <span className="text-3xl md:text-4xl font-bold text-blue-700">
                                         ₱{Number(product.price).toLocaleString()}
                                     </span>
-                                    {product.original_price && (
-                                        <span className="text-lg text-gray-400 line-through">
-                                            ₱{Number(product.original_price).toLocaleString()}
-                                        </span>
-                                    )}
+                                    {/* Removed original price display */}
                                 </div>
-                                {product.original_price && (
-                                    <p className="text-sm text-green-600 font-medium mt-1">
-                                        You save ₱{(product.original_price - product.price).toLocaleString()}
-                                    </p>
-                                )}
+                                {/* Removed savings text */}
                             </div>
 
                             <Separator className="mb-8" />

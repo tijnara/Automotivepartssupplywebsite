@@ -7,7 +7,7 @@ export interface Product {
     id: number;
     name: string;
     category: string;
-    brand: string | null; // Added
+    brand: string | null;
     price: number;
     originalPrice: number | null;
     rating: number;
@@ -84,11 +84,8 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                         </div>
                                     </div>
 
-                                    {product.originalPrice && (
-                                        <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold shadow-sm">
-                                          SALE
-                                        </span>
-                                    )}
+                                    {/* Removed SALE badge based on originalPrice */}
+
                                     {!product.inStock && (
                                         <span className="absolute top-3 left-3 bg-gray-900/80 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm uppercase tracking-wider">
                                           Out of Stock
@@ -125,11 +122,7 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
                                         <div className="flex flex-col">
                                             <span className="text-blue-700 font-bold text-lg">₱{product.price.toLocaleString()}</span>
-                                            {product.originalPrice && (
-                                                <span className="text-gray-400 text-xs line-through">
-                                                    ₱{product.originalPrice.toLocaleString()}
-                                                </span>
-                                            )}
+                                            {/* Removed originalPrice display */}
                                         </div>
                                         <button
                                             onClick={() => onAddToCart(product)}
