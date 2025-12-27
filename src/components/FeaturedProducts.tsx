@@ -7,6 +7,7 @@ export interface Product {
     id: number;
     name: string;
     category: string;
+    brand: string | null; // Added
     price: number;
     originalPrice: number | null;
     rating: number;
@@ -23,7 +24,7 @@ interface FeaturedProductsProps {
 }
 
 export function FeaturedProducts({ products, searchQuery, selectedCategory, onAddToCart }: FeaturedProductsProps) {
-    const ITEMS_PER_PAGE = 8; // Increased for better grid view
+    const ITEMS_PER_PAGE = 8;
     const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
     useEffect(() => {
@@ -32,7 +33,8 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
 
     const filteredProducts = products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.category.toLowerCase().includes(searchQuery.toLowerCase());
+            product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (product.brand && product.brand.toLowerCase().includes(searchQuery.toLowerCase()));
 
         const matchesCategory = selectedCategory
             ? product.category === selectedCategory
@@ -95,7 +97,16 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                 </Link>
 
                                 <div className="p-4 flex flex-col flex-1">
-                                    <div className="text-gray-500 mb-1 text-xs uppercase tracking-wider">{product.category}</div>
+                                    {/* Brand & Category Display */}
+                                    <div className="text-gray-500 mb-1 text-xs uppercase tracking-wider font-semibold">
+                                        {product.brand && (
+                                            <>
+                                                <span className="text-blue-600">{product.brand}</span>
+                                                <span className="mx-1.5 text-gray-300">•</span>
+                                            </>
+                                        )}
+                                        {product.category}
+                                    </div>
 
                                     <Link to={`/product/${product.id}`} className="mb-2">
                                         <h3 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 h-12">
@@ -124,9 +135,9 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                             onClick={() => onAddToCart(product)}
                                             disabled={!product.inStock}
                                             className={`p-2.5 rounded-full transition-colors active:scale-95 shadow-sm ${
-                                                product.inStock 
-                                                ? "bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700" 
-                                                : "bg-gray-50 text-gray-300 cursor-not-allowed"
+                                                product.inStock
+                                                    ? "bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700"
+                                                    : "bg-gray-50 text-gray-300 cursor-not-allowed"
                                             }`}
                                             title={product.inStock ? "Add to Cart" : "Out of Stock"}
                                         >

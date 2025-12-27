@@ -45,6 +45,7 @@ export default function PublicShop({
                         id: item.id,
                         name: item.name,
                         category: item.category,
+                        brand: item.brand, // Map the brand here
                         price: Number(item.price),
                         originalPrice: item.original_price ? Number(item.original_price) : null,
                         rating: Number(item.rating),

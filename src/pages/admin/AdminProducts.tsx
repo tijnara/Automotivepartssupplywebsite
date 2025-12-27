@@ -78,7 +78,8 @@ export default function AdminProducts() {
 
     const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(filter.toLowerCase()) ||
-        p.category.toLowerCase().includes(filter.toLowerCase())
+        p.category.toLowerCase().includes(filter.toLowerCase()) ||
+        (p.brand && p.brand.toLowerCase().includes(filter.toLowerCase()))
     );
 
     const outOfStockCount = products.filter(p => !p.in_stock || (p.quantity || 0) <= 0).length;
@@ -126,10 +127,10 @@ export default function AdminProducts() {
             {/* Toolbar */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
 
-                {/* Search Field Container - explicitly relative to contain absolute icon */}
+                {/* Search Field Container */}
                 <div className="relative w-full md:w-96 flex items-center">
                     <Input
-                        placeholder="Search..."
+                        placeholder="Search products, brands..."
                         className="pl-6 pr-12 h-12 w-full rounded-full border-2 border-gray-600 focus-visible:ring-0 focus-visible:border-black transition-all text-base shadow-none placeholder:text-gray-500 font-bold bg-white"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
@@ -153,6 +154,7 @@ export default function AdminProducts() {
                             <TableHead className="w-[100px] py-4 text-center border border-gray-200 font-bold text-gray-700">Image</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Product Name</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Category</TableHead>
+                            <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Brand</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Price</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Supplier Price</TableHead>
                             <TableHead className="py-4 text-center border border-gray-200 font-bold text-gray-700">Stock Status</TableHead>
@@ -162,7 +164,7 @@ export default function AdminProducts() {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-20 border border-gray-200">
+                                <TableCell colSpan={8} className="text-center py-20 border border-gray-200">
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                         <p className="text-gray-500 font-medium">Loading inventory...</p>
@@ -171,7 +173,7 @@ export default function AdminProducts() {
                             </TableRow>
                         ) : filteredProducts.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-16 text-gray-500 border border-gray-200">
+                                <TableCell colSpan={8} className="text-center py-16 text-gray-500 border border-gray-200">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <Package className="w-12 h-12 text-gray-200" />
                                         <p>No products found matching your search.</p>
@@ -201,6 +203,9 @@ export default function AdminProducts() {
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wider">
                                             {product.category}
                                         </span>
+                                    </TableCell>
+                                    <TableCell className="py-4 text-center border border-gray-200">
+                                        <span className="text-gray-600 font-medium">{product.brand || "—"}</span>
                                     </TableCell>
                                     <TableCell className="py-4 font-semibold text-gray-700 text-center border border-gray-200">₱{Number(product.price).toLocaleString()}</TableCell>
                                     <TableCell className="py-4 font-semibold text-gray-700 text-center border border-gray-200">

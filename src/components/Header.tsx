@@ -130,7 +130,7 @@ export function Header({
                         <div className="relative w-full">
                             <input
                                 type="text"
-                                placeholder="Search for parts by name..."
+                                placeholder="Search for parts by name, brand name, category..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-600"
