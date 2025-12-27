@@ -89,11 +89,11 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                                             setAdjustmentReason(v === "add" ? "Restock" : "Sale");
                                         }}
                                     >
-                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors focus:ring-2 focus:ring-blue-600/20 cursor-pointer">
+                                        <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600/20">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="add" className="font-medium text-green-500">Add to Inventory (+)</SelectItem>
+                                            <SelectItem value="add" className="font-medium text-green-500">Add Stock (+)</SelectItem>
                                             <SelectItem value="remove" className="font-medium text-red-500">Remove Stock (-)</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -117,7 +117,7 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                             <div className="grid gap-2">
                                 <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Reason</Label>
                                 <Select value={adjustmentReason} onValueChange={setAdjustmentReason}>
-                                    <SelectTrigger className="h-11 bg-gray-50 border-gray-200 hover:bg-accent hover:text-accent-foreground transition-colors focus:ring-2 focus:ring-blue-600/20 cursor-pointer">
+                                    <SelectTrigger className="h-11 bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600/20">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -155,10 +155,10 @@ export function InventoryAdjustmentSheet({ product, open, onOpenChange, onSave }
                                     <span className="font-semibold text-gray-900">{product?.quantity || 0}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className={isAdd ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                                    <span className={isAdd ? "text-green-500 font-medium" : "text-red-500 font-medium"}>
                                         {isAdd ? "New Stock Level:" : "New Stock Level:"}
                                     </span>
-                                    <span className={`font-bold text-lg ${isAdd ? "text-green-600" : "text-red-600"}`}>
+                                    <span className={`font-bold text-lg ${isAdd ? "text-green-500" : "text-red-500"}`}>
                                         {(product?.quantity || 0) + (isAdd ? (amountValue || 0) : -(amountValue || 0))}
                                     </span>
                                 </div>
