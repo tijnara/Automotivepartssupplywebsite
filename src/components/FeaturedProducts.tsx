@@ -1,7 +1,15 @@
 import { ShoppingCart, Star, Eye } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+    PaginationEllipsis,
+} from "./ui/pagination";
 
 export interface Product {
     id: number;
@@ -18,32 +26,26 @@ export interface Product {
 
 interface FeaturedProductsProps {
     products: Product[];
-    searchQuery: string;
     selectedCategory: string | null;
     onAddToCart: (product: any) => void;
+    // New Pagination Props
+    totalProducts: number;
+    currentPage: number;
+    itemsPerPage: number;
+    onPageChange: (page: number) => void;
 }
 
-export function FeaturedProducts({ products, searchQuery, selectedCategory, onAddToCart }: FeaturedProductsProps) {
-    const ITEMS_PER_PAGE = 8;
-    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+export function FeaturedProducts({
+                                     products,
+                                     selectedCategory,
+                                     onAddToCart,
+                                     totalProducts,
+                                     currentPage,
+                                     itemsPerPage,
+                                     onPageChange
+                                 }: FeaturedProductsProps) {
 
-    useEffect(() => {
-        setVisibleCount(ITEMS_PER_PAGE);
-    }, [searchQuery, selectedCategory]);
-
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (product.brand && product.brand.toLowerCase().includes(searchQuery.toLowerCase()));
-
-        const matchesCategory = selectedCategory
-            ? product.category === selectedCategory
-            : true;
-
-        return matchesSearch && matchesCategory;
-    });
-
-    const displayedProducts = filteredProducts.slice(0, visibleCount);
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
     return (
         <section id="featured-products" className="py-16 bg-white">
@@ -54,37 +56,33 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                             {selectedCategory ? `${selectedCategory}` : "Featured Products"}
                         </h2>
                         <p className="text-gray-600">
-                            {filteredProducts.length} items found
+                            {totalProducts} items found
                         </p>
                     </div>
                 </div>
 
-                {displayedProducts.length === 0 ? (
+                {products.length === 0 ? (
                     <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
                         <p className="text-lg">No products found</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {displayedProducts.map((product) => (
+                        {products.map((product) => (
                             <div
                                 key={product.id}
                                 className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full"
                             >
-                                {/* Link wrapper for image */}
                                 <Link to={`/product/${product.id}`} className="block relative aspect-square bg-gray-100 overflow-hidden">
                                     <ImageWithFallback
                                         src={product.image}
                                         alt={product.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
-                                    {/* Overlay on hover */}
                                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <div className="bg-white text-gray-900 px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
                                             <Eye className="w-4 h-4" /> View Details
                                         </div>
                                     </div>
-
-                                    {/* Removed SALE badge based on originalPrice */}
 
                                     {!product.inStock && (
                                         <span className="absolute top-3 left-3 bg-gray-900/80 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm uppercase tracking-wider">
@@ -94,7 +92,6 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                 </Link>
 
                                 <div className="p-4 flex flex-col flex-1">
-                                    {/* Brand & Category Display */}
                                     <div className="text-gray-500 mb-1 text-xs uppercase tracking-wider font-semibold">
                                         {product.brand && (
                                             <>
@@ -122,7 +119,6 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
                                         <div className="flex flex-col">
                                             <span className="text-blue-700 font-bold text-lg">₱{product.price.toLocaleString()}</span>
-                                            {/* Removed originalPrice display */}
                                         </div>
                                         <button
                                             onClick={() => onAddToCart(product)}
@@ -143,23 +139,67 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
                     </div>
                 )}
 
-                {filteredProducts.length > ITEMS_PER_PAGE && (
-                    <div className="mt-12 text-center">
-                        {visibleCount < filteredProducts.length ? (
-                            <button
-                                onClick={() => setVisibleCount(prev => prev + ITEMS_PER_PAGE)}
-                                className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-full transition font-medium"
-                            >
-                                Show More Products
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setVisibleCount(ITEMS_PER_PAGE)}
-                                className="text-gray-500 hover:text-gray-700 underline"
-                            >
-                                Show Less
-                            </button>
-                        )}
+                {/* Database Level Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="mt-12">
+                        <Pagination>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (currentPage > 1) onPageChange(currentPage - 1);
+                                        }}
+                                        className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                                    // Logic to show a window of pages
+                                    if (
+                                        page === 1 ||
+                                        page === totalPages ||
+                                        (page >= currentPage - 1 && page <= currentPage + 1)
+                                    ) {
+                                        return (
+                                            <PaginationItem key={page}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    isActive={page === currentPage}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        onPageChange(page);
+                                                    }}
+                                                >
+                                                    {page}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        );
+                                    }
+
+                                    if (
+                                        page === currentPage - 2 ||
+                                        page === currentPage + 2
+                                    ) {
+                                        return <PaginationItem key={page}><PaginationEllipsis /></PaginationItem>;
+                                    }
+
+                                    return null;
+                                })}
+
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (currentPage < totalPages) onPageChange(currentPage + 1);
+                                        }}
+                                        className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
                     </div>
                 )}
             </div>

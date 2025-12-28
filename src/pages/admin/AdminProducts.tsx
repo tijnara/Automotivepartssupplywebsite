@@ -3,12 +3,21 @@ import { supabase } from "../../lib/supabase";
 import { Database } from "../../types/database.types";
 import { Button } from "../../components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Trash2, Plus, Package, Search, Edit2, TrendingUp, AlertCircle } from "lucide-react";
+import { Trash2, Plus, Package, Search, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../../components/figma/ImageWithFallback";
 import { Input } from "../../components/ui/input";
 import { AdminLayout } from "../../components/admin/AdminLayout";
 import { ProductSheet } from "../../components/admin/ProductSheet";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+    PaginationEllipsis,
+} from "../../components/ui/pagination";
 
 type Product = Database['public']['Tables']['products']['Row'];
 type ProductInsert = Database['public']['Tables']['products']['Insert'];
@@ -20,16 +29,53 @@ export default function AdminProducts() {
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const ITEMS_PER_PAGE = 10;
+
+    // Debounce filter to prevent excessive DB calls
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCurrentPage(1); // Reset to page 1 on filter change
+            fetchProducts();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [filter]);
+
     useEffect(() => {
         fetchProducts();
-    }, []);
+    }, [currentPage]);
 
     const fetchProducts = async () => {
         setLoading(true);
-        const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
-        if (error) toast.error("Failed to load products");
-        else setProducts(data || []);
-        setLoading(false);
+        try {
+            let query = supabase
+                .from('products')
+                .select('*', { count: 'exact' });
+
+            if (filter) {
+                // Search across name, category, and brand
+                query = query.or(`name.ilike.%${filter}%,category.ilike.%${filter}%,brand.ilike.%${filter}%`);
+            }
+
+            const from = (currentPage - 1) * ITEMS_PER_PAGE;
+            const to = from + ITEMS_PER_PAGE - 1;
+
+            const { data, error, count } = await query
+                .order('id', { ascending: true })
+                .range(from, to);
+
+            if (error) throw error;
+
+            setProducts(data || []);
+            setTotalProducts(count || 0);
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            toast.error("Failed to load products");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDelete = async (id: number) => {
@@ -40,30 +86,31 @@ export default function AdminProducts() {
             toast.error("Error deleting product");
         } else {
             toast.success("Product deleted successfully");
-            setProducts(products.filter(p => p.id !== id));
+            fetchProducts(); // Refresh list to maintain pagination consistency
         }
     };
 
     const handleSaveProduct = async (productData: ProductInsert | Product) => {
-        if ('id' in productData && productData.id) {
-            // Update
-            const { error } = await supabase
-                .from('products')
-                .update(productData as any)
-                .eq('id', productData.id);
-
-            if (error) throw error;
-            toast.success("Product updated successfully");
-        } else {
-            // Insert
-            const { error } = await supabase
-                .from('products')
-                .insert([productData as ProductInsert]);
-
-            if (error) throw error;
-            toast.success("Product added successfully");
+        try {
+            if ('id' in productData && productData.id) {
+                const { error } = await supabase
+                    .from('products')
+                    .update(productData as any)
+                    .eq('id', productData.id);
+                if (error) throw error;
+                toast.success("Product updated successfully");
+            } else {
+                const { error } = await supabase
+                    .from('products')
+                    .insert([productData as ProductInsert]);
+                if (error) throw error;
+                toast.success("Product added successfully");
+            }
+            fetchProducts();
+        } catch (error) {
+            console.error(error);
+            toast.error("Error saving product");
         }
-        fetchProducts();
     };
 
     const openEditSheet = (product: Product) => {
@@ -76,13 +123,7 @@ export default function AdminProducts() {
         setIsSheetOpen(true);
     };
 
-    const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(filter.toLowerCase()) ||
-        p.category.toLowerCase().includes(filter.toLowerCase()) ||
-        (p.brand && p.brand.toLowerCase().includes(filter.toLowerCase()))
-    );
-
-    const outOfStockCount = products.filter(p => !p.in_stock || (p.quantity || 0) <= 0).length;
+    const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE);
 
     return (
         <AdminLayout
@@ -91,43 +132,17 @@ export default function AdminProducts() {
         >
             {/* Stats Tiles */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                {/* Total Products Tile */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 text-center">
                     <div className="p-3 bg-blue-50 rounded-xl text-blue-600 mb-3">
                         <Package className="w-6 h-6" />
                     </div>
                     <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Total Products</p>
-                    <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{products.length}</h3>
-                    <div className="mt-3 w-10 h-1 bg-blue-600 rounded-full opacity-20"></div>
-                </div>
-
-                {/* Active Categories Tile */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="p-3 bg-green-50 rounded-xl text-green-600 mb-3">
-                        <TrendingUp className="w-6 h-6" />
-                    </div>
-                    <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Active Categories</p>
-                    <h3 className="text-2xl sm:text-3xl font-black text-gray-900">
-                        {new Set(products.map(p => p.category)).size}
-                    </h3>
-                    <div className="mt-3 w-10 h-1 bg-green-600 rounded-full opacity-20"></div>
-                </div>
-
-                {/* Out of Stock Tile */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="p-3 bg-orange-50 rounded-xl text-orange-600 mb-3">
-                        <AlertCircle className="w-6 h-6" />
-                    </div>
-                    <p className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Out of Stock</p>
-                    <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{outOfStockCount}</h3>
-                    <div className="mt-3 w-10 h-1 bg-orange-600 rounded-full opacity-20"></div>
+                    <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{totalProducts}</h3>
                 </div>
             </div>
 
             {/* Toolbar */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-
-                {/* Search Field Container */}
                 <div className="relative w-full md:w-96 flex items-center">
                     <Input
                         placeholder="Search products, brands..."
@@ -147,7 +162,7 @@ export default function AdminProducts() {
             </div>
 
             {/* Product Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
                 <Table className="border-collapse border border-gray-200">
                     <TableHeader className="bg-gray-50/80 border-b border-gray-200">
                         <TableRow className="hover:bg-transparent">
@@ -171,7 +186,7 @@ export default function AdminProducts() {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ) : filteredProducts.length === 0 ? (
+                        ) : products.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={8} className="text-center py-16 text-gray-500 border border-gray-200">
                                     <div className="flex flex-col items-center justify-center gap-3">
@@ -181,7 +196,7 @@ export default function AdminProducts() {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredProducts.map((product) => (
+                            products.map((product) => (
                                 <TableRow
                                     key={product.id}
                                     className="group hover:bg-accent hover:text-accent-foreground transition-colors border-b border-gray-200 cursor-pointer"
@@ -260,6 +275,70 @@ export default function AdminProducts() {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="pb-8">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (currentPage > 1) setCurrentPage(currentPage - 1);
+                                    }}
+                                    className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                                // Show first, last, and pages around current
+                                if (
+                                    page === 1 ||
+                                    page === totalPages ||
+                                    (page >= currentPage - 1 && page <= currentPage + 1)
+                                ) {
+                                    return (
+                                        <PaginationItem key={page}>
+                                            <PaginationLink
+                                                href="#"
+                                                isActive={page === currentPage}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setCurrentPage(page);
+                                                }}
+                                            >
+                                                {page}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    );
+                                }
+
+                                if (
+                                    page === currentPage - 2 ||
+                                    page === currentPage + 2
+                                ) {
+                                    return <PaginationItem key={page}><PaginationEllipsis /></PaginationItem>;
+                                }
+
+                                return null;
+                            })}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                                    }}
+                                    className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+            )}
 
             <ProductSheet
                 open={isSheetOpen}

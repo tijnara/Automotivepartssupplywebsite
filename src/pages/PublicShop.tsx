@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; // Import useLocation
+import { useLocation } from "react-router-dom";
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
 import { ProductCategories } from "../components/ProductCategories";
@@ -31,13 +31,50 @@ export default function PublicShop({
                                    }: PublicShopProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [products, setProducts] = useState<any[]>([]);
+    // All products lightweight fetch for category counts
+    const [allCategories, setAllCategories] = useState<{id: number, category: string}[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
-    const location = useLocation(); // Get current location
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const ITEMS_PER_PAGE = 8;
+
+    const location = useLocation();
+
+    // Initial load for category counts
+    useEffect(() => {
+        async function fetchCategoryCounts() {
+            const { data } = await supabase.from('products').select('id, category');
+            if (data) setAllCategories(data);
+        }
+        fetchCategoryCounts();
+    }, []);
+
+    // Main Product Fetch with Pagination
     useEffect(() => {
         async function fetchProducts() {
+            setLoadingProducts(true);
             try {
-                const { data, error } = await supabase.from('products').select('*');
+                let query = supabase.from('products').select('*', { count: 'exact' });
+
+                // Apply Filters
+                if (selectedCategory) {
+                    query = query.eq('category', selectedCategory);
+                }
+
+                if (searchQuery) {
+                    query = query.or(`name.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`);
+                }
+
+                // Apply Pagination
+                const from = (currentPage - 1) * ITEMS_PER_PAGE;
+                const to = from + ITEMS_PER_PAGE - 1;
+
+                const { data, error, count } = await query
+                    .order('in_stock', { ascending: false }) // Show in-stock first
+                    .range(from, to);
+
                 if (error) throw error;
 
                 if (data) {
@@ -45,7 +82,7 @@ export default function PublicShop({
                         id: item.id,
                         name: item.name,
                         category: item.category,
-                        brand: item.brand, // Map the brand here
+                        brand: item.brand,
                         price: Number(item.price),
                         originalPrice: item.original_price ? Number(item.original_price) : null,
                         rating: Number(item.rating),
@@ -54,6 +91,7 @@ export default function PublicShop({
                         image: item.image
                     }));
                     setProducts(mappedProducts);
+                    setTotalProducts(count || 0);
                 }
             } catch (err) {
                 console.error("Error fetching products:", err);
@@ -62,14 +100,23 @@ export default function PublicShop({
             }
         }
 
-        fetchProducts();
-    }, []);
+        // Debounce if there is a search query
+        const timer = setTimeout(() => {
+            fetchProducts();
+        }, searchQuery ? 500 : 0);
 
-    // Effect to handle scrolling when the page loads with a hash (e.g., /#contact)
+        return () => clearTimeout(timer);
+    }, [currentPage, searchQuery, selectedCategory]);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, selectedCategory]);
+
+    // Handle Anchor Links
     useEffect(() => {
         if (location.hash) {
             const id = location.hash.replace('#', '');
-            // Use a small timeout to ensure DOM is fully rendered
             setTimeout(() => {
                 scrollToSection(id);
             }, 100);
@@ -111,18 +158,23 @@ export default function PublicShop({
                     onRequestQuote={() => scrollToSection('contact')}
                 />
                 <ProductCategories
-                    products={products}
+                    products={allCategories} // Pass all lightweight data for counts
                     selectedCategory={selectedCategory}
                     onSelectCategory={handleSelectCategory}
                 />
                 {loadingProducts ? (
-                    <div className="text-center py-20 text-gray-500">Loading products from database...</div>
+                    <div className="text-center py-20 text-gray-500">Loading products...</div>
                 ) : (
                     <FeaturedProducts
                         products={products}
                         searchQuery={searchQuery}
                         selectedCategory={selectedCategory}
                         onAddToCart={onAddToCart}
+                        // Pagination props
+                        totalProducts={totalProducts}
+                        currentPage={currentPage}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        onPageChange={setCurrentPage}
                     />
                 )}
                 <WhyChooseUs />
