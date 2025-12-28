@@ -7,8 +7,11 @@ import { FeaturedProducts } from "../components/FeaturedProducts";
 import { WhyChooseUs } from "../components/WhyChooseUs";
 import { Contact } from "../components/Contact";
 import { Footer } from "../components/Footer";
+import { VehicleSelector } from "../components/VehicleSelector";
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../App";
+import { toast } from "sonner";
+import { Product } from "../components/FeaturedProducts";
 
 interface PublicShopProps {
     cartItems: CartItem[];
@@ -30,101 +33,99 @@ export default function PublicShop({
                                        onAddToCart
                                    }: PublicShopProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [products, setProducts] = useState<any[]>([]);
-    // All products lightweight fetch for category counts
-    const [allCategories, setAllCategories] = useState<{id: number, category: string}[]>([]);
+    const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
-
-    // Pagination State
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalProducts, setTotalProducts] = useState(0);
-    const ITEMS_PER_PAGE = 8;
-
     const location = useLocation();
 
-    // Initial load for category counts
     useEffect(() => {
-        async function fetchCategoryCounts() {
-            const { data } = await supabase.from('products').select('id, category');
-            if (data) setAllCategories(data);
-        }
-        fetchCategoryCounts();
-    }, []);
+        fetchProducts();
+    }, [selectedCategory, searchQuery, selectedVehicleId]);
 
-    // Main Product Fetch with Pagination
-    useEffect(() => {
-        async function fetchProducts() {
-            setLoadingProducts(true);
-            try {
-                let query = supabase.from('products').select('*', { count: 'exact' });
+    async function fetchProducts() {
+        setLoadingProducts(true);
+        try {
+            let validProductIds: number[] | null = null;
 
-                // Apply Filters
-                if (selectedCategory) {
-                    query = query.eq('category', selectedCategory);
+            if (selectedVehicleId) {
+                const { data: fitmentData, error: fitmentError } = await supabase
+                    .from('product_fitment')
+                    .select('product_id')
+                    .eq('vehicle_id', selectedVehicleId);
+
+                if (fitmentError) throw fitmentError;
+
+                if (fitmentData) {
+                    validProductIds = fitmentData.map(f => f.product_id);
+
+                    if (validProductIds.length === 0) {
+                        setProducts([]);
+                        setLoadingProducts(false);
+                        return;
+                    }
                 }
-
-                if (searchQuery) {
-                    query = query.or(`name.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`);
-                }
-
-                // Apply Pagination
-                const from = (currentPage - 1) * ITEMS_PER_PAGE;
-                const to = from + ITEMS_PER_PAGE - 1;
-
-                const { data, error, count } = await query
-                    .order('in_stock', { ascending: false }) // Show in-stock first
-                    .range(from, to);
-
-                if (error) throw error;
-
-                if (data) {
-                    const mappedProducts = data.map((item: any) => ({
-                        id: item.id,
-                        name: item.name,
-                        category: item.category,
-                        brand: item.brand,
-                        price: Number(item.price),
-                        originalPrice: item.original_price ? Number(item.original_price) : null,
-                        rating: Number(item.rating),
-                        reviews: item.reviews,
-                        inStock: item.in_stock && (item.quantity || 0) > 0,
-                        image: item.image
-                    }));
-                    setProducts(mappedProducts);
-                    setTotalProducts(count || 0);
-                }
-            } catch (err) {
-                console.error("Error fetching products:", err);
-            } finally {
-                setLoadingProducts(false);
             }
+
+            let query = supabase.from('products').select('*');
+
+            if (validProductIds !== null) {
+                query = query.in('id', validProductIds);
+            }
+
+            if (selectedCategory) {
+                query = query.eq('category', selectedCategory);
+            }
+
+            if (searchQuery) {
+                query = query.or(`name.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`);
+            }
+
+            const { data, error } = await query;
+            if (error) throw error;
+
+            if (data) {
+                const mappedProducts: Product[] = data.map((item: any) => ({
+                    id: item.id,
+                    name: item.name,
+                    category: item.category,
+                    brand: item.brand,
+                    price: Number(item.price),
+                    originalPrice: item.original_price ? Number(item.original_price) : null,
+                    rating: Number(item.rating),
+                    reviews: item.reviews,
+                    inStock: item.in_stock && (item.quantity || 0) > 0,
+                    image: item.image
+                }));
+                setProducts(mappedProducts);
+
+                if (selectedVehicleId && mappedProducts.length > 0) {
+                    toast.success(`Found ${mappedProducts.length} parts for your vehicle`);
+                }
+            }
+        } catch (err) {
+            console.error("Error fetching products:", err);
+            toast.error("Error loading products");
+        } finally {
+            setLoadingProducts(false);
         }
+    }
 
-        // Debounce if there is a search query
-        const timer = setTimeout(() => {
-            fetchProducts();
-        }, searchQuery ? 500 : 0);
-
-        return () => clearTimeout(timer);
-    }, [currentPage, searchQuery, selectedCategory]);
-
-    // Reset page when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery, selectedCategory]);
-
-    // Handle Anchor Links
     useEffect(() => {
         if (location.hash) {
             const id = location.hash.replace('#', '');
             setTimeout(() => {
                 scrollToSection(id);
-            }, 100);
+            }, 500);
         }
     }, [location]);
 
     const handleSelectCategory = (category: string | null) => {
         setSelectedCategory(category);
+        scrollToSection('featured-products');
+    };
+
+    const handleVehicleSelect = (vehicleId: number | null) => {
+        setSelectedVehicleId(vehicleId);
         scrollToSection('featured-products');
     };
 
@@ -157,26 +158,31 @@ export default function PublicShop({
                     onShopNow={() => scrollToSection('featured-products')}
                     onRequestQuote={() => scrollToSection('contact')}
                 />
+
+                <div className="container mx-auto px-4 relative z-20">
+                    <VehicleSelector onVehicleSelect={handleVehicleSelect} />
+                </div>
+
                 <ProductCategories
-                    products={allCategories} // Pass all lightweight data for counts
+                    products={products}
                     selectedCategory={selectedCategory}
                     onSelectCategory={handleSelectCategory}
                 />
+
                 {loadingProducts ? (
-                    <div className="text-center py-20 text-gray-500">Loading products...</div>
+                    <div className="text-center py-20 text-gray-500">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        Loading products...
+                    </div>
                 ) : (
                     <FeaturedProducts
                         products={products}
                         searchQuery={searchQuery}
                         selectedCategory={selectedCategory}
                         onAddToCart={onAddToCart}
-                        // Pagination props
-                        totalProducts={totalProducts}
-                        currentPage={currentPage}
-                        itemsPerPage={ITEMS_PER_PAGE}
-                        onPageChange={setCurrentPage}
                     />
                 )}
+
                 <WhyChooseUs />
                 <Contact />
             </main>

@@ -1,15 +1,7 @@
 import { ShoppingCart, Star, Eye } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-    PaginationEllipsis,
-} from "./ui/pagination";
 
 export interface Product {
     id: number;
@@ -18,34 +10,40 @@ export interface Product {
     brand: string | null;
     price: number;
     originalPrice: number | null;
-    rating: number;
-    reviews: number;
+    rating: number | null;
+    reviews: number | null;
     inStock: boolean;
     image: string;
 }
 
 interface FeaturedProductsProps {
     products: Product[];
+    searchQuery: string; // Ensure this is present
     selectedCategory: string | null;
     onAddToCart: (product: any) => void;
-    // New Pagination Props
-    totalProducts: number;
-    currentPage: number;
-    itemsPerPage: number;
-    onPageChange: (page: number) => void;
 }
 
-export function FeaturedProducts({
-                                     products,
-                                     selectedCategory,
-                                     onAddToCart,
-                                     totalProducts,
-                                     currentPage,
-                                     itemsPerPage,
-                                     onPageChange
-                                 }: FeaturedProductsProps) {
+export function FeaturedProducts({ products, searchQuery, selectedCategory, onAddToCart }: FeaturedProductsProps) {
+    const ITEMS_PER_PAGE = 8;
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
-    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+    useEffect(() => {
+        setVisibleCount(ITEMS_PER_PAGE);
+    }, [searchQuery, selectedCategory]);
+
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (product.brand && product.brand.toLowerCase().includes(searchQuery.toLowerCase()));
+
+        const matchesCategory = selectedCategory
+            ? product.category === selectedCategory
+            : true;
+
+        return matchesSearch && matchesCategory;
+    });
+
+    const displayedProducts = filteredProducts.slice(0, visibleCount);
 
     return (
         <section id="featured-products" className="py-16 bg-white">
@@ -56,18 +54,18 @@ export function FeaturedProducts({
                             {selectedCategory ? `${selectedCategory}` : "Featured Products"}
                         </h2>
                         <p className="text-gray-600">
-                            {totalProducts} items found
+                            {filteredProducts.length} items found
                         </p>
                     </div>
                 </div>
 
-                {products.length === 0 ? (
+                {displayedProducts.length === 0 ? (
                     <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-lg">
                         <p className="text-lg">No products found</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {products.map((product) => (
+                        {displayedProducts.map((product) => (
                             <div
                                 key={product.id}
                                 className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full"
@@ -84,6 +82,11 @@ export function FeaturedProducts({
                                         </div>
                                     </div>
 
+                                    {product.originalPrice && (
+                                        <span className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold shadow-sm">
+                                          SALE
+                                        </span>
+                                    )}
                                     {!product.inStock && (
                                         <span className="absolute top-3 left-3 bg-gray-900/80 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm uppercase tracking-wider">
                                           Out of Stock
@@ -119,6 +122,11 @@ export function FeaturedProducts({
                                     <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
                                         <div className="flex flex-col">
                                             <span className="text-blue-700 font-bold text-lg">₱{product.price.toLocaleString()}</span>
+                                            {product.originalPrice && (
+                                                <span className="text-gray-400 text-xs line-through">
+                                                    ₱{product.originalPrice.toLocaleString()}
+                                                </span>
+                                            )}
                                         </div>
                                         <button
                                             onClick={() => onAddToCart(product)}
@@ -139,67 +147,23 @@ export function FeaturedProducts({
                     </div>
                 )}
 
-                {/* Database Level Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="mt-12">
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            if (currentPage > 1) onPageChange(currentPage - 1);
-                                        }}
-                                        className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-                                    />
-                                </PaginationItem>
-
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                                    // Logic to show a window of pages
-                                    if (
-                                        page === 1 ||
-                                        page === totalPages ||
-                                        (page >= currentPage - 1 && page <= currentPage + 1)
-                                    ) {
-                                        return (
-                                            <PaginationItem key={page}>
-                                                <PaginationLink
-                                                    href="#"
-                                                    isActive={page === currentPage}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        onPageChange(page);
-                                                    }}
-                                                >
-                                                    {page}
-                                                </PaginationLink>
-                                            </PaginationItem>
-                                        );
-                                    }
-
-                                    if (
-                                        page === currentPage - 2 ||
-                                        page === currentPage + 2
-                                    ) {
-                                        return <PaginationItem key={page}><PaginationEllipsis /></PaginationItem>;
-                                    }
-
-                                    return null;
-                                })}
-
-                                <PaginationItem>
-                                    <PaginationNext
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            if (currentPage < totalPages) onPageChange(currentPage + 1);
-                                        }}
-                                        className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
+                {filteredProducts.length > ITEMS_PER_PAGE && (
+                    <div className="mt-12 text-center">
+                        {visibleCount < filteredProducts.length ? (
+                            <button
+                                onClick={() => setVisibleCount(prev => prev + ITEMS_PER_PAGE)}
+                                className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-full transition font-medium"
+                            >
+                                Show More Products
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setVisibleCount(ITEMS_PER_PAGE)}
+                                className="text-gray-500 hover:text-gray-700 underline"
+                            >
+                                Show Less
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

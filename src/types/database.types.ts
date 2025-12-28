@@ -14,7 +14,7 @@ export type Database = {
                     id: number
                     name: string
                     category: string
-                    brand: string | null // Added
+                    brand: string | null
                     price: number
                     original_price: number | null
                     rating: number | null
@@ -28,7 +28,7 @@ export type Database = {
                     id?: number
                     name: string
                     category: string
-                    brand?: string | null // Added
+                    brand?: string | null
                     price: number
                     original_price?: number | null
                     rating?: number | null
@@ -42,7 +42,7 @@ export type Database = {
                     id?: number
                     name?: string
                     category?: string
-                    brand?: string | null // Added
+                    brand?: string | null
                     price?: number
                     original_price?: number | null
                     rating?: number | null
@@ -53,6 +53,66 @@ export type Database = {
                     created_at?: string
                 }
                 Relationships: []
+            }
+            vehicles: {
+                Row: {
+                    id: number
+                    make: string
+                    model: string
+                    year_start: number
+                    year_end: number | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: number
+                    make: string
+                    model: string
+                    year_start: number
+                    year_end?: number | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: number
+                    make?: string
+                    model?: string
+                    year_start?: number
+                    year_end?: number | null
+                    created_at?: string
+                }
+                Relationships: []
+            }
+            product_fitment: {
+                Row: {
+                    id: number
+                    product_id: number
+                    vehicle_id: number
+                }
+                Insert: {
+                    id?: number
+                    product_id: number
+                    vehicle_id: number
+                }
+                Update: {
+                    id?: number
+                    product_id?: number
+                    vehicle_id?: number
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "product_fitment_product_id_fkey"
+                        columns: ["product_id"]
+                        isOneToOne: false
+                        referencedRelation: "products"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "product_fitment_vehicle_id_fkey"
+                        columns: ["vehicle_id"]
+                        isOneToOne: false
+                        referencedRelation: "vehicles"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             inventory_transactions: {
                 Row: {
