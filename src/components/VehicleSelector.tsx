@@ -1,16 +1,24 @@
 import { useState, useEffect } from "react";
-import { Search, Car, X, Loader2, AlertCircle } from "lucide-react";
+import { Search, Car, X } from "lucide-react"; // Removed AlertCircle
 import { Button } from "./ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { supabase } from "../lib/supabase";
 import { Database } from "../types/database.types";
 import { cn } from "./ui/utils";
+import { toast } from "sonner";
 
-// Explicitly use the type from Database definition
 export type Vehicle = Database['public']['Tables']['vehicles']['Row'];
 
+export interface VehicleFilter {
+    vehicleId?: number;
+    make?: string;
+    model?: string;
+    year?: string;
+    label: string;
+}
+
 interface VehicleSelectorProps {
-    onVehicleSelect: (vehicle: Vehicle | null) => void; // Changed from ID to full Object
+    onVehicleSelect: (filter: VehicleFilter | null) => void;
     className?: string;
 }
 
@@ -19,51 +27,24 @@ export function VehicleSelector({ onVehicleSelect, className }: VehicleSelectorP
     const [makes, setMakes] = useState<string[]>([]);
     const [models, setModels] = useState<string[]>([]);
     const [years, setYears] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     // Selection States
     const [selectedMake, setSelectedMake] = useState<string>("");
     const [selectedModel, setSelectedModel] = useState<string>("");
     const [selectedYear, setSelectedYear] = useState<string>("");
 
-    const [activeVehicleLabel, setActiveVehicleLabel] = useState<string | null>(null);
+    const [activeLabel, setActiveLabel] = useState<string | null>(null);
 
     useEffect(() => {
         fetchVehicles();
     }, []);
 
     const fetchVehicles = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            console.log("Fetching vehicles...");
-            const { data, error } = await supabase
-                .from('vehicles')
-                .select('*');
-
-            if (error) {
-                console.error("Supabase Error:", error);
-                setError("Failed to load vehicle data.");
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                console.warn("No vehicles found in database table.");
-                setError("No vehicle data found.");
-                return;
-            }
-
-            setVehicles(data as Vehicle[]);
-
-            // Extract unique makes
-            const uniqueMakes = Array.from(new Set(data.map((v: any) => v.make))).sort();
+        const { data } = await supabase.from('vehicles').select('*');
+        if (data) {
+            setVehicles(data);
+            const uniqueMakes = Array.from(new Set(data.map(v => v.make))).sort();
             setMakes(uniqueMakes);
-        } catch (err) {
-            console.error("Unexpected error:", err);
-            setError("An unexpected error occurred.");
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -71,8 +52,7 @@ export function VehicleSelector({ onVehicleSelect, className }: VehicleSelectorP
         setSelectedMake(make);
         setSelectedModel("");
         setSelectedYear("");
-        setModels([]);
-        setYears([]);
+        setYears([]); // Reset years
 
         // Filter models for this make
         const filteredModels = vehicles
@@ -85,9 +65,10 @@ export function VehicleSelector({ onVehicleSelect, className }: VehicleSelectorP
         setSelectedModel(model);
         setSelectedYear("");
 
-        // Find valid years for this Make + Model
+        // Filter years for this Make + Model
         const relevantVehicles = vehicles.filter(v => v.make === selectedMake && v.model === model);
 
+        // Collect all covered years
         const validYears = new Set<string>();
         relevantVehicles.forEach(v => {
             const start = v.year_start;
@@ -97,43 +78,59 @@ export function VehicleSelector({ onVehicleSelect, className }: VehicleSelectorP
             }
         });
 
-        // Sort years descending (newest first)
         setYears(Array.from(validYears).sort((a, b) => Number(b) - Number(a)));
     };
 
     const handleSearch = () => {
-        if (!selectedMake || !selectedModel || !selectedYear) return;
-
-        const yearNum = parseInt(selectedYear);
-        const vehicle = vehicles.find(v =>
-            v.make === selectedMake &&
-            v.model === selectedModel &&
-            v.year_start <= yearNum &&
-            (v.year_end === null || v.year_end >= yearNum)
-        );
-
-        if (vehicle) {
-            // Updated: Pass full object
-            onVehicleSelect(vehicle);
-            setActiveVehicleLabel(`${selectedYear} ${selectedMake} ${selectedModel}`);
-        } else {
-            console.warn("No matching vehicle ID found for selection");
+        // 1. Warning if nothing selected
+        if (!selectedMake) {
+            toast.warning("Please select at least a Vehicle Make.", {
+                description: "We need to know the brand to find compatible parts."
+            });
+            return;
         }
+
+        // 2. Construct Filter
+        let filter: VehicleFilter = {
+            make: selectedMake,
+            model: selectedModel || undefined,
+            year: selectedYear || undefined,
+            label: `${selectedMake}`
+        };
+
+        if (selectedModel) filter.label += ` ${selectedModel}`;
+        if (selectedYear) filter.label = `${selectedYear} ${filter.label}`;
+
+        // 3. Try to find exact vehicle ID if all details match a specific row
+        if (selectedMake && selectedModel && selectedYear) {
+            const yearNum = parseInt(selectedYear);
+            const exactVehicle = vehicles.find(v =>
+                v.make === selectedMake &&
+                v.model === selectedModel &&
+                v.year_start <= yearNum &&
+                (v.year_end === null || v.year_end >= yearNum)
+            );
+            if (exactVehicle) {
+                filter.vehicleId = exactVehicle.id;
+            }
+        }
+
+        // 4. Apply Filter
+        setActiveLabel(filter.label);
+        onVehicleSelect(filter);
     };
 
     const handleReset = () => {
         setSelectedMake("");
         setSelectedModel("");
         setSelectedYear("");
-        setModels([]);
-        setYears([]);
-        setActiveVehicleLabel(null);
+        setActiveLabel(null);
         onVehicleSelect(null);
     };
 
     return (
         <div className={cn(
-            "bg-white p-6 rounded-xl shadow-lg border border-gray-100",
+            "bg-white p-6 rounded-xl shadow-lg border border-gray-100 -mt-10 relative z-20 mx-4 md:mx-auto max-w-5xl",
             className
         )}>
             <div className="flex items-center justify-between mb-4">
@@ -141,49 +138,36 @@ export function VehicleSelector({ onVehicleSelect, className }: VehicleSelectorP
                     <Car className="w-5 h-5" />
                     Select Your Vehicle
                 </div>
-                {activeVehicleLabel && (
+                {activeLabel && (
                     <div className="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
-                        <span>{activeVehicleLabel}</span>
+                        <span>Filtering for: {activeLabel}</span>
                         <button onClick={handleReset} className="hover:text-green-900 cursor-pointer"><X className="w-3 h-3" /></button>
                     </div>
                 )}
             </div>
 
-            {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {error}
-                </div>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                {/* Make Selector */}
                 <div className="w-full">
-                    <Select value={selectedMake || undefined} onValueChange={handleMakeChange}>
-                        <SelectTrigger className="h-12 w-full bg-white border-gray-300 focus:ring-blue-500">
-                            <SelectValue placeholder={isLoading ? "Loading..." : "Select Make"} />
+                    <Select value={selectedMake} onValueChange={handleMakeChange}>
+                        <SelectTrigger className="h-12 w-full bg-white border-gray-300">
+                            <SelectValue placeholder="Make" />
                         </SelectTrigger>
                         <SelectContent>
-                            {makes.length === 0 && !isLoading ? (
-                                <SelectItem value="none" disabled>No Data</SelectItem>
-                            ) : (
-                                makes.map(make => (
-                                    <SelectItem key={make} value={make}>{make}</SelectItem>
-                                ))
-                            )}
+                            {makes.map(make => (
+                                <SelectItem key={make} value={make}>{make}</SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
 
-                {/* Model Selector */}
                 <div className="w-full">
                     <Select
-                        value={selectedModel || undefined}
+                        value={selectedModel}
                         onValueChange={handleModelChange}
-                        disabled={!selectedMake || models.length === 0}
+                        disabled={!selectedMake}
                     >
-                        <SelectTrigger className="h-12 w-full bg-white border-gray-300 focus:ring-blue-500">
-                            <SelectValue placeholder="Select Model" />
+                        <SelectTrigger className="h-12 w-full bg-white border-gray-300">
+                            <SelectValue placeholder="Model" />
                         </SelectTrigger>
                         <SelectContent>
                             {models.map(model => (
@@ -193,15 +177,14 @@ export function VehicleSelector({ onVehicleSelect, className }: VehicleSelectorP
                     </Select>
                 </div>
 
-                {/* Year Selector */}
                 <div className="w-full">
                     <Select
-                        value={selectedYear || undefined}
+                        value={selectedYear}
                         onValueChange={setSelectedYear}
-                        disabled={!selectedModel || years.length === 0}
+                        disabled={!selectedModel}
                     >
-                        <SelectTrigger className="h-12 w-full bg-white border-gray-300 focus:ring-blue-500">
-                            <SelectValue placeholder="Select Year" />
+                        <SelectTrigger className="h-12 w-full bg-white border-gray-300">
+                            <SelectValue placeholder="Year" />
                         </SelectTrigger>
                         <SelectContent>
                             {years.map(year => (
@@ -211,15 +194,12 @@ export function VehicleSelector({ onVehicleSelect, className }: VehicleSelectorP
                     </Select>
                 </div>
 
-                {/* Search Button */}
                 <div className="w-full">
                     <Button
-                        className="h-12 w-full bg-blue-600 hover:bg-blue-700 font-bold text-base shadow-md transition-all active:scale-95"
+                        className="h-12 w-full bg-blue-600 hover:bg-blue-700 font-bold text-base shadow-sm"
                         onClick={handleSearch}
-                        disabled={!selectedYear}
                     >
-                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5 mr-2" />}
-                        Find Parts
+                        <Search className="w-5 h-5 mr-2" /> Find Parts
                     </Button>
                 </div>
             </div>

@@ -7,7 +7,7 @@ import { FeaturedProducts, Product } from "../components/FeaturedProducts";
 import { WhyChooseUs } from "../components/WhyChooseUs";
 import { Contact } from "../components/Contact";
 import { Footer } from "../components/Footer";
-import { VehicleSelector, Vehicle } from "../components/VehicleSelector";
+import { VehicleSelector, VehicleFilter } from "../components/VehicleSelector";
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../App";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ interface PublicShopProps {
     onRemoveItem: (id: number) => void;
     onUpdateQuantity: (id: number, delta: number) => void;
     onCheckout: () => void;
-    onAddToCart: (product: any, qty?: number, vehicle?: Vehicle) => void; // Updated signature
+    onAddToCart: (product: any) => void;
 }
 
 export default function PublicShop({
@@ -32,38 +32,63 @@ export default function PublicShop({
                                        onAddToCart
                                    }: PublicShopProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null); // Store full object
+    // Updated state to hold the filter object instead of just ID
+    const [vehicleFilter, setVehicleFilter] = useState<VehicleFilter | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
-
     const location = useLocation();
 
     useEffect(() => {
         fetchProducts();
-    }, [selectedCategory, searchQuery, selectedVehicle]);
+    }, [selectedCategory, searchQuery, vehicleFilter]);
 
     async function fetchProducts() {
         setLoadingProducts(true);
         try {
             let validProductIds: number[] | null = null;
 
-            if (selectedVehicle) {
-                const { data: fitmentData, error: fitmentError } = await supabase
-                    .from('product_fitment')
-                    .select('product_id')
-                    .eq('vehicle_id', selectedVehicle.id)
-                    .returns<{ product_id: number }[]>();
+            if (vehicleFilter) {
+                let targetVehicleIds: number[] = [];
 
-                if (fitmentError) throw fitmentError;
+                if (vehicleFilter.vehicleId) {
+                    // Exact vehicle identified
+                    targetVehicleIds = [vehicleFilter.vehicleId];
+                } else if (vehicleFilter.make) {
+                    // Broad search (e.g. "Toyota" or "Toyota Vios" without year)
+                    let vQuery = supabase.from('vehicles').select('id');
+                    vQuery = vQuery.eq('make', vehicleFilter.make);
+                    if (vehicleFilter.model) vQuery = vQuery.eq('model', vehicleFilter.model);
 
-                if (fitmentData) {
-                    validProductIds = fitmentData.map(f => f.product_id);
-
-                    if (validProductIds.length === 0) {
-                        setProducts([]);
-                        setLoadingProducts(false);
-                        return;
+                    const { data: vData } = await vQuery;
+                    if (vData) {
+                        targetVehicleIds = vData.map(v => v.id);
                     }
+                }
+
+                if (targetVehicleIds.length > 0) {
+                    const { data: fitmentData, error: fitmentError } = await supabase
+                        .from('product_fitment')
+                        .select('product_id')
+                        .in('vehicle_id', targetVehicleIds);
+
+                    if (fitmentError) throw fitmentError;
+
+                    if (fitmentData) {
+                        // Use Set to remove duplicates if multiple vehicle IDs map to same product
+                        validProductIds = Array.from(new Set(fitmentData.map(f => f.product_id)));
+
+                        if (validProductIds.length === 0) {
+                            setProducts([]);
+                            setLoadingProducts(false);
+                            // Optional: Warn user nothing found for this car
+                            return;
+                        }
+                    }
+                } else {
+                    // Filter active but no vehicles found in DB matching criteria
+                    setProducts([]);
+                    setLoadingProducts(false);
+                    return;
                 }
             }
 
@@ -99,8 +124,9 @@ export default function PublicShop({
                 }));
                 setProducts(mappedProducts);
 
-                if (selectedVehicle && mappedProducts.length > 0) {
-                    toast.success(`Found ${mappedProducts.length} parts for your ${selectedVehicle.make} ${selectedVehicle.model}`);
+                if (vehicleFilter && mappedProducts.length > 0) {
+                    // Only show toast once or sparingly to avoid spamming
+                    // toast.success(`Found ${mappedProducts.length} parts for ${vehicleFilter.label}`);
                 }
             }
         } catch (err) {
@@ -111,7 +137,6 @@ export default function PublicShop({
         }
     }
 
-    // Handle initial hash scrolling
     useEffect(() => {
         if (location.hash) {
             const id = location.hash.replace('#', '');
@@ -121,19 +146,19 @@ export default function PublicShop({
         }
     }, [location]);
 
-    // Simplified Add to Cart - no modal, just add with vehicle context
-    const handleAddToCartClick = (product: any) => {
-        if (selectedVehicle) {
-            onAddToCart(product, 1, selectedVehicle);
-        } else {
-            // Add without vehicle info if none selected
-            onAddToCart(product, 1);
-        }
-    };
-
     const handleSelectCategory = (category: string | null) => {
         setSelectedCategory(category);
         scrollToSection('featured-products');
+    };
+
+    const handleVehicleSelect = (filter: VehicleFilter | null) => {
+        setVehicleFilter(filter);
+        scrollToSection('featured-products');
+        if (filter) {
+            toast.success(`Filtering products for ${filter.label}`);
+        } else {
+            toast.info("Showing all vehicles parts");
+        }
     };
 
     const scrollToSection = (id: string) => {
@@ -167,10 +192,7 @@ export default function PublicShop({
                 />
 
                 <div className="container mx-auto px-4 relative z-20">
-                    <VehicleSelector
-                        onVehicleSelect={setSelectedVehicle}
-                        className="-mt-10 mx-4 md:mx-auto max-w-5xl shadow-lg border border-gray-100"
-                    />
+                    <VehicleSelector onVehicleSelect={handleVehicleSelect} />
                 </div>
 
                 <ProductCategories
@@ -189,7 +211,7 @@ export default function PublicShop({
                         products={products}
                         searchQuery={searchQuery}
                         selectedCategory={selectedCategory}
-                        onAddToCart={handleAddToCartClick}
+                        onAddToCart={onAddToCart}
                     />
                 )}
 
