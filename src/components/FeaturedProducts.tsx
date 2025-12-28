@@ -18,7 +18,7 @@ export interface Product {
 
 interface FeaturedProductsProps {
     products: Product[];
-    searchQuery: string; // Ensure this is present
+    searchQuery: string; // Added to interface
     selectedCategory: string | null;
     onAddToCart: (product: any) => void;
 }
@@ -149,21 +149,12 @@ export function FeaturedProducts({ products, searchQuery, selectedCategory, onAd
 
                 {filteredProducts.length > ITEMS_PER_PAGE && (
                     <div className="mt-12 text-center">
-                        {visibleCount < filteredProducts.length ? (
-                            <button
-                                onClick={() => setVisibleCount(prev => prev + ITEMS_PER_PAGE)}
-                                className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-full transition font-medium"
-                            >
-                                Show More Products
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setVisibleCount(ITEMS_PER_PAGE)}
-                                className="text-gray-500 hover:text-gray-700 underline"
-                            >
-                                Show Less
-                            </button>
-                        )}
+                        <button
+                            onClick={() => setVisibleCount(prev => prev + ITEMS_PER_PAGE)}
+                            className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-8 py-3 rounded-full transition font-medium"
+                        >
+                            Show More Products
+                        </button>
                     </div>
                 )}
             </div>

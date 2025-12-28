@@ -1,4 +1,4 @@
-import { Search, Phone, ShoppingCart, Menu, Plus, Minus, X } from "lucide-react";
+import { Search, Phone, ShoppingCart, Menu, Plus, Minus, X, Car } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -8,11 +8,12 @@ import {
     SheetTitle,
     SheetTrigger,
     SheetDescription,
-    SheetClose // Import SheetClose
+    SheetClose
 } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "./ui/button";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Vehicle } from "./VehicleSelector";
 
 interface Product {
     id: number;
@@ -22,8 +23,10 @@ interface Product {
     category: string;
 }
 
+// Updated CartItem to match App.tsx
 interface CartItem extends Product {
     quantity: number;
+    vehicle?: Vehicle;
 }
 
 interface HeaderProps {
@@ -41,7 +44,6 @@ export function Header({
                            setSearchQuery,
                            onRemoveItem,
                            onUpdateQuantity,
-                           // onCheckout prop is kept for interface compatibility but ignored
                        }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -87,10 +89,9 @@ export function Header({
         }
     };
 
-    // Updated: Directly navigate to the checkout page
     const handleCheckoutClick = () => {
-        setIsCartOpen(false); // Close sidebar
-        navigate('/checkout'); // Redirect to page
+        setIsCartOpen(false);
+        navigate('/checkout');
     };
 
     return (
@@ -130,7 +131,7 @@ export function Header({
                         <div className="relative w-full">
                             <input
                                 type="text"
-                                placeholder="Search for parts by name, brand name, category..."
+                                placeholder="Search for parts by name..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -172,8 +173,8 @@ export function Header({
                                     <>
                                         <ScrollArea className="flex-1 -mx-6 px-6" style={{ flex: '1 1 0%', overflow: 'hidden' }}>
                                             <div className="space-y-4 py-4">
-                                                {cartItems.map((item) => (
-                                                    <div key={item.id} className="flex gap-4">
+                                                {cartItems.map((item, index) => (
+                                                    <div key={`${item.id}-${index}`} className="flex gap-4 border-b pb-4 last:border-0">
                                                         <div
                                                             className="bg-gray-100 rounded-md overflow-hidden flex-shrink-0"
                                                             style={{ width: '80px', height: '80px', minWidth: '80px' }}
@@ -188,8 +189,15 @@ export function Header({
                                                             <div>
                                                                 <h4 className="font-medium text-sm line-clamp-2">{item.name}</h4>
                                                                 <p className="text-xs text-gray-500">{item.category}</p>
+                                                                {/* Display selected vehicle info */}
+                                                                {item.vehicle && (
+                                                                    <div className="flex items-center gap-1 mt-1 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded w-fit">
+                                                                        <Car className="w-3 h-3" />
+                                                                        <span>Fits: {item.vehicle.make} {item.vehicle.model}</span>
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                            <div className="flex justify-between items-center">
+                                                            <div className="flex justify-between items-center mt-2">
                                                                 <div className="text-blue-600 font-medium">
                                                                     ₱{(item.price * item.quantity).toLocaleString()}
                                                                 </div>
@@ -213,7 +221,7 @@ export function Header({
                                                         </div>
                                                         <button
                                                             onClick={() => onRemoveItem(item.id)}
-                                                            className="text-gray-400 hover:text-red-500 self-start cursor-pointer"
+                                                            className="text-gray-400 hover:text-red-500 self-start cursor-pointer -mt-1 -mr-1 p-1"
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>
@@ -222,7 +230,7 @@ export function Header({
                                             </div>
                                         </ScrollArea>
 
-                                        <div className="space-y-4 pt-4 mt-auto border-t">
+                                        <div className="space-y-4 pt-4 mt-auto border-t bg-white">
                                             <div className="flex justify-between items-center font-medium text-lg">
                                                 <span>Total:</span>
                                                 <span>₱{totalAmount.toLocaleString()}</span>

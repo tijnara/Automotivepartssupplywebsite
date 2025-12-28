@@ -3,15 +3,14 @@ import { useLocation } from "react-router-dom";
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
 import { ProductCategories } from "../components/ProductCategories";
-import { FeaturedProducts } from "../components/FeaturedProducts";
+import { FeaturedProducts, Product } from "../components/FeaturedProducts";
 import { WhyChooseUs } from "../components/WhyChooseUs";
 import { Contact } from "../components/Contact";
 import { Footer } from "../components/Footer";
-import { VehicleSelector } from "../components/VehicleSelector";
+import { VehicleSelector, Vehicle } from "../components/VehicleSelector";
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../App";
 import { toast } from "sonner";
-import { Product } from "../components/FeaturedProducts";
 
 interface PublicShopProps {
     cartItems: CartItem[];
@@ -20,7 +19,7 @@ interface PublicShopProps {
     onRemoveItem: (id: number) => void;
     onUpdateQuantity: (id: number, delta: number) => void;
     onCheckout: () => void;
-    onAddToCart: (product: any) => void;
+    onAddToCart: (product: any, qty?: number, vehicle?: Vehicle) => void; // Updated signature
 }
 
 export default function PublicShop({
@@ -33,25 +32,27 @@ export default function PublicShop({
                                        onAddToCart
                                    }: PublicShopProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
+    const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null); // Store full object
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
+
     const location = useLocation();
 
     useEffect(() => {
         fetchProducts();
-    }, [selectedCategory, searchQuery, selectedVehicleId]);
+    }, [selectedCategory, searchQuery, selectedVehicle]);
 
     async function fetchProducts() {
         setLoadingProducts(true);
         try {
             let validProductIds: number[] | null = null;
 
-            if (selectedVehicleId) {
+            if (selectedVehicle) {
                 const { data: fitmentData, error: fitmentError } = await supabase
                     .from('product_fitment')
                     .select('product_id')
-                    .eq('vehicle_id', selectedVehicleId);
+                    .eq('vehicle_id', selectedVehicle.id)
+                    .returns<{ product_id: number }[]>();
 
                 if (fitmentError) throw fitmentError;
 
@@ -98,8 +99,8 @@ export default function PublicShop({
                 }));
                 setProducts(mappedProducts);
 
-                if (selectedVehicleId && mappedProducts.length > 0) {
-                    toast.success(`Found ${mappedProducts.length} parts for your vehicle`);
+                if (selectedVehicle && mappedProducts.length > 0) {
+                    toast.success(`Found ${mappedProducts.length} parts for your ${selectedVehicle.make} ${selectedVehicle.model}`);
                 }
             }
         } catch (err) {
@@ -110,6 +111,7 @@ export default function PublicShop({
         }
     }
 
+    // Handle initial hash scrolling
     useEffect(() => {
         if (location.hash) {
             const id = location.hash.replace('#', '');
@@ -119,13 +121,18 @@ export default function PublicShop({
         }
     }, [location]);
 
-    const handleSelectCategory = (category: string | null) => {
-        setSelectedCategory(category);
-        scrollToSection('featured-products');
+    // Simplified Add to Cart - no modal, just add with vehicle context
+    const handleAddToCartClick = (product: any) => {
+        if (selectedVehicle) {
+            onAddToCart(product, 1, selectedVehicle);
+        } else {
+            // Add without vehicle info if none selected
+            onAddToCart(product, 1);
+        }
     };
 
-    const handleVehicleSelect = (vehicleId: number | null) => {
-        setSelectedVehicleId(vehicleId);
+    const handleSelectCategory = (category: string | null) => {
+        setSelectedCategory(category);
         scrollToSection('featured-products');
     };
 
@@ -160,7 +167,10 @@ export default function PublicShop({
                 />
 
                 <div className="container mx-auto px-4 relative z-20">
-                    <VehicleSelector onVehicleSelect={handleVehicleSelect} />
+                    <VehicleSelector
+                        onVehicleSelect={setSelectedVehicle}
+                        className="-mt-10 mx-4 md:mx-auto max-w-5xl shadow-lg border border-gray-100"
+                    />
                 </div>
 
                 <ProductCategories
@@ -179,7 +189,7 @@ export default function PublicShop({
                         products={products}
                         searchQuery={searchQuery}
                         selectedCategory={selectedCategory}
-                        onAddToCart={onAddToCart}
+                        onAddToCart={handleAddToCartClick}
                     />
                 )}
 

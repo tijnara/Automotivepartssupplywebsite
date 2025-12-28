@@ -5,12 +5,13 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminOrders from "./pages/admin/AdminOrders";
-import AdminInventory from "./pages/admin/AdminInventory"; // Import the new page
+import AdminInventory from "./pages/admin/AdminInventory";
 import ProductDetails from "./pages/ProductDetails";
 import Checkout from "./pages/Checkout";
 import { supabase } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
+import { Vehicle } from "./components/VehicleSelector"; // Import Vehicle type
 
 // Define shared types
 export interface Product {
@@ -23,10 +24,12 @@ export interface Product {
     reviews: number | null;
     in_stock: boolean;
     image: string;
+    brand: string | null;
 }
 
 export interface CartItem extends Product {
     quantity: number;
+    vehicle?: Vehicle; // Added vehicle info to cart item
 }
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -75,32 +78,39 @@ export default function App() {
         }
     }, [cartItems]);
 
-    const handleAddToCart = (product: any, qty: number = 1) => {
+    // Updated to accept vehicle info
+    const handleAddToCart = (product: any, qty: number = 1, vehicle?: Vehicle) => {
         const itemToAdd: CartItem = {
             id: product.id,
             name: product.name,
             category: product.category,
+            brand: product.brand,
             price: Number(product.price),
             original_price: product.original_price ?? product.originalPrice ?? null,
             rating: product.rating,
             reviews: product.reviews,
             in_stock: product.in_stock ?? product.inStock ?? true,
             image: product.image,
-            quantity: qty
+            quantity: qty,
+            vehicle: vehicle // Store the selected vehicle
         };
 
         setCartItems((prev) => {
-            const existingItem = prev.find((item) => item.id === itemToAdd.id);
-            if (existingItem) {
+            // Check if item exists with the SAME vehicle (or both no vehicle)
+            const existingItemIndex = prev.findIndex((item) =>
+                item.id === itemToAdd.id &&
+                item.vehicle?.id === itemToAdd.vehicle?.id
+            );
+
+            if (existingItemIndex > -1) {
                 toast.info(`Increased quantity of ${itemToAdd.name}`);
-                return prev.map((item) =>
-                    item.id === itemToAdd.id
-                        ? { ...item, quantity: item.quantity + qty }
-                        : item
-                );
+                const newCart = [...prev];
+                newCart[existingItemIndex].quantity += qty;
+                return newCart;
             }
+
             toast.success(`${itemToAdd.name} added to cart!`);
-            return [...prev, { ...itemToAdd }];
+            return [...prev, itemToAdd];
         });
     };
 
@@ -150,7 +160,8 @@ export default function App() {
                     order_id: order.id,
                     product_id: item.id,
                     quantity: item.quantity,
-                    price_at_purchase: item.price
+                    price_at_purchase: item.price,
+                    // Note: We'd ideally store the vehicle_id in order_items too if the schema supported it
                 }));
 
                 const { error: itemsError } = await supabase

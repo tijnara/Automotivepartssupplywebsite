@@ -9,6 +9,7 @@ import { supabase } from "../lib/supabase";
 import { Star, Truck, ShieldCheck, Minus, Plus, ShoppingCart, Heart } from "lucide-react";
 import { CartItem } from "../App";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Vehicle } from "../components/VehicleSelector";
 
 interface ProductDetailsProps {
     cartItems: CartItem[];
@@ -17,7 +18,7 @@ interface ProductDetailsProps {
     onRemoveItem: (id: number) => void;
     onUpdateQuantity: (id: number, delta: number) => void;
     onCheckout: () => void;
-    onAddToCart: (product: any, qty: number) => void;
+    onAddToCart: (product: any, qty?: number, vehicle?: Vehicle) => void; // Updated
 }
 
 export default function ProductDetails({
@@ -63,9 +64,10 @@ export default function ProductDetails({
 
     const handleBuyNow = () => {
         if (product) {
+            // Note: Currently ProductDetails doesn't know about the selected vehicle from PublicShop.
+            // In a real app, this state would be lifted to Context or passed via Router state.
+            // For now, we add without vehicle specific info.
             onAddToCart(product, quantity);
-            // Open cart logic usually handled by Header, but we can't trigger it easily here
-            // without context. For now, just add to cart.
         }
     };
 
@@ -156,9 +158,17 @@ export default function ProductDetails({
                                     <span className="text-3xl md:text-4xl font-bold text-blue-700">
                                         ₱{Number(product.price).toLocaleString()}
                                     </span>
-                                    {/* Removed original price display */}
+                                    {product.original_price && (
+                                        <span className="text-lg text-gray-400 line-through">
+                                            ₱{Number(product.original_price).toLocaleString()}
+                                        </span>
+                                    )}
                                 </div>
-                                {/* Removed savings text */}
+                                {product.original_price && (
+                                    <p className="text-sm text-green-600 font-medium mt-1">
+                                        You save ₱{(product.original_price - product.price).toLocaleString()}
+                                    </p>
+                                )}
                             </div>
 
                             <Separator className="mb-8" />
