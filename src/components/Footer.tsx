@@ -1,68 +1,71 @@
-import { Facebook, Instagram, Mail, Phone } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube } from "lucide-react"; // Removed unused 'Mail'
 
 export function Footer() {
-  return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <div className="bg-blue-600 text-white px-4 py-2 rounded inline-block mb-4">
-              <span>AutoParts PH</span>
+    return (
+        <footer className="bg-gray-100 pt-16 pb-8 border-t border-gray-200 text-gray-600 text-sm font-sans">
+            <div className="container mx-auto px-4">
+                {/* About Section */}
+                <div className="text-center max-w-4xl mx-auto mb-16">
+                    <h3 className="text-2xl font-black text-gray-900 mb-4 italic tracking-tight">About AutoParts PH</h3>
+                    <p className="mb-4 leading-relaxed text-gray-600 max-w-2xl mx-auto">
+                        <span className="font-bold text-gray-900">AutoParts PH</span> is the Philippines' premier car accessories online store chain.
+                        We are dedicated to bringing our products and services closer to our customers. Unlike brick and mortar stores, we are open 24/7 to serve your automotive needs anywhere in the country.
+                    </p>
+                </div>
+
+                {/* Links Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 border-t border-gray-200 pt-12">
+                    <div className="text-center md:text-left">
+                        <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Information</h4>
+                        <ul className="space-y-3">
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">About Us</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Store Locator</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Terms of Service</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Careers</a></li>
+                        </ul>
+                    </div>
+                    <div className="text-center md:text-left">
+                        <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Customer Care</h4>
+                        <ul className="space-y-3">
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Contact Us</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Returns & Exchange</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Shipping Info</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">FAQs</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Warranty</a></li>
+                        </ul>
+                    </div>
+                    <div className="text-center md:text-left">
+                        <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">My Account</h4>
+                        <ul className="space-y-3">
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Login / Register</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Order History</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Wishlist</a></li>
+                            <li><a href="#" className="hover:text-blue-600 transition-colors">Track Order</a></li>
+                        </ul>
+                    </div>
+                    <div className="text-center md:text-left">
+                        <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Follow Us</h4>
+                        <p className="mb-4 text-xs">Stay updated with our latest offers.</p>
+                        <div className="flex justify-center md:justify-start gap-4">
+                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Facebook className="w-4 h-4"/></a>
+                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Instagram className="w-4 h-4"/></a>
+                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Twitter className="w-4 h-4"/></a>
+                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Youtube className="w-4 h-4"/></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="text-center border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+                    <p>&copy; {new Date().getFullYear()} AutoParts PH. All rights reserved.</p>
+                    <div className="flex gap-4">
+                        <span>Visa</span>
+                        <span>Mastercard</span>
+                        <span>PayPal</span>
+                        <span>GCash</span>
+                    </div>
+                </div>
             </div>
-            <p className="mb-4">
-              Your trusted automotive parts supplier in the Philippines since 2015.
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition cursor-pointer">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="hover:text-white transition cursor-pointer">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="hover:text-white transition cursor-pointer">
-                <Mail className="w-5 h-5" />
-              </a>
-              <a href="#" className="hover:text-white transition cursor-pointer">
-                <Phone className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-white mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li><a href="#home" className="hover:text-white transition cursor-pointer">Home</a></li>
-              <li><a href="#products" className="hover:text-white transition cursor-pointer">Products</a></li>
-              <li><a href="#brands" className="hover:text-white transition cursor-pointer">Brands</a></li>
-              <li><a href="#about" className="hover:text-white transition cursor-pointer">About Us</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white mb-4">Categories</h4>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white transition cursor-pointer">Engine Parts</a></li>
-              <li><a href="#" className="hover:text-white transition cursor-pointer">Brake System</a></li>
-              <li><a href="#" className="hover:text-white transition cursor-pointer">Electrical</a></li>
-              <li><a href="#" className="hover:text-white transition cursor-pointer">Suspension</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white mb-4">Customer Service</h4>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-white transition cursor-pointer">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-white transition cursor-pointer">Returns Policy</a></li>
-              <li><a href="#" className="hover:text-white transition cursor-pointer">Warranty</a></li>
-              <li><a href="#contact" className="hover:text-white transition cursor-pointer">Contact Us</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-800 pt-8 text-center">
-          <p>&copy; 2024 AutoParts PH. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
-  );
+        </footer>
+    );
 }

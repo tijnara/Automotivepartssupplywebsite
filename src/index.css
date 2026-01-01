@@ -32,45 +32,57 @@
 }
 
 @layer theme {
-  :root, :host {
-    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --color-red-500: oklch(.637 .237 25.331);
-    --color-yellow-400: oklch(.852 .199 91.936);
-    --color-green-500: oklch(.723 .219 149.579);
-    --color-blue-100: oklch(.932 .032 255.585);
-    --color-blue-200: oklch(.882 .059 254.128);
-    --color-blue-600: oklch(.546 .245 262.881);
-    --color-blue-700: oklch(.488 .243 264.376);
-    --color-blue-800: oklch(.424 .199 265.638);
-    --color-blue-900: oklch(.379 .146 265.522);
-    --color-gray-50: oklch(.985 .002 247.839);
-    --color-gray-100: oklch(.967 .003 264.542);
-    --color-gray-200: oklch(.928 .006 264.531);
-    --color-gray-300: oklch(.872 .01 258.338);
-    --color-gray-400: oklch(.707 .022 261.325);
-    --color-gray-500: oklch(.551 .027 264.364);
-    --color-gray-600: oklch(.446 .03 256.802);
-    --color-gray-800: oklch(.278 .033 256.848);
-    --color-gray-900: oklch(.21 .034 264.665);
-    --color-white: #fff;
-    --spacing: .25rem;
-    --container-xl: 36rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --default-transition-duration: .15s;
-    --default-transition-timing-function: cubic-bezier(.4, 0, .2, 1);
-    --default-font-family: var(--font-sans);
-    --default-font-feature-settings: var(--font-sans--font-feature-settings);
-    --default-font-variation-settings: var(--font-sans--font-variation-settings);
-    --default-mono-font-family: var(--font-mono);
-    --default-mono-font-feature-settings: var(--font-mono--font-feature-settings);
-    --default-mono-font-variation-settings: var(--font-mono--font-variation-settings);
-  }
+    :root, :host {
+        --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+        /* Utility Colors */
+        --color-red-500: oklch(.637 .237 25.331);
+        --color-yellow-400: oklch(.852 .199 91.936);
+        --color-green-500: oklch(.723 .219 149.579);
+
+        /* Brand Blue Theme - Updated for Blue/White Look */
+        --color-blue-100: oklch(0.95 0.05 260.0); /* Very light blue background tint */
+        --color-blue-200: oklch(0.88 0.08 260.0); /* Light blue border/accent */
+        --color-blue-600: oklch(0.55 0.22 260.0); /* Primary Brand Blue */
+        --color-blue-700: oklch(0.48 0.22 260.0); /* Hover State Blue */
+        --color-blue-800: oklch(0.42 0.20 260.0); /* Darker Blue */
+        --color-blue-900: oklch(0.35 0.18 260.0); /* Deep/Nav Blue */
+
+        /* Neutrals */
+        --color-gray-50: oklch(.985 .002 247.839);
+        --color-gray-100: oklch(.967 .003 264.542);
+        --color-gray-200: oklch(.928 .006 264.531);
+        --color-gray-300: oklch(.872 .01 258.338);
+        --color-gray-400: oklch(.707 .022 261.325);
+        --color-gray-500: oklch(.551 .027 264.364);
+        --color-gray-600: oklch(.446 .03 256.802);
+        --color-gray-800: oklch(.278 .033 256.848);
+        --color-gray-900: oklch(.21 .034 264.665);
+        --color-white: #fff;
+
+        /* Layout & Spacing */
+        --spacing: .25rem;
+        --container-xl: 36rem;
+        --text-base: 1rem;
+        --text-lg: 1.125rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.5rem;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+
+        /* Animation */
+        --default-transition-duration: .15s;
+        --default-transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+
+        /* Typography Settings */
+        --default-font-family: var(--font-sans);
+        --default-font-feature-settings: var(--font-sans--font-feature-settings);
+        --default-font-variation-settings: var(--font-sans--font-variation-settings);
+        --default-mono-font-family: var(--font-mono);
+        --default-mono-font-feature-settings: var(--font-mono--font-feature-settings);
+        --default-mono-font-variation-settings: var(--font-mono--font-variation-settings);
+    }
 }
 
 @layer base {
