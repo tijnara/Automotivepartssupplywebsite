@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react"; // Removed unused 'Mail'
+import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 
 export function Footer() {
     return (
@@ -14,8 +14,8 @@ export function Footer() {
                 </div>
 
                 {/* Links Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 border-t border-gray-200 pt-12">
-                    <div className="text-center md:text-left">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 border-t border-gray-200 pt-12 text-center md:text-left">
+                    <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Information</h4>
                         <ul className="space-y-3">
                             <li><a href="#" className="hover:text-blue-600 transition-colors">About Us</a></li>
@@ -25,7 +25,7 @@ export function Footer() {
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Careers</a></li>
                         </ul>
                     </div>
-                    <div className="text-center md:text-left">
+                    <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Customer Care</h4>
                         <ul className="space-y-3">
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Contact Us</a></li>
@@ -35,7 +35,7 @@ export function Footer() {
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Warranty</a></li>
                         </ul>
                     </div>
-                    <div className="text-center md:text-left">
+                    <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">My Account</h4>
                         <ul className="space-y-3">
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Login / Register</a></li>
@@ -44,7 +44,7 @@ export function Footer() {
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Track Order</a></li>
                         </ul>
                     </div>
-                    <div className="text-center md:text-left">
+                    <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Follow Us</h4>
                         <p className="mb-4 text-xs">Stay updated with our latest offers.</p>
                         <div className="flex justify-center md:justify-start gap-4">

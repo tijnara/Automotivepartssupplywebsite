@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Header } from "../components/Header";
+import { Hero } from "../components/Hero";
 import { HomeBanners } from "../components/HomeBanners";
 import { ShopByParts, ShopByBrands } from "../components/ShopBySections";
 import { LatestNews } from "../components/LatestNews";
@@ -9,6 +10,7 @@ import { VehicleSelector, VehicleFilter } from "../components/VehicleSelector";
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../App";
 import { toast } from "sonner";
+import { Search } from "lucide-react";
 
 interface PublicShopProps {
     cartItems: CartItem[];
@@ -29,7 +31,6 @@ export default function PublicShop({
                                        onCheckout,
                                        onAddToCart
                                    }: PublicShopProps) {
-    // Removed unused 'setSelectedCategory' setter
     const [selectedCategory] = useState<string | null>(null);
     const [vehicleFilter, setVehicleFilter] = useState<VehicleFilter | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -104,7 +105,7 @@ export default function PublicShop({
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white font-sans text-gray-900">
             <Header
                 cartItems={cartItems}
                 searchQuery={searchQuery}
@@ -115,40 +116,68 @@ export default function PublicShop({
             />
 
             <main>
-                {/* 1. Search Context / Vehicle Selector */}
-                <div className="bg-gray-100 py-8 border-b border-gray-200">
+                {/* 1. Hero Banner */}
+                <Hero
+                    onShopNow={() => document.getElementById('featured-products')?.scrollIntoView({behavior: 'smooth'})}
+                    onRequestQuote={() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'})}
+                />
+
+                {/* 2. "What Are You Looking For?" Search Context */}
+                <div className="bg-gray-50 py-10 border-b border-gray-200">
                     <div className="container mx-auto px-4">
-                        <div className="text-center mb-6">
-                            <h2 className="text-xl md:text-2xl font-bold text-gray-800">What Are You Looking For?</h2>
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900">What Are You Looking For?</h2>
+                            <p className="text-gray-500 mt-2">Search our extensive catalog of parts for your specific vehicle</p>
                         </div>
-                        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm">
-                            <VehicleSelector onVehicleSelect={handleVehicleSelect} className="shadow-none border-0 mt-0" />
+
+                        {/* Integrated Vehicle Selector styled to look more like the search box in video */}
+                        <div className="max-w-5xl mx-auto bg-white p-1 rounded-xl shadow-lg border border-gray-200">
+                            <VehicleSelector onVehicleSelect={handleVehicleSelect} className="shadow-none border-0 m-0" />
+                        </div>
+
+                        {/* Fallback search if they prefer generic search */}
+                        <div className="max-w-2xl mx-auto mt-6 relative md:hidden">
+                            <input
+                                type="text"
+                                placeholder="Or search by keyword..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                            />
+                            <button className="absolute right-2 top-2 p-1 bg-blue-600 text-white rounded-md">
+                                <Search className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. Banners */}
+                {/* 3. Home Banners (Parts & Acc / Perf & Tools) */}
                 <HomeBanners />
 
-                {/* 3. Shop By Parts */}
+                {/* 4. Shop By Parts Grid */}
                 <ShopByParts />
 
-                {/* 4. Featured Products */}
-                {loadingProducts ? (
-                    <div className="text-center py-20 text-gray-500">Loading...</div>
-                ) : (
-                    <FeaturedProducts
-                        products={products}
-                        searchQuery={searchQuery}
-                        selectedCategory={selectedCategory}
-                        onAddToCart={onAddToCart}
-                    />
-                )}
+                {/* 5. Featured Products (Dynamic Content) */}
+                <div id="featured-products">
+                    {loadingProducts ? (
+                        <div className="text-center py-20 text-gray-500 bg-gray-50">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                            <p>Loading catalog...</p>
+                        </div>
+                    ) : (
+                        <FeaturedProducts
+                            products={products}
+                            searchQuery={searchQuery}
+                            selectedCategory={selectedCategory} // Always null initially but kept for interface
+                            onAddToCart={onAddToCart}
+                        />
+                    )}
+                </div>
 
-                {/* 5. Shop By Brands */}
+                {/* 6. Shop By Brands Grid */}
                 <ShopByBrands />
 
-                {/* 6. Latest News */}
+                {/* 7. Latest News */}
                 <LatestNews />
             </main>
 

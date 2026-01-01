@@ -69,10 +69,10 @@ export function Header({
                         className="flex items-center gap-1 cursor-pointer flex-shrink-0 group"
                         onClick={handleLogoClick}
                     >
-                        <div className="font-black text-2xl md:text-3xl italic tracking-tighter group-hover:opacity-90 transition-opacity">
+                        <div className="font-black text-2xl md:text-4xl italic tracking-tighter group-hover:opacity-90 transition-opacity">
                             AUTOPARTS
                         </div>
-                        <div className="bg-black text-white text-[9px] md:text-[10px] p-0.5 px-1 font-bold italic border border-white/20 rounded-[2px] tracking-wider">
+                        <div className="bg-black text-white text-[9px] md:text-[10px] p-0.5 px-1 font-bold italic border border-white/20 rounded-[2px] tracking-wider transform -skew-x-12">
                             PH
                         </div>
                     </div>
