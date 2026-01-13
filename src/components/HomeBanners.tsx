@@ -11,16 +11,17 @@ export function HomeBanners() {
                     <div className="relative rounded-lg overflow-hidden min-h-[300px] flex flex-col justify-center p-10 group shadow-lg border border-gray-100 bg-gray-900">
                         <div className="absolute inset-0 z-0">
                             <ImageWithFallback
-                                src="https://images.unsplash.com/photo-1486262715619-72a6075f1519?auto=format&fit=crop&q=80&w=1000"
+                                src="https://images.unsplash.com/photo-1530906358829-e84b2769270f?q=80&w=1000&auto=format&fit=crop"
                                 alt="Car Engine Parts"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
+                            {/* Darker gradient for text readability */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/60 to-transparent"></div>
                         </div>
 
                         <div className="relative z-10 max-w-md">
-                            <h3 className="text-3xl font-bold text-white mb-3 tracking-tight">Parts & Accessories</h3>
-                            <p className="text-gray-200 mb-8 text-sm leading-relaxed font-medium">
+                            <h3 className="text-3xl font-bold text-white mb-3 tracking-tight drop-shadow-md">Parts & Accessories</h3>
+                            <p className="text-gray-200 mb-8 text-sm leading-relaxed font-medium drop-shadow">
                                 Upgrade your ride with our premium selection of genuine parts and stylish accessories.
                             </p>
                             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-8 py-6 font-bold text-sm uppercase tracking-wide transition-all shadow-md group-hover:translate-x-2 border-0">
@@ -33,16 +34,16 @@ export function HomeBanners() {
                     <div className="relative rounded-lg overflow-hidden min-h-[300px] flex flex-col justify-center p-10 group shadow-lg border border-gray-100 bg-gray-900">
                         <div className="absolute inset-0 z-0">
                             <ImageWithFallback
-                                src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&q=80&w=1000"
+                                src="https://images.unsplash.com/photo-1572911895975-5738804a269c?q=80&w=1000&auto=format&fit=crop"
                                 alt="Mechanic Tools"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/60 to-transparent"></div>
                         </div>
 
                         <div className="relative z-10 max-w-md">
-                            <h3 className="text-3xl font-bold text-white mb-3 tracking-tight">Performance & Tools</h3>
-                            <p className="text-gray-200 mb-8 text-sm leading-relaxed font-medium">
+                            <h3 className="text-3xl font-bold text-white mb-3 tracking-tight drop-shadow-md">Performance & Tools</h3>
+                            <p className="text-gray-200 mb-8 text-sm leading-relaxed font-medium drop-shadow">
                                 Professional-grade tools and performance upgrades for the serious enthusiast.
                             </p>
                             <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-8 py-6 font-bold text-sm uppercase tracking-wide transition-all shadow-md group-hover:translate-x-2 border-0">

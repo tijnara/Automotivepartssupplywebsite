@@ -1,17 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Session } from "@supabase/supabase-js"; // Import Session type
 import PublicShop from "./pages/PublicShop";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminInventory from "./pages/admin/AdminInventory";
+import AdminHero from "./pages/admin/AdminHero"; // Correctly imported
 import ProductDetails from "./pages/ProductDetails";
 import Checkout from "./pages/Checkout";
 import { supabase } from "./lib/supabase";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
-import { Vehicle } from "./components/VehicleSelector"; // Import Vehicle type
+import { Vehicle } from "./components/VehicleSelector";
 
 // Define shared types
 export interface Product {
@@ -29,11 +31,11 @@ export interface Product {
 
 export interface CartItem extends Product {
     quantity: number;
-    vehicle?: Vehicle; // Added vehicle info to cart item
+    vehicle?: Vehicle;
 }
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const [session, setSession] = useState<any>(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -78,7 +80,6 @@ export default function App() {
         }
     }, [cartItems]);
 
-    // Updated to accept vehicle info
     const handleAddToCart = (product: any, qty: number = 1, vehicle?: Vehicle) => {
         const itemToAdd: CartItem = {
             id: product.id,
@@ -92,11 +93,10 @@ export default function App() {
             in_stock: product.in_stock ?? product.inStock ?? true,
             image: product.image,
             quantity: qty,
-            vehicle: vehicle // Store the selected vehicle
+            vehicle: vehicle
         };
 
         setCartItems((prev) => {
-            // Check if item exists with the SAME vehicle (or both no vehicle)
             const existingItemIndex = prev.findIndex((item) =>
                 item.id === itemToAdd.id &&
                 item.vehicle?.id === itemToAdd.vehicle?.id
@@ -132,7 +132,7 @@ export default function App() {
     };
 
     const handleCheckoutPlaceholder = () => {
-        // No-op: Navigation is handled in Header.tsx via useNavigate('/checkout')
+        // No-op
     };
 
     const handleConfirmOrder = async (orderData: any) => {
@@ -161,7 +161,6 @@ export default function App() {
                     product_id: item.id,
                     quantity: item.quantity,
                     price_at_purchase: item.price,
-                    // Note: We'd ideally store the vehicle_id in order_items too if the schema supported it
                 }));
 
                 const { error: itemsError } = await supabase
@@ -208,6 +207,7 @@ export default function App() {
                 <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
                 <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
                 <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />
+                <Route path="/admin/hero" element={<ProtectedRoute><AdminHero /></ProtectedRoute>} />
             </Routes>
             <Toaster />
         </BrowserRouter>

@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
-import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag, ClipboardList } from "lucide-react";
+import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag, ClipboardList, Image as ImageIcon } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
 interface AdminLayoutProps {
@@ -85,6 +85,15 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                             >
                                 <MessageSquare className="w-4 h-4" />
                                 Messages
+                            </Button>
+                            {/* Added Hero Button */}
+                            <Button
+                                variant={location.pathname === '/admin/hero' ? "default" : "ghost"}
+                                className={`gap-2 ${location.pathname === '/admin/hero' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
+                                onClick={() => navigate("/admin/hero")}
+                            >
+                                <ImageIcon className="w-4 h-4" />
+                                Hero / Banner
                             </Button>
                         </nav>
                     </div>

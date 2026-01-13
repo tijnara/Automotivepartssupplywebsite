@@ -251,6 +251,33 @@ export type Database = {
                     }
                 ]
             }
+            hero_slides: {
+                Row: {
+                    id: number
+                    image_url: string
+                    title: string | null
+                    subtitle: string | null
+                    is_active: boolean
+                    created_at: string
+                }
+                Insert: {
+                    id?: number
+                    image_url: string
+                    title?: string | null
+                    subtitle?: string | null
+                    is_active?: boolean
+                    created_at?: string
+                }
+                Update: {
+                    id?: number
+                    image_url?: string
+                    title?: string | null
+                    subtitle?: string | null
+                    is_active?: boolean
+                    created_at?: string
+                }
+                Relationships: []
+            }
         }
         Views: {
             [_ in never]: never

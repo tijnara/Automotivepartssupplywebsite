@@ -7,22 +7,19 @@ export function LatestNews() {
             title: "How to check if your gas is contaminated",
             date: "Dec 28, 2025",
             author: "AutoParts PH",
-            // Image: Mechanic / Oil check
-            image: "https://images.unsplash.com/photo-1487754180477-db33d3808e29?auto=format&fit=crop&q=80&w=600"
+            image: "https://images.unsplash.com/photo-1504222490245-4367b8b9f15f?q=80&w=600&auto=format&fit=crop"
         },
         {
             title: "One Of The Most Essential Car Accessories During Road Trips",
             date: "Dec 27, 2025",
             author: "AutoParts PH",
-            // Image: Car Interior
-            image: "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=600"
+            image: "https://images.unsplash.com/photo-1507136566006-cfc505b114fc?q=80&w=600&auto=format&fit=crop"
         },
         {
             title: "TOP 5 BEST CAR MOVIES OF ALL TIME",
             date: "Dec 26, 2025",
             author: "AutoParts PH",
-            // Image: Car Action / Exterior
-            image: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=600"
+            image: "https://images.unsplash.com/photo-1533473359331-0135ef1bcfb0?q=80&w=600&auto=format&fit=crop"
         }
     ];
 
