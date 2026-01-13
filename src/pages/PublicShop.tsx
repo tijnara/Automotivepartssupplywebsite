@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
-import { HomeBanners } from "../components/HomeBanners";
-import { ShopByParts, ShopByBrands } from "../components/ShopBySections";
-import { LatestNews } from "../components/LatestNews";
+import { ProductCategories } from "../components/ProductCategories";
 import { FeaturedProducts, Product } from "../components/FeaturedProducts";
+import { WhyChooseUs } from "../components/WhyChooseUs";
+import { Contact } from "../components/Contact";
 import { Footer } from "../components/Footer";
-import { VehicleSelector, VehicleFilter } from "../components/VehicleSelector";
+import { VehicleSelectionDialog } from "../components/VehicleSelectionDialog";
+// Fix: Import VehicleFilter type, but removed unused VehicleSelector component import
+import { VehicleFilter } from "../components/VehicleSelector";
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../App";
 import { toast } from "sonner";
-import { Search } from "lucide-react";
+import { Car, CheckCircle2 } from "lucide-react";
+import { cn } from "../components/ui/utils";
 
 interface PublicShopProps {
     cartItems: CartItem[];
@@ -31,10 +34,13 @@ export default function PublicShop({
                                        onCheckout,
                                        onAddToCart
                                    }: PublicShopProps) {
-    const [selectedCategory] = useState<string | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [vehicleFilter, setVehicleFilter] = useState<VehicleFilter | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
+
+    // Dialog State
+    const [isGarageOpen, setIsGarageOpen] = useState(false);
 
     useEffect(() => {
         fetchProducts();
@@ -47,21 +53,40 @@ export default function PublicShop({
 
             if (vehicleFilter) {
                 let targetVehicleIds: number[] = [];
+
                 if (vehicleFilter.vehicleId) {
                     targetVehicleIds = [vehicleFilter.vehicleId];
                 } else if (vehicleFilter.make) {
-                    let vQuery = supabase.from('vehicles').select('id').eq('make', vehicleFilter.make);
+                    let vQuery = supabase.from('vehicles').select('id');
+                    vQuery = vQuery.eq('make', vehicleFilter.make);
                     if (vehicleFilter.model) vQuery = vQuery.eq('model', vehicleFilter.model);
+
                     const { data: vData } = await vQuery;
-                    if (vData) targetVehicleIds = vData.map(v => v.id);
+                    if (vData) {
+                        targetVehicleIds = vData.map(v => v.id);
+                    }
                 }
 
                 if (targetVehicleIds.length > 0) {
-                    const { data: fitmentData } = await supabase.from('product_fitment').select('product_id').in('vehicle_id', targetVehicleIds);
-                    if (fitmentData) validProductIds = Array.from(new Set(fitmentData.map(f => f.product_id)));
-                    else validProductIds = [];
+                    const { data: fitmentData, error: fitmentError } = await supabase
+                        .from('product_fitment')
+                        .select('product_id')
+                        .in('vehicle_id', targetVehicleIds);
+
+                    if (fitmentError) throw fitmentError;
+
+                    if (fitmentData) {
+                        validProductIds = Array.from(new Set(fitmentData.map(f => f.product_id)));
+                        if (validProductIds.length === 0) {
+                            setProducts([]);
+                            setLoadingProducts(false);
+                            return;
+                        }
+                    }
                 } else {
-                    validProductIds = [];
+                    setProducts([]);
+                    setLoadingProducts(false);
+                    return;
                 }
             }
 
@@ -74,7 +99,7 @@ export default function PublicShop({
             if (error) throw error;
 
             if (data) {
-                setProducts(data.map((item: any) => ({
+                const mappedProducts: Product[] = data.map((item: any) => ({
                     id: item.id,
                     name: item.name,
                     category: item.category,
@@ -85,27 +110,29 @@ export default function PublicShop({
                     reviews: item.reviews,
                     inStock: item.in_stock && (item.quantity || 0) > 0,
                     image: item.image
-                })));
+                }));
+                setProducts(mappedProducts);
             }
         } catch (err) {
-            console.error(err);
+            console.error("Error:", err);
             toast.error("Error loading products");
         } finally {
             setLoadingProducts(false);
         }
     }
 
-    const handleVehicleSelect = (filter: VehicleFilter | null) => {
-        setVehicleFilter(filter);
-        if (filter) {
-            toast.success(`Filtering products for ${filter.label}`);
-            const element = document.getElementById('featured-products');
-            if(element) element.scrollIntoView({ behavior: 'smooth' });
+    const scrollToSection = (id: string) => {
+        const element = document.getElementById(id);
+        if (element) {
+            const headerOffset = 180;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: "smooth" });
         }
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans text-gray-900">
+        <div className="min-h-screen bg-gray-50">
             <Header
                 cartItems={cartItems}
                 searchQuery={searchQuery}
@@ -114,73 +141,80 @@ export default function PublicShop({
                 onUpdateQuantity={onUpdateQuantity}
                 onCheckout={onCheckout}
             />
-
             <main>
-                {/* 1. Hero Banner */}
                 <Hero
-                    onShopNow={() => document.getElementById('featured-products')?.scrollIntoView({behavior: 'smooth'})}
-                    onRequestQuote={() => document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'})}
+                    onShopNow={() => scrollToSection('featured-products')}
+                    onRequestQuote={() => scrollToSection('contact')}
                 />
 
-                {/* 2. "What Are You Looking For?" Search Context */}
-                <div className="bg-gray-50 py-10 border-b border-gray-200">
-                    <div className="container mx-auto px-4">
-                        <div className="text-center mb-8">
-                            <h2 className="text-2xl font-bold text-gray-900">What Are You Looking For?</h2>
-                            <p className="text-gray-500 mt-2">Search our extensive catalog of parts for your specific vehicle</p>
+                {/* NEW: Sticky Garage Bar (Refined Design) */}
+                <div className="sticky top-[72px] z-30 bg-white border-b border-gray-200 shadow-sm transition-all duration-300">
+                    <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                            <div className={cn(
+                                "p-2.5 rounded-full transition-colors",
+                                vehicleFilter ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'
+                            )}>
+                                {vehicleFilter ? <CheckCircle2 className="w-6 h-6" /> : <Car className="w-6 h-6" />}
+                            </div>
+
+                            <div className="flex flex-col">
+                                <p className={cn(
+                                    "text-xs font-bold uppercase tracking-wider mb-0.5 transition-colors",
+                                    vehicleFilter ? "text-green-700" : "text-gray-500"
+                                )}>
+                                    {vehicleFilter ? "Fitting Parts For:" : "My Garage"}
+                                </p>
+                                <h3 className={cn(
+                                    "font-bold leading-none transition-colors",
+                                    vehicleFilter ? "text-gray-900 text-lg" : "text-gray-400 text-base"
+                                )}>
+                                    {vehicleFilter ? vehicleFilter.label : "No vehicle selected"}
+                                </h3>
+                            </div>
                         </div>
 
-                        {/* Integrated Vehicle Selector styled to look more like the search box in video */}
-                        <div className="max-w-5xl mx-auto bg-white p-1 rounded-xl shadow-lg border border-gray-200">
-                            <VehicleSelector onVehicleSelect={handleVehicleSelect} className="shadow-none border-0 m-0" />
-                        </div>
-
-                        {/* Fallback search if they prefer generic search */}
-                        <div className="max-w-2xl mx-auto mt-6 relative md:hidden">
-                            <input
-                                type="text"
-                                placeholder="Or search by keyword..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none"
-                            />
-                            <button className="absolute right-2 top-2 p-1 bg-blue-600 text-white rounded-md">
-                                <Search className="w-5 h-5" />
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => setIsGarageOpen(true)}
+                            className="text-blue-600 font-semibold hover:text-blue-800 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all text-sm"
+                        >
+                            {vehicleFilter ? "Change Vehicle" : "Add Vehicle"}
+                        </button>
                     </div>
                 </div>
 
-                {/* 3. Home Banners (Parts & Acc / Perf & Tools) */}
-                <HomeBanners />
-
-                {/* 4. Shop By Parts Grid */}
-                <ShopByParts />
-
-                {/* 5. Featured Products (Dynamic Content) */}
-                <div id="featured-products">
-                    {loadingProducts ? (
-                        <div className="text-center py-20 text-gray-500 bg-gray-50">
-                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                            <p>Loading catalog...</p>
-                        </div>
-                    ) : (
-                        <FeaturedProducts
-                            products={products}
-                            searchQuery={searchQuery}
-                            selectedCategory={selectedCategory} // Always null initially but kept for interface
-                            onAddToCart={onAddToCart}
-                        />
-                    )}
+                <div className="container mx-auto px-4 pt-8">
+                    <ProductCategories
+                        products={products}
+                        selectedCategory={selectedCategory}
+                        onSelectCategory={(cat) => { setSelectedCategory(cat); scrollToSection('featured-products'); }}
+                    />
                 </div>
 
-                {/* 6. Shop By Brands Grid */}
-                <ShopByBrands />
+                {loadingProducts ? (
+                    <div className="text-center py-20 text-gray-500">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        Loading products...
+                    </div>
+                ) : (
+                    <FeaturedProducts
+                        products={products}
+                        searchQuery={searchQuery}
+                        selectedCategory={selectedCategory}
+                        onAddToCart={(product) => onAddToCart(product)}
+                    />
+                )}
 
-                {/* 7. Latest News */}
-                <LatestNews />
+                <WhyChooseUs />
+                <Contact />
+
+                <VehicleSelectionDialog
+                    open={isGarageOpen}
+                    onOpenChange={setIsGarageOpen}
+                    onVehicleSelect={setVehicleFilter}
+                    selectedVehicleLabel={vehicleFilter?.label}
+                />
             </main>
-
             <Footer />
         </div>
     );

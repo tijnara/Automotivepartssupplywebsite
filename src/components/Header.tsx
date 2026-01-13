@@ -62,32 +62,33 @@ export function Header({
             </div>
 
             {/* 2. Main Header (Brand Blue) */}
-            <div className="bg-blue-600 text-white py-4 md:py-5">
+            <div className="bg-blue-600 text-white py-4 md:py-6">
                 <div className="container mx-auto px-4 flex items-center justify-between gap-4 md:gap-8">
                     {/* Logo Area */}
                     <div
                         className="flex items-center gap-1 cursor-pointer flex-shrink-0 group"
                         onClick={handleLogoClick}
                     >
-                        <div className="font-black text-2xl md:text-4xl italic tracking-tighter group-hover:opacity-90 transition-opacity">
+                        <div className="font-black text-2xl md:text-5xl italic tracking-tighter group-hover:opacity-90 transition-opacity">
                             AUTOPARTS
                         </div>
-                        <div className="bg-black text-white text-[9px] md:text-[10px] p-0.5 px-1 font-bold italic border border-white/20 rounded-[2px] tracking-wider transform -skew-x-12">
+                        <div className="bg-black text-white text-[10px] md:text-xs p-0.5 px-1.5 font-bold italic border border-white/20 rounded-[2px] tracking-wider transform -skew-x-12">
                             PH
                         </div>
                     </div>
 
-                    {/* Wide Search Bar (Desktop) */}
-                    <div className="hidden md:flex flex-1 max-w-3xl relative">
+                    {/* Wide Search Bar (Desktop) - UPDATED: Thicker and Taller */}
+                    <div className="hidden md:flex flex-1 relative">
                         <input
                             type="text"
                             placeholder="Search by Category, Part, Vehicle or Brand..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 pl-4 pr-12 text-gray-800 bg-white rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-400 text-sm"
+                            // Updates: h-16 (64px), text-lg, border-2
+                            className="w-full h-16 pl-6 pr-20 text-gray-800 bg-white rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-500 text-lg shadow-sm border-2 border-transparent focus:border-blue-300"
                         />
-                        <button className="absolute right-0 top-0 h-10 w-12 bg-black flex items-center justify-center rounded-r-sm hover:bg-gray-800 transition-colors cursor-pointer">
-                            <Search className="w-5 h-5 text-white" />
+                        <button className="absolute right-0 top-0 h-16 w-20 bg-black flex items-center justify-center rounded-r-sm hover:bg-gray-800 transition-colors cursor-pointer border-2 border-black">
+                            <Search className="w-8 h-8 text-white" />
                         </button>
                     </div>
 
@@ -98,16 +99,16 @@ export function Header({
                             <SheetTrigger asChild>
                                 <button className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded transition-colors cursor-pointer">
                                     <div className="relative">
-                                        <ShoppingCart className="w-6 h-6" />
+                                        <ShoppingCart className="w-8 h-8" />
                                         {itemCount > 0 && (
-                                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full border border-blue-600">
+                                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-blue-600">
                                                 {itemCount}
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex flex-col items-start hidden sm:flex">
-                                        <span className="text-[10px] opacity-80 leading-none">My Cart</span>
-                                        <span className="font-bold text-sm leading-none">₱{totalAmount.toLocaleString()}</span>
+                                        <span className="text-[11px] opacity-80 leading-none mb-1">My Cart</span>
+                                        <span className="font-bold text-base leading-none">₱{totalAmount.toLocaleString()}</span>
                                     </div>
                                 </button>
                             </SheetTrigger>
@@ -195,10 +196,10 @@ export function Header({
                                 placeholder="Search..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full h-10 pl-4 pr-12 text-gray-800 bg-white rounded-sm focus:outline-none shadow-sm"
+                                className="w-full h-14 pl-4 pr-14 text-gray-800 bg-white rounded-sm focus:outline-none shadow-sm text-lg border-2 border-transparent focus:border-blue-400"
                             />
-                            <button className="absolute right-0 top-0 h-10 w-12 bg-black flex items-center justify-center rounded-r-sm">
-                                <Search className="w-5 h-5 text-white" />
+                            <button className="absolute right-0 top-0 h-14 w-14 bg-black flex items-center justify-center rounded-r-sm">
+                                <Search className="w-6 h-6 text-white" />
                             </button>
                         </div>
                         <nav className="flex flex-col gap-2 text-white/90 font-medium">
