@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Database } from "../../types/database.types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
+import { cn } from "../../components/ui/utils";
 
 type HeroSlide = Database['public']['Tables']['hero_slides']['Row'];
 
@@ -72,7 +73,7 @@ export default function AdminHero() {
         setTitle(slide.title || "");
         setSubtitle(slide.subtitle || "");
         setPreviewUrl(slide.image_url);
-        setSelectedFile(null); // Reset file selection so we don't upload unless changed
+        setSelectedFile(null);
 
         // Set Styles
         setTitleColor(slide.title_color || "#ffffff");
@@ -104,7 +105,6 @@ export default function AdminHero() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // If adding new, file is required. If editing, it's optional.
         if (!editingId && !selectedFile) {
             toast.error("Please select an image to upload");
             return;
@@ -114,7 +114,7 @@ export default function AdminHero() {
         try {
             let publicUrl = previewUrl;
 
-            // 1. Upload Image (Only if a new file was selected)
+            // 1. Upload Image
             if (selectedFile) {
                 const fileExt = selectedFile.name.split('.').pop();
                 const fileName = `hero-${Date.now()}.${fileExt}`;
@@ -206,27 +206,32 @@ export default function AdminHero() {
                         <form onSubmit={handleSave} className="space-y-6">
                             <div className="space-y-2">
                                 <Label>Banner Image</Label>
-                                <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors relative group">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileSelect}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    />
+                                {/* Added cursor-pointer, flex center alignment */}
+                                <label
+                                    className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition-colors relative cursor-pointer min-h-[200px]"
+                                >
                                     {previewUrl ? (
-                                        <div className="relative aspect-video w-full overflow-hidden rounded-md">
+                                        <div className="relative w-full aspect-video overflow-hidden rounded-md mb-4">
                                             <img src={previewUrl} alt="Preview" className="object-cover w-full h-full" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-medium">
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-medium">
                                                 Click to Change
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="py-8 flex flex-col items-center text-gray-400">
-                                            <ImageIcon className="w-8 h-8 mb-2" />
-                                            <span className="text-sm">Click to upload image</span>
-                                        </div>
+                                        <>
+                                            <ImageIcon className="w-8 h-8 mb-3 text-gray-400" />
+                                            <span className="text-sm font-medium text-gray-600 mb-2">Click to Upload Image</span>
+                                        </>
                                     )}
-                                </div>
+
+                                    {/* Visible Input positioned below text/preview */}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileSelect}
+                                        className="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer mx-auto"
+                                    />
+                                </label>
                             </div>
 
                             <div className="space-y-4 border-t pt-4">
@@ -304,10 +309,37 @@ export default function AdminHero() {
 
                             <div className="space-y-2 border-t pt-4">
                                 <Label>Text Alignment</Label>
-                                <ToggleGroup type="single" value={textAlign} onValueChange={(val) => val && setTextAlign(val)} className="justify-start">
-                                    <ToggleGroupItem value="left" aria-label="Left"><AlignLeft className="w-4 h-4" /></ToggleGroupItem>
-                                    <ToggleGroupItem value="center" aria-label="Center"><AlignCenter className="w-4 h-4" /></ToggleGroupItem>
-                                    <ToggleGroupItem value="right" aria-label="Right"><AlignRight className="w-4 h-4" /></ToggleGroupItem>
+                                <ToggleGroup type="single" value={textAlign} onValueChange={(val) => val && setTextAlign(val)} className="justify-start border rounded-md p-1 bg-gray-50">
+                                    <ToggleGroupItem
+                                        value="left"
+                                        aria-label="Left"
+                                        className={cn(
+                                            "hover:bg-gray-200 transition-colors",
+                                            textAlign === "left" ? "!bg-blue-600 !text-white hover:!bg-blue-700" : "text-gray-600"
+                                        )}
+                                    >
+                                        <AlignLeft className="w-4 h-4" />
+                                    </ToggleGroupItem>
+                                    <ToggleGroupItem
+                                        value="center"
+                                        aria-label="Center"
+                                        className={cn(
+                                            "hover:bg-gray-200 transition-colors",
+                                            textAlign === "center" ? "!bg-blue-600 !text-white hover:!bg-blue-700" : "text-gray-600"
+                                        )}
+                                    >
+                                        <AlignCenter className="w-4 h-4" />
+                                    </ToggleGroupItem>
+                                    <ToggleGroupItem
+                                        value="right"
+                                        aria-label="Right"
+                                        className={cn(
+                                            "hover:bg-gray-200 transition-colors",
+                                            textAlign === "right" ? "!bg-blue-600 !text-white hover:!bg-blue-700" : "text-gray-600"
+                                        )}
+                                    >
+                                        <AlignRight className="w-4 h-4" />
+                                    </ToggleGroupItem>
                                 </ToggleGroup>
                             </div>
 
@@ -335,7 +367,7 @@ export default function AdminHero() {
                         <Table>
                             <TableHeader className="bg-gray-50">
                                 <TableRow>
-                                    <TableHead className="w-[100px]">Image</TableHead>
+                                    <TableHead className="w-[120px]">Image</TableHead>
                                     <TableHead>Content Preview</TableHead>
                                     <TableHead>Alignment</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
@@ -354,9 +386,9 @@ export default function AdminHero() {
                                     </TableRow>
                                 ) : (
                                     slides.map(slide => (
-                                        <TableRow key={slide.id} className={editingId === slide.id ? "bg-blue-50/50" : ""}>
+                                        <TableRow key={slide.id} className={editingId === slide.id ? "bg-blue-50/50 transition-colors" : "transition-colors"}>
                                             <TableCell>
-                                                <div className="w-24 h-14 bg-gray-100 rounded overflow-hidden">
+                                                <div className="w-24 h-14 bg-gray-100 rounded overflow-hidden shadow-sm border border-gray-200">
                                                     <img src={slide.image_url} alt="Slide" className="w-full h-full object-cover" />
                                                 </div>
                                             </TableCell>
@@ -376,14 +408,15 @@ export default function AdminHero() {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="capitalize">{slide.text_align || 'Center'}</TableCell>
+                                            <TableCell className="capitalize text-gray-600">{slide.text_align || 'Center'}</TableCell>
                                             <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
+                                                <div className="flex justify-end gap-1">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => handleEdit(slide)}
                                                         className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                                                        title="Edit Slide"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </Button>
@@ -392,6 +425,7 @@ export default function AdminHero() {
                                                         size="icon"
                                                         onClick={() => handleDelete(slide.id)}
                                                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                        title="Delete Slide"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </Button>
