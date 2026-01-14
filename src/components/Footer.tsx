@@ -1,7 +1,27 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
-import { Link } from "react-router-dom"; // Added import
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 export function Footer() {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleContactClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        // If we are already on the home page, scroll to the contact section
+        if (location.pathname === '/') {
+            const element = document.getElementById('contact');
+            if (element) {
+                const headerOffset = 180;
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+            }
+        } else {
+            // Otherwise navigate to home with the scroll state
+            navigate('/', { state: { scrollTo: 'contact' } });
+        }
+    };
+
     return (
         <footer className="bg-gray-100 pt-16 pb-8 border-t border-gray-200 text-gray-600 text-sm font-sans">
             <div className="container mx-auto px-4">
@@ -20,7 +40,6 @@ export function Footer() {
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Information</h4>
                         <ul className="space-y-3">
                             <li><a href="#" className="hover:text-blue-600 transition-colors">About Us</a></li>
-                            {/* UPDATED LINK */}
                             <li><Link to="/stores" className="hover:text-blue-600 transition-colors cursor-pointer">Store Locator</Link></li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</a></li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Terms of Service</a></li>
@@ -30,7 +49,16 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Customer Care</h4>
                         <ul className="space-y-3">
-                            <li><a href="#" className="hover:text-blue-600 transition-colors">Contact Us</a></li>
+                            {/* UPDATED: Contact Us now uses the handler */}
+                            <li>
+                                <a
+                                    href="#contact"
+                                    onClick={handleContactClick}
+                                    className="hover:text-blue-600 transition-colors cursor-pointer"
+                                >
+                                    Contact Us
+                                </a>
+                            </li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Returns & Exchange</a></li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Shipping Info</a></li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">FAQs</a></li>
