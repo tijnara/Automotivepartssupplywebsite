@@ -189,6 +189,12 @@ export type Database = {
                     status: string
                     payment_status: string
                     created_at: string
+                    shipping_address: string | null
+                    shipping_method: string | null
+                    payment_method: string | null
+                    // ADDED COLUMNS
+                    shipping_province: string | null
+                    shipping_city: string | null
                 }
                 Insert: {
                     id?: number
@@ -199,6 +205,12 @@ export type Database = {
                     status?: string
                     payment_status?: string
                     created_at?: string
+                    shipping_address?: string | null
+                    shipping_method?: string | null
+                    payment_method?: string | null
+                    // ADDED COLUMNS
+                    shipping_province?: string | null
+                    shipping_city?: string | null
                 }
                 Update: {
                     id?: number
@@ -209,6 +221,12 @@ export type Database = {
                     status?: string
                     payment_status?: string
                     created_at?: string
+                    shipping_address?: string | null
+                    shipping_method?: string | null
+                    payment_method?: string | null
+                    // ADDED COLUMNS
+                    shipping_province?: string | null
+                    shipping_city?: string | null
                 }
                 Relationships: []
             }

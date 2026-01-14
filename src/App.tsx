@@ -141,6 +141,11 @@ export default function App() {
                     customer_email: orderData.customer_email,
                     customer_phone: orderData.customer_phone,
                     shipping_address: orderData.shipping_address,
+
+                    // Added separate fields for Province and City
+                    shipping_province: orderData.shipping_province,
+                    shipping_city: orderData.shipping_city,
+
                     shipping_method: orderData.shipping_method,
                     payment_method: orderData.payment_method,
                     total_amount: orderData.total_amount,

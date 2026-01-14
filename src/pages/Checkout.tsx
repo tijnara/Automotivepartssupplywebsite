@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { CartItem } from "../App";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ChevronRight, CreditCard, Banknote, Truck, MapPin, Wallet } from "lucide-react";
+import { ChevronRight, CreditCard, Banknote, Truck, MapPin, Wallet, CheckCircle2, Circle } from "lucide-react";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 
@@ -40,12 +40,84 @@ export default function Checkout({
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
-    const [address, setAddress] = useState("");
+    const [province, setProvince] = useState("");
     const [city, setCity] = useState("");
+    const [address, setAddress] = useState("");
     const [postalCode, setPostalCode] = useState("");
     const [phone, setPhone] = useState("");
     const [shippingMethod, setShippingMethod] = useState("standard");
     const [paymentMethod, setPaymentMethod] = useState("cod");
+
+    // Location Data State
+    const [provinces, setProvinces] = useState<{ code: string; name: string }[]>([]);
+    const [cities, setCities] = useState<{ code: string; name: string }[]>([]);
+    const [loadingProvinces, setLoadingProvinces] = useState(true);
+    const [loadingCities, setLoadingCities] = useState(false);
+
+    // Fetch Provinces on Mount
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            try {
+                const response = await fetch('https://psgc.gitlab.io/api/provinces/');
+                if (!response.ok) throw new Error('Failed to fetch provinces');
+                const data = await response.json();
+
+                // Add Metro Manila manually with its Region Code (130000000)
+                const provinceList = [
+                    { code: "130000000", name: "Metro Manila" },
+                    ...data.sort((a: any, b: any) => a.name.localeCompare(b.name))
+                ];
+
+                setProvinces(provinceList);
+            } catch (error) {
+                console.error("Error fetching provinces:", error);
+            } finally {
+                setLoadingProvinces(false);
+            }
+        };
+
+        fetchProvinces();
+    }, []);
+
+    // Handle Province Change & Fetch Cities
+    const handleProvinceChange = async (selectedProvinceName: string) => {
+        setProvince(selectedProvinceName);
+        setCity(""); // Reset city when province changes
+        setCities([]); // Clear previous cities
+
+        const selectedProv = provinces.find(p => p.name === selectedProvinceName);
+        if (!selectedProv) return;
+
+        setLoadingCities(true);
+        try {
+            // Determine endpoint: Metro Manila uses 'regions', others use 'provinces'
+            const endpoint = selectedProv.name === "Metro Manila"
+                ? `https://psgc.gitlab.io/api/regions/130000000/cities-municipalities/`
+                : `https://psgc.gitlab.io/api/provinces/${selectedProv.code}/cities-municipalities/`;
+
+            const response = await fetch(endpoint);
+            if (!response.ok) throw new Error('Failed to fetch cities');
+            const data = await response.json();
+
+            // Sort cities alphabetically
+            setCities(data.sort((a: any, b: any) => a.name.localeCompare(b.name)));
+        } catch (error) {
+            console.error("Error fetching cities:", error);
+        } finally {
+            setLoadingCities(false);
+        }
+    };
+
+    // Handle Header Navigation (Home, Categories, All Products)
+    const handleHeaderNavigation = (section: string) => {
+        if (section === 'home') {
+            navigate('/');
+        } else if (section === 'categories') {
+            navigate('/', { state: { scrollTo: 'categories' } });
+        } else if (section === 'all-products') {
+            navigate('/', { state: { scrollTo: 'featured-products' } });
+        }
+    };
 
     // Totals
     const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
@@ -61,12 +133,14 @@ export default function Checkout({
                 customer_email: email,
                 customer_phone: phone,
                 total_amount: total,
-                shipping_address: `${address}, ${city} ${postalCode}`,
+                shipping_address: `${address}, ${city}, ${province} ${postalCode}, Philippines`,
+                // Send separate fields to be stored in the new DB columns
+                shipping_province: province,
+                shipping_city: city,
                 shipping_method: shippingMethod,
                 payment_method: paymentMethod,
                 status: "pending"
             });
-            // Redirect to home or success page after order
             navigate("/");
         } catch (err) {
             console.error(err);
@@ -85,6 +159,7 @@ export default function Checkout({
                     onRemoveItem={onRemoveItem}
                     onUpdateQuantity={onUpdateQuantity}
                     onCheckout={onCheckout}
+                    onNavigate={handleHeaderNavigation}
                 />
                 <main className="flex-grow flex items-center justify-center">
                     <div className="text-center">
@@ -108,6 +183,7 @@ export default function Checkout({
                 onRemoveItem={onRemoveItem}
                 onUpdateQuantity={onUpdateQuantity}
                 onCheckout={onCheckout}
+                onNavigate={handleHeaderNavigation}
             />
 
             <main className="flex-grow container mx-auto px-4 py-8">
@@ -117,7 +193,7 @@ export default function Checkout({
                         {/* LEFT COLUMN: Input Forms */}
                         <div className="flex-1 p-6 md:p-10 order-2 md:order-1 border-r border-gray-100">
                             <div className="flex items-center gap-2 text-xs text-gray-500 mb-8">
-                                <Link to="/" className="hover:text-blue-600 transition">Cart</Link>
+                                <Link to="/" className="hover:text-blue-600 transition cursor-pointer">Cart</Link>
                                 <ChevronRight className="w-3 h-3" />
                                 <span className="text-blue-900 font-semibold">Information</span>
                                 <ChevronRight className="w-3 h-3" />
@@ -143,12 +219,23 @@ export default function Checkout({
                                 {/* Delivery Section */}
                                 <div className="space-y-6">
                                     <h3 className="font-semibold text-lg text-gray-900">Shipping address</h3>
-                                    <Select defaultValue="PH">
+
+                                    {/* Province Dropdown */}
+                                    <Select
+                                        value={province}
+                                        onValueChange={handleProvinceChange}
+                                        required
+                                        disabled={loadingProvinces}
+                                    >
                                         <SelectTrigger className="w-full bg-gray-50 border-gray-200 h-12">
-                                            <SelectValue placeholder="Country/Region" />
+                                            <SelectValue placeholder={loadingProvinces ? "Loading provinces..." : "Select Province"} />
                                         </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="PH">Philippines</SelectItem>
+                                        <SelectContent className="max-h-[300px]">
+                                            {provinces.map((prov) => (
+                                                <SelectItem key={prov.code} value={prov.name}>
+                                                    {prov.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
 
@@ -182,13 +269,29 @@ export default function Checkout({
                                     />
 
                                     <div className="grid grid-cols-2 gap-6">
-                                        <Input
-                                            placeholder="City"
+                                        {/* City Dropdown */}
+                                        <Select
                                             value={city}
-                                            onChange={(e) => setCity(e.target.value)}
+                                            onValueChange={setCity}
                                             required
-                                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all h-12"
-                                        />
+                                            disabled={!province || loadingCities}
+                                        >
+                                            <SelectTrigger className="w-full bg-gray-50 border-gray-200 h-12">
+                                                <SelectValue placeholder={
+                                                    !province ? "Select Province first" :
+                                                        loadingCities ? "Loading cities..." :
+                                                            "Select City / Municipality"
+                                                } />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-[300px]">
+                                                {cities.map((c) => (
+                                                    <SelectItem key={c.code} value={c.name}>
+                                                        {c.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
                                         <Input
                                             placeholder="Postal code"
                                             value={postalCode}
@@ -210,31 +313,70 @@ export default function Checkout({
                                 {/* Shipping Method */}
                                 <div className="space-y-6 pt-8">
                                     <h3 className="font-semibold text-lg text-gray-900">Shipping method</h3>
-                                    <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="flex flex-col gap-6">
-                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${shippingMethod === 'standard' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
-                                            <RadioGroupItem value="standard" id="sm-standard" />
-                                            <Label htmlFor="sm-standard" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="bg-white p-2 rounded-full shadow-sm border border-gray-100">
-                                                        <Truck className="w-5 h-5 text-blue-600" />
-                                                    </div>
-                                                    <span>Standard Delivery</span>
+                                    <RadioGroup value={shippingMethod} onValueChange={setShippingMethod} className="flex flex-col gap-4">
+
+                                        {/* Standard Delivery Option */}
+                                        <Label htmlFor="sm-standard" className="cursor-pointer">
+                                            <div className={`
+                                                relative border-2 rounded-xl p-5 flex items-center gap-5 transition-all duration-200 cursor-pointer
+                                                ${shippingMethod === 'standard'
+                                                ? 'border-blue-600 bg-blue-50/50 shadow-sm'
+                                                : 'border-gray-200 hover:border-blue-200 hover:bg-gray-50'}
+                                            `}>
+                                                <RadioGroupItem value="standard" id="sm-standard" className="sr-only" />
+
+                                                <div className={`
+                                                    p-3 rounded-full flex-shrink-0 transition-colors
+                                                    ${shippingMethod === 'standard' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}
+                                                `}>
+                                                    <Truck className="w-6 h-6" />
                                                 </div>
-                                                <span className="font-bold">₱150.00</span>
-                                            </Label>
-                                        </div>
-                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${shippingMethod === 'walkin' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
-                                            <RadioGroupItem value="walkin" id="sm-walkin" />
-                                            <Label htmlFor="sm-walkin" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="bg-white p-2 rounded-full shadow-sm border border-gray-100">
-                                                        <MapPin className="w-5 h-5 text-blue-600" />
+
+                                                <div className="flex-1">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className={`font-bold text-base ${shippingMethod === 'standard' ? 'text-blue-900' : 'text-gray-900'}`}>Standard Delivery</span>
+                                                        <span className="font-bold text-gray-900">₱150.00</span>
                                                     </div>
-                                                    <span>Walk-in</span>
+                                                    <p className="text-sm text-gray-500">Fast and reliable shipping anywhere in PH.</p>
                                                 </div>
-                                                <span className="font-bold text-green-600">Free</span>
-                                            </Label>
-                                        </div>
+
+                                                <div className={`transition-all duration-200 ${shippingMethod === 'standard' ? 'text-blue-600 scale-100 opacity-100' : 'text-gray-300 scale-90 opacity-50'}`}>
+                                                    {shippingMethod === 'standard' ? <CheckCircle2 className="w-6 h-6 fill-blue-100" /> : <Circle className="w-6 h-6" />}
+                                                </div>
+                                            </div>
+                                        </Label>
+
+                                        {/* Walk-in Option */}
+                                        <Label htmlFor="sm-walkin" className="cursor-pointer">
+                                            <div className={`
+                                                relative border-2 rounded-xl p-5 flex items-center gap-5 transition-all duration-200 cursor-pointer
+                                                ${shippingMethod === 'walkin'
+                                                ? 'border-blue-600 bg-blue-50/50 shadow-sm'
+                                                : 'border-gray-200 hover:border-blue-200 hover:bg-gray-50'}
+                                            `}>
+                                                <RadioGroupItem value="walkin" id="sm-walkin" className="sr-only" />
+
+                                                <div className={`
+                                                    p-3 rounded-full flex-shrink-0 transition-colors
+                                                    ${shippingMethod === 'walkin' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}
+                                                `}>
+                                                    <MapPin className="w-6 h-6" />
+                                                </div>
+
+                                                <div className="flex-1">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className={`font-bold text-base ${shippingMethod === 'walkin' ? 'text-blue-900' : 'text-gray-900'}`}>Walk-in / Pickup</span>
+                                                        <span className="font-bold text-green-600">Free</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-500">Pick up your order at our nearest store.</p>
+                                                </div>
+
+                                                <div className={`transition-all duration-200 ${shippingMethod === 'walkin' ? 'text-blue-600 scale-100 opacity-100' : 'text-gray-300 scale-90 opacity-50'}`}>
+                                                    {shippingMethod === 'walkin' ? <CheckCircle2 className="w-6 h-6 fill-blue-100" /> : <Circle className="w-6 h-6" />}
+                                                </div>
+                                            </div>
+                                        </Label>
+
                                     </RadioGroup>
                                 </div>
 
@@ -242,28 +384,98 @@ export default function Checkout({
                                 <div className="space-y-6 pt-8">
                                     <h3 className="font-semibold text-lg text-gray-900">Payment</h3>
                                     <p className="text-sm text-gray-500 mb-3">All transactions are secure and encrypted.</p>
-                                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col gap-6">
-                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
-                                            <RadioGroupItem value="card" id="pm-card" />
-                                            <Label htmlFor="pm-card" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
-                                                <span>Credit/Debit Card via PayMongo</span>
-                                                <CreditCard className="w-5 h-5 text-gray-500" />
-                                            </Label>
-                                        </div>
-                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
-                                            <RadioGroupItem value="cod" id="pm-cod" />
-                                            <Label htmlFor="pm-cod" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
-                                                <span>Cash on Delivery (COD)</span>
-                                                <Banknote className="w-5 h-5 text-gray-500" />
-                                            </Label>
-                                        </div>
-                                        <div className={`border rounded-lg p-5 flex items-center gap-5 cursor-pointer transition-all ${paymentMethod === 'cash' ? 'border-blue-600 ring-1 ring-blue-600 bg-blue-50/20' : 'hover:bg-gray-50'}`}>
-                                            <RadioGroupItem value="cash" id="pm-cash" />
-                                            <Label htmlFor="pm-cash" className="flex-1 cursor-pointer font-medium flex items-center justify-between">
-                                                <span>Cash</span>
-                                                <Wallet className="w-5 h-5 text-gray-500" />
-                                            </Label>
-                                        </div>
+                                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex flex-col gap-4">
+
+                                        {/* Card Payment */}
+                                        <Label htmlFor="pm-card" className="cursor-pointer">
+                                            <div className={`
+                                                relative border-2 rounded-xl p-5 flex items-center gap-5 transition-all duration-200 cursor-pointer
+                                                ${paymentMethod === 'card'
+                                                ? 'border-blue-600 bg-blue-50/50 shadow-sm'
+                                                : 'border-gray-200 hover:border-blue-200 hover:bg-gray-50'}
+                                            `}>
+                                                <RadioGroupItem value="card" id="pm-card" className="sr-only" />
+
+                                                <div className={`
+                                                    p-3 rounded-full flex-shrink-0 transition-colors
+                                                    ${paymentMethod === 'card' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}
+                                                `}>
+                                                    <CreditCard className="w-6 h-6" />
+                                                </div>
+
+                                                <div className="flex-1">
+                                                    <span className={`font-bold text-base block mb-1 ${paymentMethod === 'card' ? 'text-blue-900' : 'text-gray-900'}`}>
+                                                        Credit/Debit Card via PayMongo
+                                                    </span>
+                                                    <p className="text-sm text-gray-500">Secure online payment.</p>
+                                                </div>
+
+                                                <div className={`transition-all duration-200 ${paymentMethod === 'card' ? 'text-blue-600 scale-100 opacity-100' : 'text-gray-300 scale-90 opacity-50'}`}>
+                                                    {paymentMethod === 'card' ? <CheckCircle2 className="w-6 h-6 fill-blue-100" /> : <Circle className="w-6 h-6" />}
+                                                </div>
+                                            </div>
+                                        </Label>
+
+                                        {/* COD Payment */}
+                                        <Label htmlFor="pm-cod" className="cursor-pointer">
+                                            <div className={`
+                                                relative border-2 rounded-xl p-5 flex items-center gap-5 transition-all duration-200 cursor-pointer
+                                                ${paymentMethod === 'cod'
+                                                ? 'border-blue-600 bg-blue-50/50 shadow-sm'
+                                                : 'border-gray-200 hover:border-blue-200 hover:bg-gray-50'}
+                                            `}>
+                                                <RadioGroupItem value="cod" id="pm-cod" className="sr-only" />
+
+                                                <div className={`
+                                                    p-3 rounded-full flex-shrink-0 transition-colors
+                                                    ${paymentMethod === 'cod' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}
+                                                `}>
+                                                    <Banknote className="w-6 h-6" />
+                                                </div>
+
+                                                <div className="flex-1">
+                                                    <span className={`font-bold text-base block mb-1 ${paymentMethod === 'cod' ? 'text-blue-900' : 'text-gray-900'}`}>
+                                                        Cash on Delivery (COD)
+                                                    </span>
+                                                    <p className="text-sm text-gray-500">Pay when your order arrives.</p>
+                                                </div>
+
+                                                <div className={`transition-all duration-200 ${paymentMethod === 'cod' ? 'text-blue-600 scale-100 opacity-100' : 'text-gray-300 scale-90 opacity-50'}`}>
+                                                    {paymentMethod === 'cod' ? <CheckCircle2 className="w-6 h-6 fill-blue-100" /> : <Circle className="w-6 h-6" />}
+                                                </div>
+                                            </div>
+                                        </Label>
+
+                                        {/* Cash Payment */}
+                                        <Label htmlFor="pm-cash" className="cursor-pointer">
+                                            <div className={`
+                                                relative border-2 rounded-xl p-5 flex items-center gap-5 transition-all duration-200 cursor-pointer
+                                                ${paymentMethod === 'cash'
+                                                ? 'border-blue-600 bg-blue-50/50 shadow-sm'
+                                                : 'border-gray-200 hover:border-blue-200 hover:bg-gray-50'}
+                                            `}>
+                                                <RadioGroupItem value="cash" id="pm-cash" className="sr-only" />
+
+                                                <div className={`
+                                                    p-3 rounded-full flex-shrink-0 transition-colors
+                                                    ${paymentMethod === 'cash' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}
+                                                `}>
+                                                    <Wallet className="w-6 h-6" />
+                                                </div>
+
+                                                <div className="flex-1">
+                                                    <span className={`font-bold text-base block mb-1 ${paymentMethod === 'cash' ? 'text-blue-900' : 'text-gray-900'}`}>
+                                                        Cash
+                                                    </span>
+                                                    <p className="text-sm text-gray-500">Pay at the store counter.</p>
+                                                </div>
+
+                                                <div className={`transition-all duration-200 ${paymentMethod === 'cash' ? 'text-blue-600 scale-100 opacity-100' : 'text-gray-300 scale-90 opacity-50'}`}>
+                                                    {paymentMethod === 'cash' ? <CheckCircle2 className="w-6 h-6 fill-blue-100" /> : <Circle className="w-6 h-6" />}
+                                                </div>
+                                            </div>
+                                        </Label>
+
                                     </RadioGroup>
                                 </div>
 

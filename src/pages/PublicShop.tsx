@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom"; // Added useLocation
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
 import { ProductCategories } from "../components/ProductCategories";
@@ -7,7 +8,6 @@ import { WhyChooseUs } from "../components/WhyChooseUs";
 import { Contact } from "../components/Contact";
 import { Footer } from "../components/Footer";
 import { VehicleSelectionDialog } from "../components/VehicleSelectionDialog";
-// Fix: Import VehicleFilter type, but removed unused VehicleSelector component import
 import { VehicleFilter } from "../components/VehicleSelector";
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../App";
@@ -39,12 +39,25 @@ export default function PublicShop({
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
 
+    // Get location to handle navigation from other pages (like Checkout)
+    const location = useLocation();
+
     // Dialog State
     const [isGarageOpen, setIsGarageOpen] = useState(false);
 
     useEffect(() => {
         fetchProducts();
     }, [selectedCategory, searchQuery, vehicleFilter]);
+
+    // NEW: Handle scroll state from Checkout navigation
+    useEffect(() => {
+        if (location.state && location.state.scrollTo) {
+            // Add a small delay to ensure rendering is complete
+            setTimeout(() => {
+                scrollToSection(location.state.scrollTo);
+            }, 100);
+        }
+    }, [location]);
 
     async function fetchProducts() {
         setLoadingProducts(true);
@@ -131,6 +144,21 @@ export default function PublicShop({
         }
     };
 
+    // Navigation Handler passed to Header
+    const handleHeaderNavigation = (action: string) => {
+        if (action === 'home') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (action === 'categories') {
+            scrollToSection('categories');
+        } else if (action === 'all-products') {
+            // Reset filters and show all
+            setSelectedCategory(null);
+            setSearchQuery("");
+            setVehicleFilter(null);
+            scrollToSection('featured-products');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <Header
@@ -140,6 +168,7 @@ export default function PublicShop({
                 onRemoveItem={onRemoveItem}
                 onUpdateQuantity={onUpdateQuantity}
                 onCheckout={onCheckout}
+                onNavigate={handleHeaderNavigation}
             />
             <main>
                 <Hero
@@ -147,7 +176,7 @@ export default function PublicShop({
                     onRequestQuote={() => scrollToSection('contact')}
                 />
 
-                {/* NEW: Sticky Garage Bar (Refined Design) */}
+                {/* Sticky Garage Bar */}
                 <div className="sticky top-[72px] z-30 bg-white border-b border-gray-200 shadow-sm transition-all duration-300">
                     <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                         <div className="flex items-center gap-4">
@@ -183,7 +212,8 @@ export default function PublicShop({
                     </div>
                 </div>
 
-                <div className="container mx-auto px-4 pt-8">
+                {/* Wrapped Categories with ID for navigation */}
+                <div id="categories" className="container mx-auto px-4 pt-8">
                     <ProductCategories
                         products={products}
                         selectedCategory={selectedCategory}
@@ -191,19 +221,22 @@ export default function PublicShop({
                     />
                 </div>
 
-                {loadingProducts ? (
-                    <div className="text-center py-20 text-gray-500">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        Loading products...
-                    </div>
-                ) : (
-                    <FeaturedProducts
-                        products={products}
-                        searchQuery={searchQuery}
-                        selectedCategory={selectedCategory}
-                        onAddToCart={(product) => onAddToCart(product)}
-                    />
-                )}
+                {/* Wrapped Featured Products with ID for navigation */}
+                <div id="featured-products">
+                    {loadingProducts ? (
+                        <div className="text-center py-20 text-gray-500">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                            Loading products...
+                        </div>
+                    ) : (
+                        <FeaturedProducts
+                            products={products}
+                            searchQuery={searchQuery}
+                            selectedCategory={selectedCategory}
+                            onAddToCart={(product) => onAddToCart(product)}
+                        />
+                    )}
+                </div>
 
                 <WhyChooseUs />
                 <Contact />

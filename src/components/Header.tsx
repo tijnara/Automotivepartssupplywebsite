@@ -22,6 +22,7 @@ interface HeaderProps {
     onRemoveItem: (id: number) => void;
     onUpdateQuantity: (id: number, delta: number) => void;
     onCheckout: () => void;
+    onNavigate: (section: string) => void;
 }
 
 export function Header({
@@ -30,6 +31,7 @@ export function Header({
                            setSearchQuery,
                            onRemoveItem,
                            onUpdateQuantity,
+                           onNavigate
                        }: HeaderProps) {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,12 +42,12 @@ export function Header({
 
     const handleLogoClick = () => {
         navigate('/');
-        window.scrollTo(0, 0);
+        onNavigate('home');
     };
 
     return (
-        <header className="sticky top-0 z-50 w-full shadow-md font-sans">
-            {/* 1. Top Contact Bar (White/Light Grey) */}
+        <header className="fixed top-0 left-0 right-0 z-[999] w-full shadow-md font-sans bg-white transition-all duration-300">
+            {/* 1. Top Contact Bar */}
             <div className="bg-gray-100 text-gray-600 text-[11px] md:text-xs py-1.5 border-b border-gray-200">
                 <div className="container mx-auto px-4 flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -53,21 +55,22 @@ export function Header({
                         <span>Need Help? Call Us at <span className="font-semibold">+632 8 927 7777</span></span>
                     </div>
                     <div className="flex gap-4">
-                        <a href="#" className="hover:text-blue-600 transition-colors flex items-center gap-1">
+                        <a href="#" style={{ cursor: 'pointer' }} className="hover:text-blue-600 transition-colors flex items-center gap-1">
                             <MapPin className="w-3 h-3" /> Store Locator
                         </a>
-                        <a href="#" className="hover:text-blue-600 transition-colors hidden sm:inline">Track Order</a>
+                        <a href="#" style={{ cursor: 'pointer' }} className="hover:text-blue-600 transition-colors hidden sm:inline">Track Order</a>
                     </div>
                 </div>
             </div>
 
-            {/* 2. Main Header (Brand Blue) */}
+            {/* 2. Main Header */}
             <div className="bg-blue-600 text-white py-4 md:py-6">
                 <div className="container mx-auto px-4 flex items-center justify-between gap-4 md:gap-8">
                     {/* Logo Area */}
                     <div
                         className="flex items-center gap-1 cursor-pointer flex-shrink-0 group"
                         onClick={handleLogoClick}
+                        style={{ cursor: 'pointer' }}
                     >
                         <div className="font-black text-2xl md:text-5xl italic tracking-tighter group-hover:opacity-90 transition-opacity">
                             AUTOPARTS
@@ -77,17 +80,19 @@ export function Header({
                         </div>
                     </div>
 
-                    {/* Wide Search Bar (Desktop) - UPDATED: Thicker and Taller */}
+                    {/* Wide Search Bar */}
                     <div className="hidden md:flex flex-1 relative">
                         <input
                             type="text"
                             placeholder="Search by Category, Part, Vehicle or Brand..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            // Updates: h-16 (64px), text-lg, border-2
                             className="w-full h-16 pl-6 pr-20 text-gray-800 bg-white rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-gray-500 text-lg shadow-sm border-2 border-transparent focus:border-blue-300"
                         />
-                        <button className="absolute right-0 top-0 h-16 w-20 bg-black flex items-center justify-center rounded-r-sm hover:bg-gray-800 transition-colors cursor-pointer border-2 border-black">
+                        <button
+                            style={{ cursor: 'pointer' }}
+                            className="absolute right-0 top-0 h-16 w-20 bg-black flex items-center justify-center rounded-r-sm hover:bg-gray-800 transition-colors border-2 border-black"
+                        >
                             <Search className="w-8 h-8 text-white" />
                         </button>
                     </div>
@@ -97,7 +102,10 @@ export function Header({
                         {/* Cart */}
                         <Sheet modal={false} open={isCartOpen} onOpenChange={setIsCartOpen}>
                             <SheetTrigger asChild>
-                                <button className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded transition-colors cursor-pointer">
+                                <button
+                                    style={{ cursor: 'pointer' }}
+                                    className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded transition-colors"
+                                >
                                     <div className="relative">
                                         <ShoppingCart className="w-8 h-8" />
                                         {itemCount > 0 && (
@@ -112,7 +120,7 @@ export function Header({
                                     </div>
                                 </button>
                             </SheetTrigger>
-                            <SheetContent overlay={true} className="z-[100]">
+                            <SheetContent overlay={true} className="z-[1000] bg-white">
                                 <SheetHeader className="border-b pb-4">
                                     <SheetTitle>Shopping Cart</SheetTitle>
                                     <SheetDescription>Review your selected items</SheetDescription>
@@ -120,7 +128,7 @@ export function Header({
                                 <ScrollArea className="h-[calc(100vh-200px)] pr-4 mt-4">
                                     {cartItems.map((item) => (
                                         <div key={item.id} className="flex gap-4 mb-4 border-b pb-4 last:border-0">
-                                            <div className="w-20 h-20 bg-gray-100 rounded-md flex-shrink-0 border border-gray-200">
+                                            <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 border border-gray-200">
                                                 <ImageWithFallback src={item.image} className="w-full h-full object-cover rounded-md" />
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -132,6 +140,7 @@ export function Header({
                                                         <button
                                                             onClick={() => onUpdateQuantity(item.id, -1)}
                                                             className="w-6 h-6 flex items-center justify-center hover:bg-gray-200 rounded-l-md"
+                                                            style={{ cursor: 'pointer' }}
                                                             disabled={item.quantity <= 1}
                                                         >
                                                             -
@@ -140,6 +149,7 @@ export function Header({
                                                         <button
                                                             onClick={() => onUpdateQuantity(item.id, 1)}
                                                             className="w-6 h-6 flex items-center justify-center hover:bg-gray-200 rounded-r-md"
+                                                            style={{ cursor: 'pointer' }}
                                                         >
                                                             +
                                                         </button>
@@ -148,6 +158,7 @@ export function Header({
                                                 <button
                                                     onClick={() => onRemoveItem(item.id)}
                                                     className="text-xs text-red-500 hover:underline mt-2 flex items-center gap-1"
+                                                    style={{ cursor: 'pointer' }}
                                                 >
                                                     <X className="w-3 h-3" /> Remove
                                                 </button>
@@ -168,7 +179,11 @@ export function Header({
                                             <span className="text-blue-600">₱{totalAmount.toLocaleString()}</span>
                                         </div>
                                         <SheetClose asChild>
-                                            <Button onClick={() => navigate('/checkout')} className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-base font-bold shadow-lg shadow-blue-600/20">
+                                            <Button
+                                                onClick={() => navigate('/checkout')}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-base font-bold shadow-lg shadow-blue-600/20"
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 Proceed to Checkout
                                             </Button>
                                         </SheetClose>
@@ -181,6 +196,7 @@ export function Header({
                         <button
                             className="md:hidden p-2 hover:bg-blue-700 rounded transition-colors"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            style={{ cursor: 'pointer' }}
                         >
                             <Menu className="w-6 h-6" />
                         </button>
@@ -198,15 +214,35 @@ export function Header({
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full h-14 pl-4 pr-14 text-gray-800 bg-white rounded-sm focus:outline-none shadow-sm text-lg border-2 border-transparent focus:border-blue-400"
                             />
-                            <button className="absolute right-0 top-0 h-14 w-14 bg-black flex items-center justify-center rounded-r-sm">
+                            <button
+                                style={{ cursor: 'pointer' }}
+                                className="absolute right-0 top-0 h-14 w-14 bg-black flex items-center justify-center rounded-r-sm"
+                            >
                                 <Search className="w-6 h-6 text-white" />
                             </button>
                         </div>
                         <nav className="flex flex-col gap-2 text-white/90 font-medium">
-                            <a href="#" className="py-2 border-b border-white/10">Home</a>
-                            <a href="#" className="py-2 border-b border-white/10">Categories</a>
-                            <a href="#" className="py-2 border-b border-white/10">Brands</a>
-                            <a href="#" className="py-2 border-b border-white/10">All Products</a>
+                            <button
+                                onClick={() => { onNavigate('home'); setIsMobileMenuOpen(false); }}
+                                className="py-2 border-b border-white/10 text-left"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                Home
+                            </button>
+                            <button
+                                onClick={() => { onNavigate('categories'); setIsMobileMenuOpen(false); }}
+                                className="py-2 border-b border-white/10 text-left"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                Categories
+                            </button>
+                            <button
+                                onClick={() => { onNavigate('all-products'); setIsMobileMenuOpen(false); }}
+                                className="py-2 border-b border-white/10 text-left"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                All Products
+                            </button>
                         </nav>
                     </div>
                 )}
@@ -216,32 +252,37 @@ export function Header({
             <div className="bg-white border-b border-gray-200 py-3 hidden md:block">
                 <div className="container mx-auto px-4 flex justify-between items-center text-sm font-medium text-gray-700">
                     <ul className="flex gap-8">
-                        <li className="hover:text-blue-600 cursor-pointer transition-colors relative group">
+                        {/* FORCED CURSOR POINTER VIA INLINE STYLE */}
+                        <li
+                            onClick={() => onNavigate('home')}
+                            className="hover:text-blue-600 transition-colors relative group"
+                            style={{ cursor: 'pointer' }}
+                        >
                             Home
                             <span className="absolute -bottom-3 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
                         </li>
-                        <li className="hover:text-blue-600 cursor-pointer transition-colors relative group">
+                        <li
+                            onClick={() => onNavigate('categories')}
+                            className="hover:text-blue-600 transition-colors relative group"
+                            style={{ cursor: 'pointer' }}
+                        >
                             Categories
                             <span className="absolute -bottom-3 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
                         </li>
-                        <li className="hover:text-blue-600 cursor-pointer transition-colors relative group">
-                            Brands
-                            <span className="absolute -bottom-3 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
-                        </li>
-                        <li className="hover:text-blue-600 cursor-pointer transition-colors relative group">
+                        <li
+                            onClick={() => onNavigate('all-products')}
+                            className="hover:text-blue-600 transition-colors relative group"
+                            style={{ cursor: 'pointer' }}
+                        >
                             All Products
                             <span className="absolute -bottom-3 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
                         </li>
-                        <li className="hover:text-blue-600 cursor-pointer transition-colors text-blue-600 font-bold relative group">
-                            Online Exclusives
-                            <span className="absolute -bottom-3 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
-                        </li>
-                        <li className="hover:text-red-500 cursor-pointer transition-colors text-red-500 font-bold relative group">
-                            Clearance Sale
-                            <span className="absolute -bottom-3 left-0 w-0 h-0.5 bg-red-500 transition-all group-hover:w-full"></span>
-                        </li>
                     </ul>
-                    <Button variant="default" className="bg-black text-white hover:bg-gray-800 rounded-sm h-8 text-xs px-4 font-bold tracking-wide">
+                    <Button
+                        variant="default"
+                        className="bg-black text-white hover:bg-gray-800 rounded-sm h-8 text-xs px-4 font-bold tracking-wide"
+                        style={{ cursor: 'pointer' }}
+                    >
                         STORE LOCATOR
                     </Button>
                 </div>
