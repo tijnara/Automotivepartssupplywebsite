@@ -21,7 +21,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
 
     return (
         <div className="min-h-screen bg-gray-50/50 flex flex-col">
-            {/* Top Bar - Consistent with Client Header */}
             <div className="bg-blue-900 text-white py-2">
                 <div className="container mx-auto px-4 flex justify-between items-center">
                     <div className="flex items-center gap-4 text-xs md:text-sm">
@@ -41,18 +40,15 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                 </div>
             </div>
 
-            {/* Main Header */}
             <header className="sticky top-0 z-40 w-full bg-white shadow-sm border-b border-gray-200">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-8">
-                        {/* Logo */}
                         <div className="flex items-center gap-2">
                             <div className="bg-blue-600 text-white px-4 py-2 rounded font-bold cursor-pointer" onClick={() => navigate("/admin")}>
                                 <span>AutoParts PH</span>
                             </div>
                         </div>
 
-                        {/* Navigation */}
                         <nav className="hidden md:flex items-center gap-1">
                             <Button
                                 variant={location.pathname === '/admin' ? "default" : "ghost"}
@@ -86,7 +82,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                                 <MessageSquare className="w-4 h-4" />
                                 Messages
                             </Button>
-                            {/* Added Hero Button */}
                             <Button
                                 variant={location.pathname === '/admin/hero' ? "default" : "ghost"}
                                 className={`gap-2 ${location.pathname === '/admin/hero' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
@@ -112,7 +107,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                 </div>
             </header>
 
-            {/* Content Area */}
             <main className="flex-1 container mx-auto px-4 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
@@ -121,7 +115,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                 {children}
             </main>
 
-            {/* Footer */}
             <footer className="bg-white border-t border-gray-200 py-6 mt-auto">
                 <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
                     &copy; {new Date().getFullYear()} AutoParts PH Admin. All rights reserved.

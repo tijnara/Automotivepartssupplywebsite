@@ -22,14 +22,13 @@ export function Hero({ onShopNow }: HeroProps) {
     const [current, setCurrent] = useState(0);
     const [dbSlides, setDbSlides] = useState<any[]>([]);
 
-    // 1. Fetch Slides from Database
     useEffect(() => {
         const fetchSlides = async () => {
             const { data } = await supabase
                 .from('hero_slides')
                 .select('*')
                 .eq('is_active', true)
-                .order('created_at', { ascending: true }); // Show in order of upload
+                .order('created_at', { ascending: true });
 
             if (data && data.length > 0) {
                 setDbSlides(data);
@@ -38,7 +37,6 @@ export function Hero({ onShopNow }: HeroProps) {
         fetchSlides();
     }, []);
 
-    // 2. Default Slides (Fallback)
     const defaultSlides = [
         {
             id: 1,
@@ -63,7 +61,6 @@ export function Hero({ onShopNow }: HeroProps) {
         }
     ];
 
-    // Decide which slides to show
     const activeSlides = dbSlides.length > 0
         ? dbSlides.map(s => ({
             id: s.id,
@@ -74,7 +71,6 @@ export function Hero({ onShopNow }: HeroProps) {
         }))
         : defaultSlides;
 
-    // Auto-slide functionality
     useEffect(() => {
         if (!api) return;
         const interval = setInterval(() => { api.scrollNext(); }, 5000);
@@ -92,57 +88,58 @@ export function Hero({ onShopNow }: HeroProps) {
     return (
         <section id="home" className="relative bg-gray-900">
             <Carousel setApi={setApi} className="w-full relative" opts={{ loop: true }}>
-                <CarouselContent className="-ml-0">
+                <CarouselContent className="-ml-0 flex">
                     {activeSlides.map((slide) => (
                         <CarouselItem
                             key={slide.id}
-                            className="pl-0 min-w-0 shrink-0 grow-0 basis-full w-full"
+                            className="pl-0 min-w-0 shrink-0 grow-0 basis-full"
+                            style={{ minWidth: "100%", flex: "0 0 100%" }} // FORCE 100% WIDTH
                         >
-                            {/* CONTAINER HEIGHT FIX:
-                                - h-[500px] for mobile
-                                - md:h-[650px] for desktop
-                            */}
-                            <div className="relative w-full h-[500px] md:h-[650px] overflow-hidden bg-gray-900 group">
+                            {/* Fixed Height Container: 600px mobile / 800px desktop */}
+                            <div className="relative w-full h-[600px] md:h-[950px] overflow-hidden bg-gray-900 group">
 
-                                {/* IMAGE FIX:
-                                    - absolute inset-0: Locks image to corners
-                                    - w-full h-full: Forces filling the parent
-                                    - object-cover: Zooms image to cover without distortion
-                                */}
+                                {/* Background Image - Forced Coverage */}
                                 <div className="absolute inset-0 z-0 w-full h-full">
                                     <ImageWithFallback
                                         src={slide.image}
                                         alt={slide.title || "Hero Image"}
-                                        className="w-full h-full object-cover opacity-80"
+                                        className="block opacity-90"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                            objectPosition: 'center'
+                                        }}
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-transparent mix-blend-multiply"></div>
+                                    {/* Gradient Overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent mix-blend-multiply z-10"></div>
                                 </div>
 
                                 {/* Content Overlay */}
-                                <div className="relative h-full container mx-auto px-4 flex flex-col justify-center items-center text-center z-10 text-white pb-12">
+                                <div className="relative h-full container mx-auto px-4 flex flex-col justify-center items-center text-center z-20 text-white pb-16">
                                     {slide.title && (
-                                        <h1 className="text-3xl md:text-6xl font-black italic tracking-tighter mb-4 drop-shadow-xl max-w-4xl leading-tight">
+                                        <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter mb-6 drop-shadow-xl max-w-5xl leading-tight">
                                             {slide.title}
                                         </h1>
                                     )}
                                     {slide.subtitle && (
-                                        <p className="text-sm md:text-xl font-bold uppercase tracking-widest mb-8 text-blue-100 shadow-sm bg-blue-900/50 px-4 py-1 rounded">
+                                        <p className="text-sm md:text-2xl font-bold uppercase tracking-widest mb-10 text-blue-100 shadow-sm bg-blue-900/60 px-6 py-2 rounded backdrop-blur-sm">
                                             {slide.subtitle}
                                         </p>
                                     )}
 
                                     <Button
                                         onClick={onShopNow}
-                                        className="bg-white text-blue-900 hover:bg-gray-200 font-bold py-6 px-10 rounded-sm text-lg shadow-xl border-none transition-transform hover:scale-105"
+                                        className="bg-white text-blue-900 hover:bg-gray-200 font-bold py-7 px-12 rounded-sm text-xl shadow-2xl border-none transition-transform hover:scale-105"
                                     >
                                         SHOP NOW
                                     </Button>
 
                                     {slide.brands && (
-                                        <div className="mt-16 w-full overflow-hidden">
-                                            <div className="flex justify-center flex-wrap gap-6 md:gap-12 opacity-80">
+                                        <div className="mt-20 w-full overflow-hidden">
+                                            <div className="flex justify-center flex-wrap gap-8 md:gap-16 opacity-90">
                                                 {brandLogos.map(brand => (
-                                                    <span key={brand} className="text-xl md:text-2xl font-black text-white italic drop-shadow-md">
+                                                    <span key={brand} className="text-2xl md:text-3xl font-black text-white italic drop-shadow-lg">
                                                         {brand}
                                                     </span>
                                                 ))}
@@ -157,17 +154,17 @@ export function Hero({ onShopNow }: HeroProps) {
 
                 {/* Navigation Buttons */}
                 <div className="hidden md:block">
-                    <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white text-white hover:text-blue-900 border-none h-12 w-12 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-sm" />
-                    <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white text-white hover:text-blue-900 border-none h-12 w-12 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-sm" />
+                    <CarouselPrevious className="absolute left-6 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white text-white hover:text-blue-900 border-none h-14 w-14 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-md transition-all" />
+                    <CarouselNext className="absolute right-6 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white text-white hover:text-blue-900 border-none h-14 w-14 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-md transition-all" />
                 </div>
 
-                {/* Dots */}
-                <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20">
+                {/* Dots Indicator */}
+                <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-3 z-30">
                     {activeSlides.map((_, index) => (
                         <button
                             key={index}
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                                current === index + 1 ? "bg-white w-8" : "bg-white/40 w-2"
+                            className={`h-3 rounded-full transition-all duration-300 shadow-sm ${
+                                current === index + 1 ? "bg-white w-10" : "bg-white/40 w-3 hover:bg-white/60"
                             }`}
                             onClick={() => api?.scrollTo(index)}
                         />
@@ -175,18 +172,19 @@ export function Hero({ onShopNow }: HeroProps) {
                 </div>
             </Carousel>
 
-            <div className="bg-blue-600 text-white py-4 border-t border-blue-500 relative z-20">
-                <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm font-medium">
-                    <div className="flex items-center justify-center gap-2">
-                        <Truck className="w-5 h-5" />
+            {/* Bottom Info Bar */}
+            <div className="bg-blue-600 text-white py-5 border-t border-blue-500 relative z-30">
+                <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm md:text-base font-bold tracking-wide">
+                    <div className="flex items-center justify-center gap-3">
+                        <Truck className="w-6 h-6" />
                         <span>Fast Nationwide Delivery</span>
                     </div>
-                    <div className="flex items-center justify-center gap-2">
-                        <ShieldCheck className="w-5 h-5" />
+                    <div className="flex items-center justify-center gap-3">
+                        <ShieldCheck className="w-6 h-6" />
                         <span>100% Genuine Parts Guaranteed</span>
                     </div>
-                    <div className="flex items-center justify-center gap-2">
-                        <MapPin className="w-5 h-5" />
+                    <div className="flex items-center justify-center gap-3">
+                        <MapPin className="w-6 h-6" />
                         <span>50+ Stores Across Philippines</span>
                     </div>
                 </div>

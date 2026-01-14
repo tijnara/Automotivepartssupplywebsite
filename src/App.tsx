@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Session } from "@supabase/supabase-js"; // Import Session type
+import { Session } from "@supabase/supabase-js";
 import PublicShop from "./pages/PublicShop";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminInventory from "./pages/admin/AdminInventory";
-import AdminHero from "./pages/admin/AdminHero"; // Correctly imported
+import AdminHero from "./pages/admin/AdminHero";
 import ProductDetails from "./pages/ProductDetails";
 import Checkout from "./pages/Checkout";
 import { supabase } from "./lib/supabase";
@@ -15,7 +15,6 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner";
 import { Vehicle } from "./components/VehicleSelector";
 
-// Define shared types
 export interface Product {
     id: number;
     name: string;
@@ -131,9 +130,7 @@ export default function App() {
         );
     };
 
-    const handleCheckoutPlaceholder = () => {
-        // No-op
-    };
+    const handleCheckoutPlaceholder = () => { };
 
     const handleConfirmOrder = async (orderData: any) => {
         try {

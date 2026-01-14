@@ -17,7 +17,6 @@ export default function AdminHero() {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
 
-    // Form State
     const [title, setTitle] = useState("");
     const [subtitle, setSubtitle] = useState("");
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -31,7 +30,7 @@ export default function AdminHero() {
         const { data, error } = await supabase
             .from('hero_slides')
             .select('*')
-            .order('created_at', { ascending: true }); // Oldest first (Slide 1, 2, 3...)
+            .order('created_at', { ascending: true });
 
         if (error) {
             console.error(error);
@@ -62,7 +61,6 @@ export default function AdminHero() {
 
         setUploading(true);
         try {
-            // 1. Upload Image to Supabase Storage
             const fileExt = selectedFile.name.split('.').pop();
             const fileName = `hero-${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
@@ -73,12 +71,10 @@ export default function AdminHero() {
 
             if (uploadError) throw uploadError;
 
-            // 2. Get Public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('hero-images')
                 .getPublicUrl(filePath);
 
-            // 3. Save Record to Database
             const { error: dbError } = await supabase
                 .from('hero_slides')
                 .insert([{
@@ -92,7 +88,6 @@ export default function AdminHero() {
 
             toast.success("Slide added successfully!");
 
-            // Reset Form
             setTitle("");
             setSubtitle("");
             setSelectedFile(null);
@@ -122,7 +117,6 @@ export default function AdminHero() {
     return (
         <AdminLayout title="Hero Section" description="Manage homepage banners. Upload images to replace the default slides.">
             <div className="grid lg:grid-cols-3 gap-8">
-                {/* Upload Form */}
                 <Card className="lg:col-span-1 h-fit">
                     <CardHeader>
                         <CardTitle>Add New Slide</CardTitle>
@@ -180,7 +174,6 @@ export default function AdminHero() {
                     </CardContent>
                 </Card>
 
-                {/* Slides List */}
                 <div className="lg:col-span-2 space-y-4">
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <Table>
