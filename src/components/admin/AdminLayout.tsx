@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
-// ADDED: MapPin
-import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag, ClipboardList, Image as ImageIcon, MapPin } from "lucide-react";
+// ADDED: Share2
+import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag, ClipboardList, Image as ImageIcon, MapPin, Share2 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
 interface AdminLayoutProps {
@@ -94,7 +94,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                                     <MessageSquare className="w-4 h-4" />
                                     Messages
                                 </Button>
-                                {/* ADDED: Stores Button */}
                                 <Button
                                     variant={location.pathname === '/admin/stores' ? "default" : "ghost"}
                                     className={`gap-2 ${location.pathname === '/admin/stores' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
@@ -110,6 +109,15 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                                 >
                                     <ImageIcon className="w-4 h-4" />
                                     Hero / Banner
+                                </Button>
+                                {/* ADDED: Socials Button */}
+                                <Button
+                                    variant={location.pathname === '/admin/socials' ? "default" : "ghost"}
+                                    className={`gap-2 ${location.pathname === '/admin/socials' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
+                                    onClick={() => navigate("/admin/socials")}
+                                >
+                                    <Share2 className="w-4 h-4" />
+                                    Socials
                                 </Button>
                             </nav>
                         </div>

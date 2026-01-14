@@ -9,7 +9,8 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminHero from "./pages/admin/AdminHero";
 import AdminStores from "./pages/admin/AdminStores";
-import StoreLocator from "./pages/StoreLocator"; // ADDED
+import AdminSocials from "./pages/admin/AdminSocials"; // ADDED
+import StoreLocator from "./pages/StoreLocator";
 import ProductDetails from "./pages/ProductDetails";
 import Checkout from "./pages/Checkout";
 import { supabase } from "./lib/supabase";
@@ -196,7 +197,6 @@ export default function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<PublicShop {...cartProps} />} />
-                {/* ADDED: Store Locator Route */}
                 <Route path="/stores" element={<StoreLocator {...cartProps} />} />
                 <Route path="/product/:id" element={<ProductDetails {...cartProps} />} />
 
@@ -214,6 +214,8 @@ export default function App() {
                 <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />
                 <Route path="/admin/stores" element={<ProtectedRoute><AdminStores /></ProtectedRoute>} />
                 <Route path="/admin/hero" element={<ProtectedRoute><AdminHero /></ProtectedRoute>} />
+                {/* ADDED: Route for Socials */}
+                <Route path="/admin/socials" element={<ProtectedRoute><AdminSocials /></ProtectedRoute>} />
             </Routes>
             <Toaster />
         </BrowserRouter>

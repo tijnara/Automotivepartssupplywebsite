@@ -139,7 +139,6 @@ export function Hero({ onShopNow }: HeroProps) {
                         >
                             <div className="relative w-full h-[600px] md:h-[950px] overflow-hidden bg-gray-900 group">
                                 <div className="absolute inset-0 z-0 w-full h-full">
-                                    {/* UPDATED: Changed object-cover to object-contain so full image is visible */}
                                     <ImageWithFallback
                                         src={slide.image}
                                         alt={slide.title || "Hero Image"}
@@ -176,7 +175,7 @@ export function Hero({ onShopNow }: HeroProps) {
                                             )}
                                             style={{
                                                 color: slide.subtitleColor,
-                                                WebkitTextStroke: '1px black'
+                                                // Removed WebkitTextStroke to fix color issue
                                             }}
                                         >
                                             {slide.subtitle}

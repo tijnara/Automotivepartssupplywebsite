@@ -1,9 +1,48 @@
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube, Linkedin, Globe } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
+
+// Helper to map DB platform strings to Icons
+const getSocialIcon = (platform: string) => {
+    switch (platform.toLowerCase()) {
+        case 'facebook': return Facebook;
+        case 'instagram': return Instagram;
+        case 'twitter': return Twitter;
+        case 'youtube': return Youtube;
+        case 'linkedin': return Linkedin;
+        default: return Globe;
+    }
+};
+
+// Helper: Ensure URL is absolute so it redirects externally
+const ensureAbsoluteUrl = (url: string) => {
+    if (!url) return '#';
+    // If it handles mailto or already has http/https, return as is
+    if (url.startsWith('mailto:') || url.match(/^https?:\/\//i)) {
+        return url;
+    }
+    // Otherwise prepend https://
+    return `https://${url}`;
+};
 
 export function Footer() {
     const navigate = useNavigate();
     const location = useLocation();
+    const [socials, setSocials] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchSocials = async () => {
+            const { data } = await supabase
+                .from('social_media')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: true });
+
+            if (data) setSocials(data);
+        };
+        fetchSocials();
+    }, []);
 
     const handleContactClick = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -77,11 +116,29 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Follow Us</h4>
                         <p className="mb-4 text-xs">Stay updated with our latest offers.</p>
-                        <div className="flex justify-center md:justify-start gap-4">
-                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Facebook className="w-4 h-4"/></a>
-                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Instagram className="w-4 h-4"/></a>
-                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Twitter className="w-4 h-4"/></a>
-                            <a href="#" className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"><Youtube className="w-4 h-4"/></a>
+
+                        {/* DYNAMIC SOCIAL ICONS */}
+                        <div className="flex justify-center md:justify-start gap-4 flex-wrap">
+                            {socials.length === 0 ? (
+                                <span className="text-gray-400 italic text-xs">No links active</span>
+                            ) : (
+                                socials.map((social) => {
+                                    const Icon = getSocialIcon(social.platform);
+                                    const safeUrl = ensureAbsoluteUrl(social.url);
+                                    return (
+                                        <a
+                                            key={social.id}
+                                            href={safeUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            title={social.platform}
+                                            className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"
+                                        >
+                                            <Icon className="w-4 h-4"/>
+                                        </a>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
                 </div>

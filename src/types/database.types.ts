@@ -308,7 +308,6 @@ export type Database = {
                 }
                 Relationships: []
             }
-            // ADDED: Stores Table
             stores: {
                 Row: {
                     id: number
@@ -340,6 +339,31 @@ export type Database = {
                     email?: string | null
                     map_url?: string | null
                     hours?: string | null
+                    is_active?: boolean
+                    created_at?: string
+                }
+                Relationships: []
+            }
+            // ADDED: Social Media Table
+            social_media: {
+                Row: {
+                    id: number
+                    platform: string
+                    url: string
+                    is_active: boolean
+                    created_at: string
+                }
+                Insert: {
+                    id?: number
+                    platform: string
+                    url: string
+                    is_active?: boolean
+                    created_at?: string
+                }
+                Update: {
+                    id?: number
+                    platform?: string
+                    url?: string
                     is_active?: boolean
                     created_at?: string
                 }

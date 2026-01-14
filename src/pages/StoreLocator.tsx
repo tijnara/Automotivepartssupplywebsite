@@ -4,7 +4,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { supabase } from "../lib/supabase";
 import { Database } from "../types/database.types";
-import { MapPin, Phone, Mail, Clock } from "lucide-react"; // Removed ExternalLink
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { CartItem } from "../App";
 
 type Store = Database['public']['Tables']['stores']['Row'];
@@ -16,7 +16,7 @@ interface StoreLocatorProps {
     onRemoveItem: (id: number) => void;
     onUpdateQuantity: (id: number, delta: number) => void;
     onCheckout: () => void;
-    onNavigate: (section: string) => void;
+    // REMOVED: onNavigate is handled internally, not passed from App.tsx
     onAddToCart: (product: any) => void;
 }
 
