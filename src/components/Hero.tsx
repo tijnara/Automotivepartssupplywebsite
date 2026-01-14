@@ -11,6 +11,7 @@ import {
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { MapPin, ShieldCheck, Truck } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { cn } from "./ui/utils";
 
 interface HeroProps {
     onShopNow: () => void;
@@ -37,27 +38,62 @@ export function Hero({ onShopNow }: HeroProps) {
         fetchSlides();
     }, []);
 
+    // Helper maps for sizing
+    const titleSizes: Record<string, string> = {
+        small: "text-2xl md:text-4xl",
+        medium: "text-3xl md:text-5xl",
+        large: "text-4xl md:text-7xl",
+        xl: "text-5xl md:text-8xl",
+    };
+
+    const subtitleSizes: Record<string, string> = {
+        small: "text-xs md:text-sm",
+        medium: "text-sm md:text-lg",
+        large: "text-base md:text-2xl",
+    };
+
+    const alignClasses: Record<string, string> = {
+        left: "items-start text-left pl-8 md:pl-20",
+        center: "items-center text-center",
+        right: "items-end text-right pr-8 md:pr-20",
+    };
+
     const defaultSlides = [
         {
             id: 1,
             image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=1920",
             title: "ALL THE BIGGEST BRANDS ARE HERE",
             subtitle: "AT THE COUNTRY'S LARGEST CAR ACCESSORIES CHAIN STORE!",
-            brands: true
+            brands: true,
+            titleColor: '#ffffff',
+            titleSize: 'large',
+            subtitleColor: '#ffffff',
+            subtitleSize: 'medium',
+            align: 'center'
         },
         {
             id: 2,
             image: "https://images.unsplash.com/photo-1503376763036-066120622c74?auto=format&fit=crop&q=80&w=1920",
             title: "QUALITY PARTS FOR EVERY VEHICLE",
             subtitle: "GENUINE PARTS • AFTERMARKET • ACCESSORIES",
-            brands: false
+            brands: false,
+            titleColor: '#ffffff',
+            titleSize: 'large',
+            subtitleColor: '#ffffff',
+            subtitleSize: 'medium',
+            align: 'center'
         },
         {
             id: 3,
             image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=1920",
             title: "NATIONWIDE DELIVERY",
             subtitle: "WE SHIP ANYWHERE IN THE PHILIPPINES",
-            brands: false
+            brands: false,
+            titleColor: '#ffffff',
+            titleSize: 'large',
+            subtitleColor: '#ffffff',
+            subtitleSize: 'medium',
+            align: 'center'
         }
     ];
 
@@ -67,7 +103,13 @@ export function Hero({ onShopNow }: HeroProps) {
             image: s.image_url,
             title: s.title,
             subtitle: s.subtitle,
-            brands: false
+            brands: false,
+            // Styling props
+            titleColor: s.title_color || '#ffffff',
+            titleSize: s.title_size || 'large',
+            subtitleColor: s.subtitle_color || '#ffffff',
+            subtitleSize: s.subtitle_size || 'medium',
+            align: s.text_align || 'center'
         }))
         : defaultSlides;
 
@@ -93,44 +135,56 @@ export function Hero({ onShopNow }: HeroProps) {
                         <CarouselItem
                             key={slide.id}
                             className="pl-0 min-w-0 shrink-0 grow-0 basis-full"
-                            style={{ minWidth: "100%", flex: "0 0 100%" }} // FORCE 100% WIDTH
+                            style={{ minWidth: "100%", flex: "0 0 100%" }}
                         >
-                            {/* Fixed Height Container: 600px mobile / 800px desktop */}
                             <div className="relative w-full h-[600px] md:h-[950px] overflow-hidden bg-gray-900 group">
-
-                                {/* Background Image - Forced Coverage */}
                                 <div className="absolute inset-0 z-0 w-full h-full">
                                     <ImageWithFallback
                                         src={slide.image}
                                         alt={slide.title || "Hero Image"}
-                                        className="block opacity-90"
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover',
-                                            objectPosition: 'center'
-                                        }}
+                                        className="w-full !h-full object-cover block"
+                                        style={{ width: '100%', height: '100%', objectPosition: 'center' }}
                                     />
-                                    {/* Gradient Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-transparent mix-blend-multiply z-10"></div>
+                                    <div className="absolute inset-0 bg-black/40 z-10"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 z-10"></div>
                                 </div>
 
-                                {/* Content Overlay */}
-                                <div className="relative h-full container mx-auto px-4 flex flex-col justify-center items-center text-center z-20 text-white pb-16">
+                                <div className={cn(
+                                    "relative h-full container mx-auto px-4 flex flex-col justify-center z-20 pb-16",
+                                    alignClasses[slide.align || 'center']
+                                )}>
                                     {slide.title && (
-                                        <h1 className="text-4xl md:text-7xl font-black italic tracking-tighter mb-6 drop-shadow-xl max-w-5xl leading-tight">
+                                        <h1
+                                            className={cn(
+                                                "font-black italic tracking-tighter mb-6 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] max-w-5xl leading-tight",
+                                                titleSizes[slide.titleSize || 'large']
+                                            )}
+                                            style={{
+                                                color: slide.titleColor,
+                                                WebkitTextStroke: '2px black'
+                                            }}
+                                        >
                                             {slide.title}
                                         </h1>
                                     )}
                                     {slide.subtitle && (
-                                        <p className="text-sm md:text-2xl font-bold uppercase tracking-widest mb-10 text-blue-100 shadow-sm bg-blue-900/60 px-6 py-2 rounded backdrop-blur-sm">
+                                        <p
+                                            className={cn(
+                                                "font-bold uppercase tracking-widest mb-10 text-white shadow-lg bg-blue-600/90 px-8 py-3 rounded-full backdrop-blur-md",
+                                                subtitleSizes[slide.subtitleSize || 'medium']
+                                            )}
+                                            style={{
+                                                color: slide.subtitleColor,
+                                                WebkitTextStroke: '1px black'
+                                            }}
+                                        >
                                             {slide.subtitle}
                                         </p>
                                     )}
 
                                     <Button
                                         onClick={onShopNow}
-                                        className="bg-white text-blue-900 hover:bg-gray-200 font-bold py-7 px-12 rounded-sm text-xl shadow-2xl border-none transition-transform hover:scale-105"
+                                        className="bg-white text-blue-900 hover:bg-gray-100 font-bold py-7 px-12 rounded-sm text-xl shadow-[0_10px_20px_rgba(0,0,0,0.5)] border-none transition-transform hover:scale-105 hover:-translate-y-1"
                                     >
                                         SHOP NOW
                                     </Button>
@@ -139,7 +193,11 @@ export function Hero({ onShopNow }: HeroProps) {
                                         <div className="mt-20 w-full overflow-hidden">
                                             <div className="flex justify-center flex-wrap gap-8 md:gap-16 opacity-90">
                                                 {brandLogos.map(brand => (
-                                                    <span key={brand} className="text-2xl md:text-3xl font-black text-white italic drop-shadow-lg">
+                                                    <span
+                                                        key={brand}
+                                                        className="text-2xl md:text-3xl font-black text-white italic drop-shadow-lg"
+                                                        style={{ WebkitTextStroke: '1px black' }}
+                                                    >
                                                         {brand}
                                                     </span>
                                                 ))}
@@ -152,19 +210,17 @@ export function Hero({ onShopNow }: HeroProps) {
                     ))}
                 </CarouselContent>
 
-                {/* Navigation Buttons */}
                 <div className="hidden md:block">
-                    <CarouselPrevious className="absolute left-6 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white text-white hover:text-blue-900 border-none h-14 w-14 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-md transition-all" />
-                    <CarouselNext className="absolute right-6 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white text-white hover:text-blue-900 border-none h-14 w-14 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-md transition-all" />
+                    <CarouselPrevious className="absolute left-6 top-1/2 -translate-y-1/2 z-30 bg-white/10 hover:bg-white text-white hover:text-blue-900 border-white/20 h-14 w-14 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-md transition-all hover:scale-110" />
+                    <CarouselNext className="absolute right-6 top-1/2 -translate-y-1/2 z-30 bg-white/10 hover:bg-white text-white hover:text-blue-900 border-white/20 h-14 w-14 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-md transition-all hover:scale-110" />
                 </div>
 
-                {/* Dots Indicator */}
                 <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-3 z-30">
                     {activeSlides.map((_, index) => (
                         <button
                             key={index}
                             className={`h-3 rounded-full transition-all duration-300 shadow-sm ${
-                                current === index + 1 ? "bg-white w-10" : "bg-white/40 w-3 hover:bg-white/60"
+                                current === index + 1 ? "bg-white w-10" : "bg-white/40 w-3 hover:bg-white/80"
                             }`}
                             onClick={() => api?.scrollTo(index)}
                         />
@@ -172,8 +228,7 @@ export function Hero({ onShopNow }: HeroProps) {
                 </div>
             </Carousel>
 
-            {/* Bottom Info Bar */}
-            <div className="bg-blue-600 text-white py-5 border-t border-blue-500 relative z-30">
+            <div className="bg-blue-600 text-white py-5 border-t border-blue-500 relative z-30 shadow-2xl">
                 <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm md:text-base font-bold tracking-wide">
                     <div className="flex items-center justify-center gap-3">
                         <Truck className="w-6 h-6" />

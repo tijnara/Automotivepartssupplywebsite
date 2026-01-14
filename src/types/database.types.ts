@@ -259,6 +259,11 @@ export type Database = {
                     subtitle: string | null
                     is_active: boolean
                     created_at: string
+                    title_color: string | null
+                    title_size: string | null
+                    subtitle_color: string | null
+                    subtitle_size: string | null
+                    text_align: string | null
                 }
                 Insert: {
                     id?: number
@@ -267,6 +272,11 @@ export type Database = {
                     subtitle?: string | null
                     is_active?: boolean
                     created_at?: string
+                    title_color?: string | null
+                    title_size?: string | null
+                    subtitle_color?: string | null
+                    subtitle_size?: string | null
+                    text_align?: string | null
                 }
                 Update: {
                     id?: number
@@ -275,6 +285,11 @@ export type Database = {
                     subtitle?: string | null
                     is_active?: boolean
                     created_at?: string
+                    title_color?: string | null
+                    title_size?: string | null
+                    subtitle_color?: string | null
+                    subtitle_size?: string | null
+                    text_align?: string | null
                 }
                 Relationships: []
             }
