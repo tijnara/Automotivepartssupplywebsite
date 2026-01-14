@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { Link } from "react-router-dom"; // Added import
 
 export function Footer() {
     return (
@@ -19,7 +20,8 @@ export function Footer() {
                         <h4 className="font-bold text-gray-900 mb-6 uppercase text-xs tracking-widest">Information</h4>
                         <ul className="space-y-3">
                             <li><a href="#" className="hover:text-blue-600 transition-colors">About Us</a></li>
-                            <li><a href="#" className="hover:text-blue-600 transition-colors">Store Locator</a></li>
+                            {/* UPDATED LINK */}
+                            <li><Link to="/stores" className="hover:text-blue-600 transition-colors cursor-pointer">Store Locator</Link></li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</a></li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Terms of Service</a></li>
                             <li><a href="#" className="hover:text-blue-600 transition-colors">Careers</a></li>

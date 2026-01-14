@@ -8,6 +8,8 @@ import AdminMessages from "./pages/admin/AdminMessages";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminHero from "./pages/admin/AdminHero";
+import AdminStores from "./pages/admin/AdminStores";
+import StoreLocator from "./pages/StoreLocator"; // ADDED
 import ProductDetails from "./pages/ProductDetails";
 import Checkout from "./pages/Checkout";
 import { supabase } from "./lib/supabase";
@@ -142,7 +144,6 @@ export default function App() {
                     customer_phone: orderData.customer_phone,
                     shipping_address: orderData.shipping_address,
 
-                    // Added separate fields for Province and City
                     shipping_province: orderData.shipping_province,
                     shipping_city: orderData.shipping_city,
 
@@ -195,6 +196,8 @@ export default function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<PublicShop {...cartProps} />} />
+                {/* ADDED: Store Locator Route */}
+                <Route path="/stores" element={<StoreLocator {...cartProps} />} />
                 <Route path="/product/:id" element={<ProductDetails {...cartProps} />} />
 
                 <Route path="/checkout" element={
@@ -209,6 +212,7 @@ export default function App() {
                 <Route path="/admin/messages" element={<ProtectedRoute><AdminMessages /></ProtectedRoute>} />
                 <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
                 <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />
+                <Route path="/admin/stores" element={<ProtectedRoute><AdminStores /></ProtectedRoute>} />
                 <Route path="/admin/hero" element={<ProtectedRoute><AdminHero /></ProtectedRoute>} />
             </Routes>
             <Toaster />

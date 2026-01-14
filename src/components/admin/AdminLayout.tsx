@@ -1,7 +1,8 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
-import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag, ClipboardList, Image as ImageIcon } from "lucide-react";
+// ADDED: MapPin
+import { LogOut, ExternalLink, Package, MessageSquare, ShoppingBag, ClipboardList, Image as ImageIcon, MapPin } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
 interface AdminLayoutProps {
@@ -23,7 +24,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
         <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
 
             {/* FIXED Header Container */}
-            {/* Using 'fixed' ensures it remains visually on top of everything, regardless of scroll or parent styles */}
             <div className="fixed top-0 left-0 right-0 z-[999] w-full shadow-md bg-white">
 
                 {/* 1. Top Bar (Blue) */}
@@ -94,6 +94,15 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
                                     <MessageSquare className="w-4 h-4" />
                                     Messages
                                 </Button>
+                                {/* ADDED: Stores Button */}
+                                <Button
+                                    variant={location.pathname === '/admin/stores' ? "default" : "ghost"}
+                                    className={`gap-2 ${location.pathname === '/admin/stores' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
+                                    onClick={() => navigate("/admin/stores")}
+                                >
+                                    <MapPin className="w-4 h-4" />
+                                    Stores
+                                </Button>
                                 <Button
                                     variant={location.pathname === '/admin/hero' ? "default" : "ghost"}
                                     className={`gap-2 ${location.pathname === '/admin/hero' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-blue-600'}`}
@@ -121,7 +130,6 @@ export function AdminLayout({ children, title, description }: AdminLayoutProps) 
             </div>
 
             {/* Content Area */}
-            {/* Added mt-[100px] to push content down below the fixed header (Approx height of Top Bar + Header) */}
             <main className="flex-1 container mx-auto px-4 py-8 mt-[100px] relative z-0">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>

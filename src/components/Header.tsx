@@ -55,10 +55,10 @@ export function Header({
                         <span>Need Help? Call Us at <span className="font-semibold">+632 8 927 7777</span></span>
                     </div>
                     <div className="flex gap-4">
-                        <a href="#" style={{ cursor: 'pointer' }} className="hover:text-blue-600 transition-colors flex items-center gap-1">
+                        <div onClick={() => navigate('/stores')} style={{ cursor: 'pointer' }} className="hover:text-blue-600 transition-colors flex items-center gap-1 cursor-pointer">
                             <MapPin className="w-3 h-3" /> Store Locator
-                        </a>
-                        <a href="#" style={{ cursor: 'pointer' }} className="hover:text-blue-600 transition-colors hidden sm:inline">Track Order</a>
+                        </div>
+                        <a href="#" style={{ cursor: 'pointer' }} className="hover:text-blue-600 transition-colors hidden sm:inline cursor-pointer">Track Order</a>
                     </div>
                 </div>
             </div>
@@ -91,7 +91,7 @@ export function Header({
                         />
                         <button
                             style={{ cursor: 'pointer' }}
-                            className="absolute right-0 top-0 h-16 w-20 bg-black flex items-center justify-center rounded-r-sm hover:bg-gray-800 transition-colors border-2 border-black"
+                            className="absolute right-0 top-0 h-16 w-20 bg-black flex items-center justify-center rounded-r-sm hover:bg-gray-800 transition-colors cursor-pointer border-2 border-black"
                         >
                             <Search className="w-8 h-8 text-white" />
                         </button>
@@ -104,7 +104,7 @@ export function Header({
                             <SheetTrigger asChild>
                                 <button
                                     style={{ cursor: 'pointer' }}
-                                    className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded transition-colors"
+                                    className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded transition-colors cursor-pointer"
                                 >
                                     <div className="relative">
                                         <ShoppingCart className="w-8 h-8" />
@@ -139,7 +139,7 @@ export function Header({
                                                     <div className="flex items-center gap-2 border rounded-md bg-gray-50">
                                                         <button
                                                             onClick={() => onUpdateQuantity(item.id, -1)}
-                                                            className="w-6 h-6 flex items-center justify-center hover:bg-gray-200 rounded-l-md"
+                                                            className="w-6 h-6 flex items-center justify-center hover:bg-gray-200 rounded-l-md cursor-pointer"
                                                             style={{ cursor: 'pointer' }}
                                                             disabled={item.quantity <= 1}
                                                         >
@@ -148,7 +148,7 @@ export function Header({
                                                         <span className="text-xs w-4 text-center font-medium">{item.quantity}</span>
                                                         <button
                                                             onClick={() => onUpdateQuantity(item.id, 1)}
-                                                            className="w-6 h-6 flex items-center justify-center hover:bg-gray-200 rounded-r-md"
+                                                            className="w-6 h-6 flex items-center justify-center hover:bg-gray-200 rounded-r-md cursor-pointer"
                                                             style={{ cursor: 'pointer' }}
                                                         >
                                                             +
@@ -157,7 +157,7 @@ export function Header({
                                                 </div>
                                                 <button
                                                     onClick={() => onRemoveItem(item.id)}
-                                                    className="text-xs text-red-500 hover:underline mt-2 flex items-center gap-1"
+                                                    className="text-xs text-red-500 hover:underline mt-2 flex items-center gap-1 cursor-pointer"
                                                     style={{ cursor: 'pointer' }}
                                                 >
                                                     <X className="w-3 h-3" /> Remove
@@ -194,7 +194,7 @@ export function Header({
 
                         {/* Mobile Menu Toggle */}
                         <button
-                            className="md:hidden p-2 hover:bg-blue-700 rounded transition-colors"
+                            className="md:hidden p-2 hover:bg-blue-700 rounded transition-colors cursor-pointer"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             style={{ cursor: 'pointer' }}
                         >
@@ -216,7 +216,7 @@ export function Header({
                             />
                             <button
                                 style={{ cursor: 'pointer' }}
-                                className="absolute right-0 top-0 h-14 w-14 bg-black flex items-center justify-center rounded-r-sm"
+                                className="absolute right-0 top-0 h-14 w-14 bg-black flex items-center justify-center rounded-r-sm cursor-pointer"
                             >
                                 <Search className="w-6 h-6 text-white" />
                             </button>
@@ -243,6 +243,14 @@ export function Header({
                             >
                                 All Products
                             </button>
+                            {/* Mobile Store Locator Link */}
+                            <button
+                                onClick={() => { navigate('/stores'); setIsMobileMenuOpen(false); }}
+                                className="py-2 border-b border-white/10 text-left"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                Store Locator
+                            </button>
                         </nav>
                     </div>
                 )}
@@ -252,7 +260,6 @@ export function Header({
             <div className="bg-white border-b border-gray-200 py-3 hidden md:block">
                 <div className="container mx-auto px-4 flex justify-between items-center text-sm font-medium text-gray-700">
                     <ul className="flex gap-8">
-                        {/* FORCED CURSOR POINTER VIA INLINE STYLE */}
                         <li
                             onClick={() => onNavigate('home')}
                             className="hover:text-blue-600 transition-colors relative group"
@@ -282,6 +289,7 @@ export function Header({
                         variant="default"
                         className="bg-black text-white hover:bg-gray-800 rounded-sm h-8 text-xs px-4 font-bold tracking-wide"
                         style={{ cursor: 'pointer' }}
+                        onClick={() => navigate('/stores')}
                     >
                         STORE LOCATOR
                     </Button>

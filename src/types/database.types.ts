@@ -192,7 +192,6 @@ export type Database = {
                     shipping_address: string | null
                     shipping_method: string | null
                     payment_method: string | null
-                    // ADDED COLUMNS
                     shipping_province: string | null
                     shipping_city: string | null
                 }
@@ -208,7 +207,6 @@ export type Database = {
                     shipping_address?: string | null
                     shipping_method?: string | null
                     payment_method?: string | null
-                    // ADDED COLUMNS
                     shipping_province?: string | null
                     shipping_city?: string | null
                 }
@@ -224,7 +222,6 @@ export type Database = {
                     shipping_address?: string | null
                     shipping_method?: string | null
                     payment_method?: string | null
-                    // ADDED COLUMNS
                     shipping_province?: string | null
                     shipping_city?: string | null
                 }
@@ -308,6 +305,43 @@ export type Database = {
                     subtitle_color?: string | null
                     subtitle_size?: string | null
                     text_align?: string | null
+                }
+                Relationships: []
+            }
+            // ADDED: Stores Table
+            stores: {
+                Row: {
+                    id: number
+                    name: string
+                    address: string
+                    phone: string | null
+                    email: string | null
+                    map_url: string | null
+                    hours: string | null
+                    is_active: boolean
+                    created_at: string
+                }
+                Insert: {
+                    id?: number
+                    name: string
+                    address: string
+                    phone?: string | null
+                    email?: string | null
+                    map_url?: string | null
+                    hours?: string | null
+                    is_active?: boolean
+                    created_at?: string
+                }
+                Update: {
+                    id?: number
+                    name?: string
+                    address?: string
+                    phone?: string | null
+                    email?: string | null
+                    map_url?: string | null
+                    hours?: string | null
+                    is_active?: boolean
+                    created_at?: string
                 }
                 Relationships: []
             }
